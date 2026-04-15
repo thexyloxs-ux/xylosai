@@ -314,7 +314,7 @@
 					<div class="aw-school-sub">14-day free trial · No credit card</div>
 				</div>
 			</div>
-			{#each ['Full AI access for all students', 'Admin engagement dashboard', 'CSV reports & data export', 'Curriculum focus settings', 'Student management tools', 'Seat-based Stripe billing'] as f}
+			{#each ['Full AI access for all students', 'Admin engagement dashboard', 'CSV reports & data export', 'Curriculum focus settings', 'Student management tools', 'Seat-based billing'] as f}
 				<div class="aw-school-feature"><span class="aw-check green">✓</span>{f}</div>
 			{/each}
 			<a href="/auth/signup?type=school" class="aw-school-cta">Start free trial →</a>

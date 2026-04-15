@@ -10,8 +10,6 @@ export interface Database {
 					country: string | null;
 					curriculum: string | null;
 					invite_code: string | null;
-					stripe_customer_id: string | null;
-					stripe_subscription_id: string | null;
 					plan: string;
 					plan_status: string;
 					seat_limit: number;
@@ -23,27 +21,25 @@ export interface Database {
 					country?: string | null;
 					curriculum?: string | null;
 					invite_code?: string | null;
-					stripe_customer_id?: string | null;
-					stripe_subscription_id?: string | null;
 					plan?: string;
 					plan_status?: string;
 					seat_limit?: number;
 					created_at?: string;
 				};
 				Update: Partial<Database['public']['Tables']['organizations']['Insert']>;
+				Relationships: [];
 			};
 			profiles: {
 				Row: {
 					id: string;
 					full_name: string | null;
+					email: string | null;
 					role: string;
 					org_id: string | null;
 					level: string | null;
 					curriculum: string | null;
 					subjects: string[] | null;
 					study_challenge: string | null;
-					stripe_customer_id: string | null;
-					stripe_subscription_id: string | null;
 					plan: string;
 					plan_status: string;
 					messages_today: number;
@@ -54,14 +50,13 @@ export interface Database {
 				Insert: {
 					id: string;
 					full_name?: string | null;
+					email?: string | null;
 					role?: string;
 					org_id?: string | null;
 					level?: string | null;
 					curriculum?: string | null;
 					subjects?: string[] | null;
 					study_challenge?: string | null;
-					stripe_customer_id?: string | null;
-					stripe_subscription_id?: string | null;
 					plan?: string;
 					plan_status?: string;
 					messages_today?: number;
@@ -70,6 +65,7 @@ export interface Database {
 					created_at?: string;
 				};
 				Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+				Relationships: [];
 			};
 			conversations: {
 				Row: {
@@ -91,6 +87,7 @@ export interface Database {
 					last_message_at?: string;
 				};
 				Update: Partial<Database['public']['Tables']['conversations']['Insert']>;
+				Relationships: [];
 			};
 			messages: {
 				Row: {
@@ -108,6 +105,7 @@ export interface Database {
 					created_at?: string;
 				};
 				Update: Partial<Database['public']['Tables']['messages']['Insert']>;
+				Relationships: [];
 			};
 			student_activity: {
 				Row: {
@@ -129,11 +127,13 @@ export interface Database {
 					subjects_studied?: string[] | null;
 				};
 				Update: Partial<Database['public']['Tables']['student_activity']['Insert']>;
+				Relationships: [];
 			};
 		};
 		Views: Record<string, never>;
 		Functions: Record<string, never>;
 		Enums: Record<string, never>;
+		CompositeTypes: Record<string, never>;
 	};
 }
 

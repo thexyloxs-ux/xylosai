@@ -3,11 +3,12 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session, user } = await locals.safeGetSession();
+
 	if (!session || !user) redirect(302, '/auth/login');
 
 	const { data: profile } = await locals.supabase
 		.from('profiles')
-		.select('role, onboarded')
+		.select('*')
 		.eq('id', user.id)
 		.single();
 

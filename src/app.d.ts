@@ -18,7 +18,7 @@ declare global {
 			session: Session | null;
 			user: User | null;
 			profile: Profile | null;
-			supabase: SupabaseClient<Database>;
+			supabase?: SupabaseClient<Database>;
 		}
 		// interface PageState {}
 		// interface Platform {}

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { PageData } from './$types';
 
-	export let data: PageData;
-
+	const { data } = $props<{ data: App.PageData & { org: any; students: any[] } }>();
 	const { org, students, profile } = data;
 
 	let totalStudents = students.length;
-	let activeStudents = students.filter((s) => s.messages_today > 0).length;
-	let totalMessagesToday = students.reduce((sum, s) => sum + (s.messages_today || 0), 0);
+	let activeStudents = students.filter((s: { messages_today: number }) => s.messages_today > 0).length;
+	let totalMessagesToday = students.reduce((sum: number, s: { messages_today: number }) => sum + (s.messages_today || 0), 0);
 
 	function getLevelLabel(level: string | null) {
 		if (!level) return 'Unknown';
@@ -31,7 +29,7 @@
 				<span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-slate-100 text-slate-500 rounded-full">School Admin</span>
 			</div>
 			<div>
-				<button class="inline-flex items-center gap-2 px-[1.125rem] py-2 bg-transparent text-slate-600 font-medium text-[0.875rem] rounded-lg transition-colors hover:text-slate-900 hover:bg-slate-100" onclick={() => goto('/auth/login')}>
+				<button class="inline-flex items-center gap-2 px-[1.125rem] py-2 bg-transparent text-slate-600 font-medium text-[0.875rem] rounded-lg transition-colors hover:text-slate-900 hover:bg-slate-100" onclick={async () => { await data.supabase.auth.signOut(); goto('/auth/login'); }}>
 					Log out
 				</button>
 			</div>

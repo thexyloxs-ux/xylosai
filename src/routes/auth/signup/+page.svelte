@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { createSupabaseBrowserClient } from '$lib/supabase';
+	import '../../landing.css';
 
 	const supabase = createSupabaseBrowserClient();
 
@@ -48,13 +49,25 @@
 		}
 
 		if (data.user) {
-			// Send welcome email via API
+			// 1. Send Welcome Email
 			await fetch('/api/auth/welcome', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name: fullName, email })
-			}).catch(() => {}); // Non-blocking
+			}).catch(() => {});
 
+			// 2. If it is a school, call the setup API
+			if (isSchool) {
+				await fetch('/api/auth/setup-org', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ schoolName, country })
+				}).catch(err => {
+					console.error('Setup Org Error:', err);
+				});
+			}
+
+			// 3. Redirect to appropriate next step
 			if (joinCode) goto(`/join/${joinCode}`);
 			else goto('/onboarding');
 		}
@@ -65,298 +78,370 @@
 	<title>{isSchool ? 'Register your school' : 'Create account'} — XYLO</title>
 </svelte:head>
 
-<div class="auth-page">
-	<div class="auth-card">
-		<a href="/" class="auth-logo">XYLO</a>
-
-		{#if joinCode}
-			<div class="auth-banner">
-				You've been invited to join a school on XYLO. Create your account to join.
-			</div>
-		{/if}
-
-		<h1 class="auth-title">
-			{#if isSchool}Register your school{:else}Create your account{/if}
-		</h1>
-		<p class="auth-sub">
-			{#if isSchool}
-				Get full AI access for all your students — free for 14 days.
-			{:else}
-				Start free. 20 messages/day. No credit card needed.
+<div class="aw-page auth-wrapper">
+	<div class="glow-aura"></div>
+	
+	<div class="auth-card glass-deck signup-deck">
+		<header class="auth-header">
+			<a href="/" class="aw-logo">XYLO</a>
+			{#if joinCode}
+				<div class="auth-banner glass-amber">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+					Join School via Invite
+				</div>
 			{/if}
-		</p>
+			<h1 class="auth-title">
+				{#if isSchool}Register your school{:else}Create your account{/if}
+			</h1>
+			<p class="auth-sub">
+				{#if isSchool}
+					Get full AI access for all your students — free for 14 days.
+				{:else}
+					Start free. 20 messages/day. No credit card needed.
+				{/if}
+			</p>
+		</header>
 
-		<!-- Type toggle (only shown if not joining via invite) -->
+		<!-- Type Toggle: Sliding Glass -->
 		{#if !joinCode}
-			<div class="type-toggle">
-				<a
-					href="/auth/signup"
-					class="toggle-btn"
-					class:active={!isSchool}
-				>Student</a>
-				<a
-					href="/auth/signup?type=school"
-					class="toggle-btn"
-					class:active={isSchool}
-				>School</a>
+			<div class="type-toggle-island">
+				<a href="/auth/signup" class="toggle-btn" class:active={!isSchool}>
+					🎓 <span>Student</span>
+				</a>
+				<a href="/auth/signup?type=school" class="toggle-btn" class:active={isSchool}>
+					🏫 <span>School</span>
+				</a>
 			</div>
 		{/if}
 
 		<form class="auth-form" onsubmit={handleSignup}>
-			<div class="field">
-				<label for="fullName">{isSchool ? 'Your name (admin)' : 'Full name'}</label>
-				<input
-					id="fullName"
-					type="text"
-					bind:value={fullName}
-					placeholder="Amara Okafor"
-					required
-					autocomplete="name"
-				/>
-			</div>
-
-			{#if isSchool}
+			<div class="field-grid">
 				<div class="field">
-					<label for="schoolName">School name</label>
-					<input
-						id="schoolName"
-						type="text"
-						bind:value={schoolName}
-						placeholder="St. Mary's College, Lagos"
-						required
-					/>
+					<label for="fullName">{isSchool ? 'Admin Name' : 'Full Name'}</label>
+					<div class="field-island">
+						<input
+							id="fullName"
+							type="text"
+							bind:value={fullName}
+							placeholder="Amara Okafor"
+							required
+							autocomplete="name"
+						/>
+					</div>
 				</div>
+
+				{#if isSchool}
+					<div class="field">
+						<label for="schoolName">School Name</label>
+						<div class="field-island">
+							<input
+								id="schoolName"
+								type="text"
+								bind:value={schoolName}
+								placeholder="St. Mary's College"
+								required
+							/>
+						</div>
+					</div>
+					<div class="field">
+						<label for="country">Country</label>
+						<div class="field-island select-wrap">
+							<select id="country" bind:value={country} required>
+								<option value="">Select country</option>
+								{#each ['Nigeria', 'Kenya', 'Ghana', 'South Africa', 'Tanzania', 'Uganda', 'Rwanda', 'Senegal', 'Ivory Coast', 'Cameroon', 'Ethiopia', 'Other'] as c}
+									<option value={c}>{c}</option>
+								{/each}
+							</select>
+						</div>
+					</div>
+				{/if}
+
 				<div class="field">
-					<label for="country">Country</label>
-					<select id="country" bind:value={country} required>
-						<option value="">Select country</option>
-						{#each ['Nigeria', 'Kenya', 'Ghana', 'South Africa', 'Tanzania', 'Uganda', 'Rwanda', 'Senegal', 'Ivory Coast', 'Cameroon', 'Ethiopia', 'Other'] as c}
-							<option value={c}>{c}</option>
-						{/each}
-					</select>
+					<label for="email">Email Address</label>
+					<div class="field-island">
+						<input
+							id="email"
+							type="email"
+							bind:value={email}
+							placeholder="name@email.com"
+							required
+							autocomplete="email"
+						/>
+					</div>
 				</div>
-			{/if}
 
-			<div class="field">
-				<label for="email">Email address</label>
-				<input
-					id="email"
-					type="email"
-					bind:value={email}
-					placeholder="you@example.com"
-					required
-					autocomplete="email"
-				/>
-			</div>
-
-			<div class="field">
-				<label for="password">Password</label>
-				<div class="password-wrap">
-					<input
-						id="password"
-						type={showPassword ? 'text' : 'password'}
-						bind:value={password}
-						placeholder="At least 8 characters"
-						required
-						minlength="8"
-						autocomplete="new-password"
-					/>
-					<button
-						type="button"
-						class="pw-toggle"
-						onclick={() => (showPassword = !showPassword)}
-						aria-label={showPassword ? 'Hide password' : 'Show password'}
-					>
-						{#if showPassword}
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-						{:else}
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-						{/if}
-					</button>
+				<div class="field">
+					<label for="password">Password</label>
+					<div class="field-island pw-wrap">
+						<input
+							id="password"
+							type={showPassword ? 'text' : 'password'}
+							bind:value={password}
+							placeholder="Min. 8 characters"
+							required
+							minlength="8"
+							autocomplete="new-password"
+						/>
+						<button
+							type="button"
+							class="pw-vis-toggle"
+							onclick={() => (showPassword = !showPassword)}
+						>
+							{#if showPassword}
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+							{:else}
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+							{/if}
+						</button>
+					</div>
 				</div>
 			</div>
 
 			{#if error}
-				<div class="auth-error" role="alert">{error}</div>
+				<div class="auth-error-chip glass-red" role="alert">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+					{error}
+				</div>
 			{/if}
 
 			<p class="auth-terms">
-				By signing up you agree to our
+				By signing up, you agree to our
 				<a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
 			</p>
 
-			<button type="submit" class="auth-submit" disabled={loading}>
+			<button type="submit" class="aw-btn aw-btn-primary auth-submit" disabled={loading}>
 				{#if loading}
-					<span class="spinner"></span>
-					{isSchool ? 'Creating school account…' : 'Creating account…'}
+					<span class="spinner"></span> Creating account…
 				{:else}
-					{isSchool ? 'Register school — start free trial' : 'Create free account'}
+					{isSchool ? 'Register School — Start Trial' : 'Create Free Account'}
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				{/if}
 			</button>
 		</form>
 
-		<p class="auth-switch">
-			Already have an account? <a href="/auth/login">Sign in</a>
-		</p>
+		<footer class="auth-footer">
+			<p class="auth-switch">
+				Already have an account?
+				<a href="/auth/login">Sign in here</a>
+			</p>
+		</footer>
 	</div>
 </div>
 
 <style>
-	.auth-page {
+	.auth-wrapper {
 		min-height: 100dvh;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #f8fafc;
-		padding: 1.5rem;
+		padding: 3rem 1.5rem;
+		position: relative;
+		overflow: hidden;
 	}
-	.auth-card {
-		width: 100%;
-		max-width: 460px;
-		background: #fff;
-		border: 1px solid #e2e8f0;
-		border-radius: 1rem;
-		padding: 2.5rem 2rem;
-		box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-	}
-	.auth-logo {
-		display: block;
-		font-size: 1.375rem;
-		font-weight: 800;
-		color: #f59e0b;
-		letter-spacing: -0.03em;
-		margin-bottom: 1.75rem;
-	}
-	.auth-banner {
-		background: #fef3c7;
-		border: 1px solid #fde68a;
-		border-radius: 0.5rem;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		color: #92400e;
-		margin-bottom: 1.25rem;
-		line-height: 1.5;
-	}
-	.auth-title {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: #0f172a;
-		letter-spacing: -0.02em;
-		margin-bottom: 0.375rem;
-	}
-	.auth-sub { font-size: 0.9375rem; color: #64748b; margin-bottom: 1.5rem; }
 
-	.type-toggle {
-		display: flex;
-		background: #f1f5f9;
-		border-radius: 0.5rem;
-		padding: 0.25rem;
+	.glow-aura {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 800px;
+		height: 800px;
+		background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.auth-card.glass-deck {
+		width: 100%;
+		max-width: 520px;
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(48px);
+		-webkit-backdrop-filter: blur(48px);
+		border-radius: 2.5rem;
+		padding: 3.5rem 3rem;
+		box-shadow: 
+			0 24px 80px rgba(0, 0, 0, 0.08), 
+			0 2px 4px rgba(0, 0, 0, 0.02),
+			inset 0 1px 0 rgba(255, 255, 255, 1);
+		position: relative;
+		z-index: 1;
+		animation: auth-reveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+	@keyframes auth-reveal {
+		from { opacity: 0; transform: translateY(20px) scale(0.98); }
+		to { opacity: 1; transform: translateY(0) scale(1); }
+	}
+	.auth-card.glass-deck::before {
+		content: '';
+		position: absolute;
+		inset: -1px;
+		border-radius: 2.5rem;
+		border: 1px solid rgba(0, 0, 0, 0.06);
+		pointer-events: none;
+	}
+
+	.auth-header { text-align: center; margin-bottom: 2rem; }
+	.aw-logo { margin-bottom: 2rem; display: inline-block; font-size: 1.5rem; }
+	
+	.auth-title { 
+		font-size: 1.75rem; 
+		font-weight: 900; 
+		color: #0f172a; 
+		letter-spacing: -0.04em; 
+		margin-bottom: 0.5rem; 
+	}
+	.auth-sub { 
+		font-size: 0.9375rem; 
+		color: #64748b; 
+		line-height: 1.6; 
+		font-weight: 500;
+	}
+
+	.auth-banner.glass-amber {
+		background: rgba(245, 158, 11, 0.1);
+		border: 1px solid rgba(245, 158, 11, 0.2);
+		border-radius: 999px;
+		padding: 0.5rem 1rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: #b45309;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
 		margin-bottom: 1.5rem;
+	}
+
+	.type-toggle-island {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		background: rgba(0, 0, 0, 0.04);
+		border-radius: 1.25rem;
+		margin-bottom: 2.5rem;
 	}
 	.toggle-btn {
 		flex: 1;
-		text-align: center;
-		padding: 0.5rem;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
-		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.625rem;
+		padding: 0.75rem;
+		border-radius: 1rem;
+		font-size: 0.9375rem;
+		font-weight: 700;
 		color: #64748b;
-		transition: all 0.15s;
+		transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 	}
 	.toggle-btn.active {
 		background: #fff;
 		color: #0f172a;
-		box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+		transform: scale(1.02);
 	}
 
-	.auth-form { display: flex; flex-direction: column; gap: 1.125rem; }
-	.field { display: flex; flex-direction: column; gap: 0.375rem; }
-	.field label { font-size: 0.875rem; font-weight: 600; color: #374151; }
-	.field input, .field select {
+	.auth-form { display: flex; flex-direction: column; gap: 1.5rem; }
+	.field-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+	
+	.field { display: flex; flex-direction: column; gap: 0.625rem; }
+	.field label { 
+		font-size: 0.75rem; 
+		font-weight: 800; 
+		color: #94a3b8; 
+		text-transform: uppercase; 
+		letter-spacing: 0.1em; 
+	}
+
+	.field-island {
+		background: #fff;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 1.25rem;
+		padding: 0.125rem;
+		transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+		box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+		position: relative;
+	}
+	.field-island:focus-within {
+		border-color: #f59e0b;
+		box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(245,158,11,0.05);
+		transform: translateY(-1px);
+	}
+	
+	.field-island input, .field-island select {
 		width: 100%;
-		padding: 0.625rem 0.875rem;
-		background: #f8fafc;
-		color: #0f172a;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		font-size: 0.9375rem;
-		min-height: 44px;
-		transition: border-color 0.15s, box-shadow 0.15s;
+		padding: 0.875rem 1.25rem;
+		background: transparent;
+		border: none;
+		outline: none;
+		font-size: 1rem;
+		font-weight: 600;
+		color: #1e293b;
 		font-family: inherit;
 	}
-	.field input::placeholder { color: #94a3b8; }
-	.field input:focus, .field select:focus {
-		outline: none;
-		border-color: #f59e0b;
-		box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
-		background: #fff;
-	}
-	.password-wrap { position: relative; }
-	.password-wrap input { padding-right: 2.75rem; }
-	.pw-toggle {
-		position: absolute;
-		right: 0.75rem;
-		top: 50%;
-		transform: translateY(-50%);
+
+	.pw-wrap { display: flex; align-items: center; }
+	.pw-vis-toggle {
 		background: none;
 		border: none;
-		cursor: pointer;
+		padding: 0.75rem;
+		margin-right: 0.5rem;
 		color: #94a3b8;
-		padding: 0.25rem;
+		cursor: pointer;
 		display: flex;
 		align-items: center;
 	}
-	.pw-toggle:hover { color: #64748b; }
+
+	.select-wrap {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 1.25rem center;
+	}
+	.select-wrap select { appearance: none; padding-right: 2.5rem; }
 
 	.auth-terms {
 		font-size: 0.8125rem;
 		color: #94a3b8;
-		line-height: 1.5;
-		margin-top: -0.25rem;
+		line-height: 1.6;
+		font-weight: 500;
+		text-align: center;
+		margin-top: 0.5rem;
 	}
-	.auth-terms a { color: #f59e0b; }
-	.auth-error {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		border-radius: 0.5rem;
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		color: #dc2626;
-	}
-	.auth-submit {
-		width: 100%;
-		min-height: 48px;
-		background: #f59e0b;
-		color: #000;
-		font-weight: 700;
-		font-size: 0.9375rem;
-		border: none;
-		border-radius: 0.5rem;
-		cursor: pointer;
+	.auth-terms a { color: #f59e0b; font-weight: 700; }
+
+	.auth-error-chip {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		transition: background 0.15s, transform 0.1s;
-		font-family: inherit;
+		gap: 0.75rem;
+		padding: 0.875rem 1.25rem;
+		background: rgba(239, 68, 68, 0.08);
+		border: 1px solid rgba(239, 68, 68, 0.15);
+		border-radius: 1.25rem;
+		color: #dc2626;
+		font-size: 0.875rem;
+		font-weight: 600;
 	}
-	.auth-submit:hover:not(:disabled) { background: #d97706; }
-	.auth-submit:active:not(:disabled) { transform: scale(0.98); }
-	.auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+	.auth-submit { 
+		width: 100%; 
+		min-height: 56px; 
+		margin-top: 0.5rem;
+		font-size: 1rem;
+	}
+
+	.auth-footer { margin-top: 2.5rem; text-align: center; }
+	.auth-switch { font-size: 0.9375rem; color: #64748b; font-weight: 500; }
+	.auth-switch a { color: #f59e0b; font-weight: 800; margin-left: 0.25rem; }
+
 	.spinner {
-		width: 16px; height: 16px;
-		border: 2px solid rgba(0,0,0,0.2);
-		border-top-color: #000;
+		width: 18px; height: 18px;
+		border: 2.5px solid rgba(255,255,255,0.3);
+		border-top-color: #fff;
 		border-radius: 50%;
-		animation: spin 0.7s linear infinite;
+		animation: spin 0.8s linear infinite;
 	}
 	@keyframes spin { to { transform: rotate(360deg); } }
-	.auth-switch {
-		text-align: center;
-		font-size: 0.875rem;
-		color: #64748b;
-		margin-top: 1.25rem;
+
+	@media (max-width: 580px) {
+		.auth-card.glass-deck { padding: 3rem 1.5rem; border-radius: 1.5rem; }
+		.field-grid { gap: 1rem; }
 	}
-	.auth-switch a { color: #f59e0b; font-weight: 600; }
-	.auth-switch a:hover { color: #d97706; }
 </style>

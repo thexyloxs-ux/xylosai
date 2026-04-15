@@ -1,50 +1,46 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	// TEMPORARY: Bypassing authentication and providing mock data for UI testing.
-	
-	const mockProfile = {
-		id: 'mock-user-123',
-		role: 'school_admin',
-		org_id: 'mock-org-123'
-	};
+export const load: PageServerLoad = async ({ locals }) => {
+	const { session, user } = await locals.safeGetSession();
 
-	const mockOrg = {
-		id: 'mock-org-123',
-		name: 'Demo High School',
-		plan: 'school',
-		seat_limit: 100,
-		invite_code: 'DHS-2026'
-	};
+	if (!session || !user) redirect(302, '/auth/login');
 
-	const mockStudents = [
-		{
-			id: 'st-1',
-			full_name: 'John Doe',
-			level: 'SS2',
-			curriculum: 'WAEC',
-			messages_today: 15
-		},
-		{
-			id: 'st-2',
-			full_name: 'Jane Smith',
-			level: 'SS3',
-			curriculum: 'JAMB',
-			messages_today: 4
-		},
-		{
-			id: 'st-3',
-			full_name: 'Michael Johnson',
-			level: 'SS1',
-			curriculum: 'NECO',
-			messages_today: 0
-		}
-	];
+	const { data: profile } = await locals.supabase
+		.from('profiles')
+		.select('*')
+		.eq('id', user.id)
+		.single();
 
-	return {
-		profile: mockProfile,
-		org: mockOrg,
-		students: mockStudents
-	};
+	if (!profile || profile.role !== 'school_admin') redirect(302, '/chat');
+
+	if (!profile.org_id) {
+		return { profile, org: null, students: [] };
+	}
+
+	// Fetch the organisation
+	const { data: org } = await locals.supabase
+		.from('organizations')
+		.select('*')
+		.eq('id', profile.org_id)
+		.single();
+
+	// Fetch students in this org (exclude the admin)
+	const { data: rawStudents } = await locals.supabase
+		.from('profiles')
+		.select('id, full_name, level, curriculum, messages_today, messages_today_reset_at')
+		.eq('org_id', profile.org_id)
+		.neq('role', 'school_admin');
+
+	// Normalise messages_today — zero out if the counter is from a previous day
+	const todayStr = new Date().toDateString();
+	const students = (rawStudents ?? []).map((s) => ({
+		...s,
+		messages_today:
+			new Date(s.messages_today_reset_at).toDateString() === todayStr
+				? (s.messages_today ?? 0)
+				: 0
+	}));
+
+	return { profile, org, students };
 };
