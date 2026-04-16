@@ -7,140 +7,139 @@
 	let totalStudents = students.length;
 	let activeStudents = students.filter((s: { messages_today: number }) => s.messages_today > 0).length;
 	let totalMessagesToday = students.reduce((sum: number, s: { messages_today: number }) => sum + (s.messages_today || 0), 0);
+	let engagementRate = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
 
 	function getLevelLabel(level: string | null) {
-		if (!level) return 'Unknown';
-		return level;
+		return level || 'Unknown';
 	}
 </script>
 
 <svelte:head>
-	<title>Dashboard - XYLO School Admin</title>
+	<title>{org?.name || 'School'} Dashboard — XYLO</title>
 </svelte:head>
 
-<!-- We force light mode palette to exactly match the landing page -->
-<div class="min-h-screen bg-[#f8fafc] text-slate-900 font-sans pb-12">
-	
-	<!-- Match aw-header -->
-	<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-[12px] border-b border-slate-200">
-		<div class="w-full max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
-			<div class="flex items-center gap-4">
-				<a href="/" class="text-[1.375rem] font-[800] text-[#f59e0b] tracking-[-0.03em]">XYLO</a>
-				<span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-slate-100 text-slate-500 rounded-full">School Admin</span>
+<div class="dash">
+	<!-- ── Header ── -->
+	<header class="dash-header">
+		<div class="header-inner">
+			<div class="header-left">
+				<a href="/" class="wordmark">XYLO</a>
+				<span class="admin-pill">School Admin</span>
 			</div>
-			<div>
-				<button class="inline-flex items-center gap-2 px-[1.125rem] py-2 bg-transparent text-slate-600 font-medium text-[0.875rem] rounded-lg transition-colors hover:text-slate-900 hover:bg-slate-100" onclick={async () => { await data.supabase.auth.signOut(); goto('/auth/login'); }}>
-					Log out
-				</button>
-			</div>
+			<button
+				class="signout-btn"
+				onclick={async () => { await data.supabase.auth.signOut(); goto('/auth/login'); }}
+			>
+				Sign out
+			</button>
 		</div>
 	</header>
 
-	<main class="w-full max-w-[1200px] mx-auto px-6 pt-12">
+	<main class="dash-main">
 		{#if !org}
-			<div class="flex items-start gap-6 bg-white border border-slate-200 border-l-4 border-l-[#f59e0b] rounded-[0.75rem] p-8 max-w-2xl mx-auto shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-				<div class="text-[2rem] leading-none shrink-0">💡</div>
-				<div>
-					<h2 class="text-xl font-bold text-slate-900 mb-2">Organization Setup Pending</h2>
-					<p class="text-[1.125rem] text-slate-700 leading-[1.75]">
-						Your profile is not yet linked to an active school organization. Please contact XYLO support or finish your setup to view student data.
+			<!-- ── No org state ── -->
+			<div class="no-org">
+				<div class="no-org-inner">
+					<p class="no-org-label">Setup required</p>
+					<h2 class="no-org-heading">Organization not linked</h2>
+					<p class="no-org-body">
+						Your account isn't connected to a school organization yet.
+						Contact XYLO support or finish your setup to view student data.
 					</p>
 				</div>
 			</div>
 		{:else}
-			
-			<!-- Dashboard Header -->
-			<div class="mb-10">
-				<p class="text-[0.8125rem] font-bold text-[#f59e0b] uppercase tracking-[0.08em] mb-3">Overview</p>
-				<h1 class="text-[clamp(1.625rem,4vw,2.25rem)] font-bold tracking-[-0.025em] leading-[1.2] text-slate-900 mb-4">
-					{org.name} Dashboard
-				</h1>
-				<p class="text-[1.0625rem] text-slate-500 leading-[1.7]">
-					Plan: <strong class="capitalize text-slate-700">{org.plan}</strong> &nbsp;·&nbsp; Seats Used: <strong class="text-slate-700">{totalStudents} / {org.seat_limit}</strong>
+			<!-- ── Dashboard heading ── -->
+			<div class="page-head">
+				<p class="page-eyebrow">Overview</p>
+				<h1 class="page-title">{org.name}</h1>
+				<p class="page-meta">
+					Plan: <strong>{org.plan}</strong>
+					&nbsp;·&nbsp;
+					Seats: <strong>{totalStudents} / {org.seat_limit}</strong>
 				</p>
 			</div>
 
-			<!-- Match aw-stats / aw-feature-card styling for metrics -->
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-				<div class="bg-white border border-slate-200 rounded-[0.875rem] p-[1.75rem] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.07)]">
-					<h3 class="text-[1.0625rem] font-bold text-slate-900 mb-2">Total Enrolled</h3>
-					<div class="text-[2.5rem] font-[800] text-[#f59e0b] tracking-[-0.03em] leading-none">{totalStudents}</div>
-					<p class="text-[0.9375rem] text-slate-500 mt-3 border-t border-slate-100 pt-3">Students in your organization</p>
+			<!-- ── Stats row ── -->
+			<div class="stats-row">
+				<div class="stat-item">
+					<span class="stat-num">{totalStudents}</span>
+					<span class="stat-label">Enrolled students</span>
 				</div>
-				
-				<div class="bg-white border border-slate-200 rounded-[0.875rem] p-[1.75rem] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.07)] relative overflow-hidden">
-					<div class="absolute top-0 left-0 w-full h-[3px] bg-green-500"></div>
-					<h3 class="text-[1.0625rem] font-bold text-slate-900 mb-2">Active Today</h3>
-					<div class="text-[2.5rem] font-[800] text-green-500 tracking-[-0.03em] leading-none">{activeStudents}</div>
-					<p class="text-[0.9375rem] text-slate-500 mt-3 border-t border-slate-100 pt-3">Students who sent at least 1 msg today</p>
+				<div class="stat-divider"></div>
+				<div class="stat-item">
+					<span class="stat-num active">{activeStudents}</span>
+					<span class="stat-label">Active today</span>
 				</div>
-				
-				<div class="bg-white border border-slate-200 rounded-[0.875rem] p-[1.75rem] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.07)]">
-					<h3 class="text-[1.0625rem] font-bold text-slate-900 mb-2">Total Messages</h3>
-					<div class="text-[2.5rem] font-[800] text-slate-900 tracking-[-0.03em] leading-none">{totalMessagesToday}</div>
-					<p class="text-[0.9375rem] text-slate-500 mt-3 border-t border-slate-100 pt-3">AI interactions today across school</p>
+				<div class="stat-divider"></div>
+				<div class="stat-item">
+					<span class="stat-num">{totalMessagesToday}</span>
+					<span class="stat-label">AI messages today</span>
+				</div>
+				<div class="stat-divider"></div>
+				<div class="stat-item">
+					<span class="stat-num">{engagementRate}%</span>
+					<span class="stat-label">Engagement rate</span>
 				</div>
 			</div>
 
-			<!-- Match aw-school-card functionality for the table -->
-			<div class="bg-white border border-slate-200 rounded-[1rem] shadow-[0_8px_32px_rgba(0,0,0,0.06)] overflow-hidden">
-				<div class="flex items-center justify-between p-6 border-b border-slate-100 bg-[#f8fafc]/50">
-					<div class="flex items-center gap-4">
-						<span class="text-[2rem]">🏫</span>
-						<h2 class="text-[1.125rem] font-bold text-slate-900">Student Directory</h2>
+			<!-- ── Student table ── -->
+			<div class="table-section">
+				<div class="table-head">
+					<div class="table-head-left">
+						<h2 class="table-title">Student Directory</h2>
+						<span class="student-count">{totalStudents} student{totalStudents !== 1 ? 's' : ''}</span>
 					</div>
 					{#if org.invite_code}
-						<div class="text-[0.8125rem] text-slate-500 bg-white px-3 py-1.5 rounded-md border border-slate-200 shadow-sm">
-							Invite Code: <span class="font-mono font-bold text-[#f59e0b] ml-2 text-[0.9rem] bg-[#fffbeb] border border-[#fde68a] px-2 py-0.5 rounded">{org.invite_code}</span>
+						<div class="invite-row">
+							<span class="invite-label">Invite code</span>
+							<code class="invite-code">{org.invite_code}</code>
 						</div>
 					{/if}
 				</div>
-				
-				<div class="overflow-x-auto">
-					{#if students.length === 0}
-						<div class="py-16 px-6 text-center text-slate-500">
-							<div class="text-4xl mb-4 opacity-50">👩🏾‍🎓</div>
-							<p class="text-[1.0625rem]">No students have joined your organization yet.</p>
-							<p class="text-[0.9375rem] mt-2">Share your invite code with them to get started.</p>
-						</div>
-					{:else}
-						<table class="w-full text-left">
+
+				{#if students.length === 0}
+					<div class="table-empty">
+						<p class="empty-heading">No students yet</p>
+						<p class="empty-sub">Share your invite code above to add your first students.</p>
+					</div>
+				{:else}
+					<div class="table-wrap">
+						<table>
 							<thead>
-								<tr class="border-b border-slate-200 bg-slate-50/50 text-[0.8125rem] font-bold text-slate-500 uppercase tracking-[0.06em]">
-									<th class="py-4 px-6 font-semibold">Name</th>
-									<th class="py-4 px-6 font-semibold">Class</th>
-									<th class="py-4 px-6 font-semibold">Curriculum</th>
-									<th class="py-4 px-6 font-semibold">Status</th>
-									<th class="py-4 px-6 font-semibold text-right">Msgs Today</th>
+								<tr>
+									<th>Name</th>
+									<th>Class</th>
+									<th>Curriculum</th>
+									<th>Status</th>
+									<th class="right">Msgs today</th>
 								</tr>
 							</thead>
-							<tbody class="divide-y divide-slate-100">
+							<tbody>
 								{#each students as student}
-									<tr class="transition-colors hover:bg-slate-50 group">
-										<td class="py-4 px-6 font-medium text-slate-900">{student.full_name || 'Anonymous Student'}</td>
-										<td class="py-4 px-6 text-[0.9375rem] text-slate-500">{getLevelLabel(student.level)}</td>
-										<td class="py-4 px-6">
+									<tr>
+										<td class="name-cell">{student.full_name || 'Anonymous'}</td>
+										<td>{getLevelLabel(student.level)}</td>
+										<td>
 											{#if student.curriculum}
-												<span class="inline-block px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600 font-semibold border border-slate-200">
-													{student.curriculum}
-												</span>
+												<span class="curriculum-tag">{student.curriculum}</span>
 											{:else}
-												<span class="text-slate-400 text-sm italic">Not set</span>
+												<span class="not-set">Not set</span>
 											{/if}
 										</td>
-										<td class="py-4 px-6">
+										<td>
 											{#if student.messages_today > 0}
-												<span class="inline-flex items-center gap-2 text-[0.875rem] font-bold text-green-600">
-													<span class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span> Active
+												<span class="status active">
+													<span class="status-dot active"></span> Active
 												</span>
 											{:else}
-												<span class="inline-flex items-center gap-2 text-[0.875rem] font-medium text-slate-400">
-													<span class="w-2 h-2 rounded-full bg-slate-300"></span> Inactive
+												<span class="status inactive">
+													<span class="status-dot"></span> Inactive
 												</span>
 											{/if}
 										</td>
-										<td class="py-4 px-6 text-right">
-											<span class="font-mono font-bold {student.messages_today > 0 ? 'text-slate-900' : 'text-slate-400'}">
+										<td class="right">
+											<span class="msg-count" class:has-msgs={student.messages_today > 0}>
 												{student.messages_today}
 											</span>
 										</td>
@@ -148,9 +147,407 @@
 								{/each}
 							</tbody>
 						</table>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</main>
 </div>
+
+<style>
+	/* ── Tokens ── */
+	.dash {
+		--cream:      oklch(97.5% 0.018 85);
+		--cream-warm: oklch(94.5% 0.025 80);
+		--border:     oklch(87%   0.028 78);
+		--ink:        oklch(18%   0.014 50);
+		--ink-2:      oklch(40%   0.020 50);
+		--ink-3:      oklch(62%   0.016 55);
+		--amber:      oklch(72%   0.185 72);
+		--amber-deep: oklch(63%   0.175 68);
+		--success:    oklch(60%   0.16  145);
+
+		min-height: 100dvh;
+		background: var(--cream);
+		color: var(--ink);
+		font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	}
+
+	/* ── Header ── */
+	.dash-header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: oklch(99% 0.008 85);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.header-inner {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		height: 60px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.header-left {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.wordmark {
+		font-size: 1.125rem;
+		font-weight: 800;
+		color: var(--amber);
+		letter-spacing: -0.05em;
+	}
+
+	.admin-pill {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+		background: var(--cream-warm);
+		border: 1px solid var(--border);
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+	}
+
+	.signout-btn {
+		padding: 0.375rem 0.875rem;
+		background: none;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--ink-3);
+		cursor: pointer;
+		transition: color 0.12s, border-color 0.12s;
+	}
+	.signout-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+
+	/* ── Main content ── */
+	.dash-main {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 3rem 2rem 5rem;
+	}
+
+	/* ── No org state ── */
+	.no-org {
+		max-width: 600px;
+		margin: 4rem auto 0;
+	}
+
+	.no-org-inner {
+		border-left: 3px solid var(--amber);
+		padding: 2rem 2rem 2rem 2.5rem;
+		background: oklch(99% 0.008 85);
+		border-radius: 0 0.875rem 0.875rem 0;
+		border-top: 1px solid var(--border);
+		border-right: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.no-org-label {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--amber-deep);
+		margin-bottom: 0.75rem;
+	}
+
+	.no-org-heading {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 0.75rem;
+	}
+
+	.no-org-body {
+		font-size: 0.9375rem;
+		color: var(--ink-2);
+		line-height: 1.65;
+	}
+
+	/* ── Page heading ── */
+	.page-head {
+		margin-bottom: 3rem;
+	}
+
+	.page-eyebrow {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--amber-deep);
+		margin-bottom: 0.75rem;
+	}
+
+	.page-title {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: clamp(1.875rem, 4vw, 2.75rem);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: -0.03em;
+		color: var(--ink);
+		margin-bottom: 0.75rem;
+	}
+
+	.page-meta {
+		font-size: 0.9375rem;
+		color: var(--ink-3);
+	}
+	.page-meta strong { color: var(--ink-2); font-weight: 700; }
+
+	/* ── Stats row (editorial — not identical cards) ── */
+	.stats-row {
+		display: flex;
+		align-items: center;
+		gap: 0;
+		margin-bottom: 3.5rem;
+		border: 1px solid var(--border);
+		border-radius: 0.875rem;
+		background: oklch(99% 0.008 85);
+		overflow: hidden;
+	}
+
+	.stat-item {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		padding: 1.75rem 2rem;
+	}
+
+	.stat-divider {
+		width: 1px;
+		align-self: stretch;
+		background: var(--border);
+		flex-shrink: 0;
+	}
+
+	.stat-num {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 2.25rem;
+		font-weight: 700;
+		line-height: 1;
+		color: var(--ink);
+		letter-spacing: -0.02em;
+	}
+	.stat-num.active { color: var(--success); }
+
+	.stat-label {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--ink-3);
+	}
+
+	/* ── Table section ── */
+	.table-section {
+		background: oklch(99% 0.008 85);
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		overflow: hidden;
+	}
+
+	.table-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1.5rem 2rem;
+		border-bottom: 1px solid var(--border);
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.table-head-left {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.table-title {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.student-count {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		background: var(--cream-warm);
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+	}
+
+	.invite-row {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+	}
+
+	.invite-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ink-3);
+	}
+
+	.invite-code {
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		color: var(--amber-deep);
+		background: oklch(96% 0.04 80);
+		border: 1px solid oklch(85% 0.06 78);
+		padding: 0.25rem 0.75rem;
+		border-radius: 0.375rem;
+		letter-spacing: 0.04em;
+	}
+
+	/* ── Empty ── */
+	.table-empty {
+		padding: 4rem 2rem;
+		text-align: center;
+	}
+
+	.empty-heading {
+		font-family: 'Fraunces', Georgia, serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--ink-2);
+		margin-bottom: 0.5rem;
+	}
+
+	.empty-sub {
+		font-size: 0.9375rem;
+		color: var(--ink-3);
+	}
+
+	/* ── Table ── */
+	.table-wrap { overflow-x: auto; }
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	thead tr {
+		border-bottom: 1px solid var(--border);
+		background: var(--cream);
+	}
+
+	th {
+		padding: 0.875rem 1.5rem;
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+		text-align: left;
+	}
+	th.right { text-align: right; }
+
+	tbody tr {
+		border-bottom: 1px solid oklch(92% 0.020 82);
+		transition: background 0.1s;
+	}
+	tbody tr:last-child { border-bottom: none; }
+	tbody tr:hover { background: oklch(98% 0.012 84); }
+
+	td {
+		padding: 1rem 1.5rem;
+		font-size: 0.875rem;
+		color: var(--ink-2);
+	}
+	td.right { text-align: right; }
+	td.name-cell { font-weight: 700; color: var(--ink); }
+
+	.curriculum-tag {
+		display: inline-block;
+		padding: 0.1875rem 0.5625rem;
+		background: var(--cream-warm);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-2);
+	}
+
+	.not-set {
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+		font-style: italic;
+	}
+
+	.status {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+	}
+	.status.active { color: var(--success); }
+	.status.inactive { color: var(--ink-3); }
+
+	.status-dot {
+		width: 7px; height: 7px;
+		border-radius: 50%;
+		background: var(--border);
+		flex-shrink: 0;
+	}
+	.status-dot.active {
+		background: var(--success);
+		box-shadow: 0 0 0 3px oklch(60% 0.16 145 / 0.2);
+	}
+
+	.msg-count {
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--ink-3);
+	}
+	.msg-count.has-msgs { color: var(--ink); }
+
+	/* ── Responsive ── */
+	@media (max-width: 900px) {
+		.stats-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+		}
+		.stat-divider { display: none; }
+		.stat-item {
+			border-bottom: 1px solid var(--border);
+		}
+		.stat-item:nth-child(1), .stat-item:nth-child(3) {
+			border-right: 1px solid var(--border);
+		}
+		.stat-item:nth-last-child(1), .stat-item:nth-last-child(2) {
+			border-bottom: none;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.dash-main { padding: 2rem 1rem 4rem; }
+		.header-inner { padding: 0 1rem; }
+		.table-head { padding: 1.25rem; }
+		th, td { padding: 0.875rem 1rem; }
+		.stats-row { grid-template-columns: 1fr; }
+		.stat-item { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+		.stat-item:last-child { border-bottom: none !important; }
+	}
+</style>

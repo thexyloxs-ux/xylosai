@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { createSupabaseBrowserClient } from '$lib/supabase';
-	import '../../landing.css';
 
 	const supabase = createSupabaseBrowserClient();
 
@@ -53,44 +52,48 @@
 	<title>Sign in — XYLO</title>
 </svelte:head>
 
-<div class="aw-page auth-wrapper">
-	<div class="glow-aura"></div>
-	
-	<div class="auth-card glass-deck">
-		<header class="auth-header">
-			<a href="/" class="aw-logo">XYLO</a>
+<div class="auth-page">
+	<div class="auth-bg-grain"></div>
+
+	<nav class="auth-nav">
+		<a href="/" class="auth-wordmark">XYLO</a>
+		<a href="/auth/signup" class="auth-nav-link">New here? Create account →</a>
+	</nav>
+
+	<main class="auth-main">
+		<div class="auth-card">
 			{#if joinCode}
-				<div class="auth-banner glass-amber">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-					Accept School Invite
+				<div class="auth-badge">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+					Accepting school invite
 				</div>
 			{/if}
-			<h1 class="auth-title">Welcome back</h1>
-			<p class="auth-sub">Continue your learning journey with XYLO</p>
-		</header>
 
-		<!-- Google OAuth -->
-		<button type="button" class="google-btn" onclick={signInWithGoogle} disabled={googleLoading}>
-			{#if googleLoading}
-				<span class="spinner-dark"></span> Redirecting…
-			{:else}
-				<svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-					<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-					<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-					<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-					<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-					<path fill="none" d="M0 0h48v48H0z"/>
-				</svg>
-				Continue with Google
-			{/if}
-		</button>
+			<h1 class="auth-heading">Welcome back.</h1>
+			<p class="auth-sub">Continue your learning journey with XYLO.</p>
 
-		<div class="divider"><span>or</span></div>
+			<button type="button" class="google-btn" onclick={signInWithGoogle} disabled={googleLoading}>
+				{#if googleLoading}
+					<span class="spinner-ink"></span>
+					Redirecting…
+				{:else}
+					<svg width="19" height="19" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+						<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+						<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+						<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+					</svg>
+					Continue with Google
+				{/if}
+			</button>
 
-		<form class="auth-form" onsubmit={handleLogin}>
-			<div class="field">
-				<label for="email">Email Address</label>
-				<div class="field-island">
+			<div class="divider">
+				<span>or sign in with email</span>
+			</div>
+
+			<form class="auth-form" onsubmit={handleLogin}>
+				<div class="field">
+					<label for="email">Email address</label>
 					<input
 						id="email"
 						type="email"
@@ -100,14 +103,12 @@
 						autocomplete="email"
 					/>
 				</div>
-			</div>
 
-			<div class="field">
-				<div class="field-label-row">
-					<label for="password">Password</label>
-					<a href="/auth/forgot-password" class="forgot-link">Forgot?</a>
-				</div>
-				<div class="field-island">
+				<div class="field">
+					<div class="field-label-row">
+						<label for="password">Password</label>
+						<a href="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+					</div>
 					<input
 						id="password"
 						type="password"
@@ -117,242 +118,440 @@
 						autocomplete="current-password"
 					/>
 				</div>
-			</div>
 
-			{#if error}
-				<div class="auth-error-chip glass-red" role="alert">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-					{error}
-				</div>
-			{/if}
-
-			<button type="submit" class="aw-btn aw-btn-primary auth-submit" disabled={loading}>
-				{#if loading}
-					<span class="spinner"></span> Signing in…
-				{:else}
-					Sign in to Xylo
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+				{#if error}
+					<div class="auth-error" role="alert">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+						{error}
+					</div>
 				{/if}
-			</button>
-		</form>
 
-		<footer class="auth-footer">
+				<button type="submit" class="submit-btn" disabled={loading}>
+					{#if loading}
+						<span class="spinner-white"></span>
+						Signing in…
+					{:else}
+						Sign in to XYLO
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+					{/if}
+				</button>
+			</form>
+
 			<p class="auth-switch">
-				New to XYLO?
-				<a href="/auth/signup{joinCode ? `?join=${joinCode}` : ''}">Create an account</a>
+				New to XYLO? <a href="/auth/signup{joinCode ? `?join=${joinCode}` : ''}">Create a free account</a>
 			</p>
-			<p class="auth-switch-alt">
-				School leader?
-				<a href="/auth/signup?type=school">Register your school →</a>
+			<p class="auth-switch-school">
+				School leader? <a href="/auth/signup?type=school">Register your school →</a>
 			</p>
-		</footer>
-	</div>
+		</div>
+
+		<aside class="auth-aside">
+			<blockquote class="aside-quote">
+				<p>"XYLO explained organic chemistry in a way my teacher never did. I actually get it now."</p>
+				<footer>Amara T. — SS3, Lagos</footer>
+			</blockquote>
+			<div class="aside-stat-row">
+				<div class="aside-stat">
+					<span class="stat-n">20</span>
+					<span class="stat-l">free messages<br>every single day</span>
+				</div>
+				<div class="aside-stat">
+					<span class="stat-n">6+</span>
+					<span class="stat-l">African curricula<br>fully supported</span>
+				</div>
+			</div>
+		</aside>
+	</main>
 </div>
 
 <style>
-	.auth-wrapper {
+	/* ── Design tokens ── */
+	:root {
+		--cream:      oklch(97.5% 0.018 85);
+		--cream-warm: oklch(94.5% 0.025 80);
+		--border:     oklch(87%   0.028 78);
+		--ink:        oklch(18%   0.014 50);
+		--ink-2:      oklch(40%   0.020 50);
+		--ink-3:      oklch(62%   0.016 55);
+		--amber:      oklch(72%   0.185 72);
+		--amber-deep: oklch(63%   0.175 68);
+	}
+
+	/* ── Page shell ── */
+	.auth-page {
 		min-height: 100dvh;
+		background-color: var(--cream);
+		background-image:
+			radial-gradient(ellipse 80% 50% at 10% 0%, oklch(91% 0.040 80 / 0.55) 0%, transparent 60%),
+			radial-gradient(ellipse 60% 40% at 90% 100%, oklch(91% 0.032 78 / 0.35) 0%, transparent 55%);
+		color: var(--ink);
+		font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem 1.5rem;
+		flex-direction: column;
 		position: relative;
 		overflow: hidden;
 	}
 
-	.glow-aura {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 600px;
-		height: 600px;
-		background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+	/* subtle paper grain overlay */
+	.auth-bg-grain {
+		position: fixed;
+		inset: 0;
 		pointer-events: none;
 		z-index: 0;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+		background-size: 200px 200px;
 	}
 
-	.auth-card.glass-deck {
+	/* ── Top nav ── */
+	.auth-nav {
+		position: relative;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1.5rem 2.5rem;
+	}
+
+	.auth-wordmark {
+		font-size: 1.25rem;
+		font-weight: 800;
+		color: var(--amber);
+		letter-spacing: -0.05em;
+	}
+
+	.auth-nav-link {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--ink-2);
+		transition: color 0.15s;
+	}
+	.auth-nav-link:hover { color: var(--ink); }
+
+	/* ── Main two-column layout ── */
+	.auth-main {
+		flex: 1;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		align-items: center;
+		max-width: 1100px;
 		width: 100%;
-		max-width: 440px;
-		background: rgba(255, 255, 255, 0.7);
-		backdrop-filter: blur(48px);
-		-webkit-backdrop-filter: blur(48px);
-		border-radius: 2.5rem;
-		padding: 3.5rem 2.5rem;
-		box-shadow: 
-			0 24px 80px rgba(0, 0, 0, 0.08), 
-			0 2px 4px rgba(0, 0, 0, 0.02),
-			inset 0 1px 0 rgba(255, 255, 255, 1);
+		margin: 0 auto;
+		padding: 3rem 2.5rem 4rem;
 		position: relative;
 		z-index: 1;
-		animation: auth-reveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-	}
-	@keyframes auth-reveal {
-		from { opacity: 0; transform: translateY(20px) scale(0.98); }
-		to { opacity: 1; transform: translateY(0) scale(1); }
-	}
-	/* Hairline boundary */
-	.auth-card.glass-deck::before {
-		content: '';
-		position: absolute;
-		inset: -1px;
-		border-radius: 2.5rem;
-		border: 1px solid rgba(0, 0, 0, 0.06);
-		pointer-events: none;
 	}
 
-	.auth-header { text-align: center; margin-bottom: 2.5rem; }
-	.aw-logo { margin-bottom: 2rem; display: inline-block; font-size: 1.5rem; }
-	
-	.auth-title { 
-		font-size: 1.75rem; 
-		font-weight: 900; 
-		color: #0f172a; 
-		letter-spacing: -0.04em; 
-		margin-bottom: 0.5rem; 
+	/* ── Auth card ── */
+	.auth-card {
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 1.25rem;
+		padding: 3rem 2.5rem;
+		box-shadow:
+			0 1px 3px oklch(18% 0.014 50 / 0.04),
+			0 8px 32px oklch(18% 0.014 50 / 0.06);
+		animation: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 	}
-	.auth-sub { 
-		font-size: 0.9375rem; 
-		color: #64748b; 
-		line-height: 1.6; 
-		font-weight: 500;
+	@keyframes card-in {
+		from { opacity: 0; transform: translateY(16px); }
+		to   { opacity: 1; transform: translateY(0); }
 	}
 
-	.auth-banner.glass-amber {
-		background: rgba(245, 158, 11, 0.1);
-		border: 1px solid rgba(245, 158, 11, 0.2);
-		border-radius: 999px;
-		padding: 0.5rem 1rem;
-		font-size: 0.8125rem;
-		font-weight: 700;
-		color: #b45309;
+	/* ── Badge ── */
+	.auth-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
+		padding: 0.375rem 0.875rem;
+		background: oklch(95% 0.06 80 / 0.6);
+		border: 1px solid oklch(82% 0.08 78);
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--amber-deep);
 		margin-bottom: 1.5rem;
 	}
 
+	/* ── Headings ── */
+	.auth-heading {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: clamp(2rem, 4vw, 2.75rem);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: -0.03em;
+		color: var(--ink);
+		margin-bottom: 0.5rem;
+	}
+
+	.auth-sub {
+		font-size: 0.9375rem;
+		color: var(--ink-3);
+		line-height: 1.6;
+		margin-bottom: 2rem;
+	}
+
+	/* ── Google button ── */
 	.google-btn {
 		width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		padding: 0.875rem 1.25rem;
-		background: #fff;
-		border: 1.5px solid rgba(0, 0, 0, 0.1);
-		border-radius: 1rem;
+		padding: 0.8125rem 1.25rem;
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 0.75rem;
+		font-family: inherit;
 		font-size: 0.9375rem;
 		font-weight: 700;
-		color: #1e293b;
+		color: var(--ink);
 		cursor: pointer;
-		transition: all 0.2s;
-		box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-		font-family: inherit;
+		transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+		box-shadow: 0 1px 3px oklch(18% 0.014 50 / 0.06);
 	}
-	.google-btn:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
-	.google-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+	.google-btn:hover {
+		border-color: oklch(72% 0.04 78);
+		box-shadow: 0 4px 12px oklch(18% 0.014 50 / 0.08);
+		transform: translateY(-1px);
+	}
+	.google-btn:active { transform: translateY(0); }
+	.google-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+	/* ── Divider ── */
 	.divider {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-		margin: 0.25rem 0;
+		margin: 1.25rem 0;
 	}
 	.divider::before, .divider::after {
 		content: '';
 		flex: 1;
 		height: 1px;
-		background: rgba(0,0,0,0.08);
+		background: var(--border);
 	}
-	.divider span { font-size: 0.8125rem; font-weight: 700; color: #94a3b8; }
-
-	.spinner-dark {
-		width: 18px; height: 18px;
-		border: 2.5px solid rgba(0,0,0,0.1);
-		border-top-color: #1e293b;
-		border-radius: 50%;
-		animation: spin 0.8s linear infinite;
-		display: inline-block;
+	.divider span {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		white-space: nowrap;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
 	}
 
-	.auth-form { display: flex; flex-direction: column; gap: 1.5rem; }
-	.field { display: flex; flex-direction: column; gap: 0.625rem; }
-	.field label { 
-		font-size: 0.75rem; 
-		font-weight: 800; 
-		color: #94a3b8; 
-		text-transform: uppercase; 
-		letter-spacing: 0.1em; 
+	/* ── Form ── */
+	.auth-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
 	}
-	.field-label-row { display: flex; justify-content: space-between; align-items: center; }
-	.forgot-link { font-size: 0.8125rem; color: #f59e0b; font-weight: 700; }
 
-	.field-island {
-		background: #fff;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		border-radius: 1rem;
-		padding: 0.125rem;
-		transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-		box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
-	.field-island:focus-within {
-		border-color: #f59e0b;
-		box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(245,158,11,0.05);
-		transform: translateY(-1px);
+
+	.field-label-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
-	
-	.field-island input {
+
+	.field label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-2);
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+	}
+
+	.field input {
 		width: 100%;
 		padding: 0.75rem 1rem;
-		background: transparent;
-		border: none;
-		outline: none;
-		font-size: 1rem;
-		font-weight: 600;
-		color: #1e293b;
+		background: var(--cream);
+		border: 1px solid var(--border);
+		border-radius: 0.625rem;
 		font-family: inherit;
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: var(--ink);
+		transition: border-color 0.15s, box-shadow 0.15s;
+		min-height: 44px;
+	}
+	.field input::placeholder { color: var(--ink-3); }
+	.field input:focus {
+		outline: none;
+		border-color: var(--amber);
+		box-shadow: 0 0 0 3px oklch(72% 0.185 72 / 0.12);
 	}
 
-	.auth-error-chip {
+	.forgot-link {
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		transition: color 0.15s;
+	}
+	.forgot-link:hover { color: var(--amber-deep); }
+
+	/* ── Error ── */
+	.auth-error {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.875rem 1.25rem;
-		background: rgba(239, 68, 68, 0.08);
-		border: 1px solid rgba(239, 68, 68, 0.15);
-		border-radius: 1.25rem;
-		color: #dc2626;
+		gap: 0.625rem;
+		padding: 0.75rem 1rem;
+		background: oklch(93% 0.06 25 / 0.5);
+		border: 1px solid oklch(75% 0.12 25 / 0.4);
+		border-radius: 0.625rem;
+		color: oklch(40% 0.14 25);
 		font-size: 0.875rem;
 		font-weight: 600;
 	}
 
-	.auth-submit { 
-		width: 100%; 
-		min-height: 54px; 
+	/* ── Submit button ── */
+	.submit-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		min-height: 50px;
+		padding: 0.75rem 1.5rem;
+		background: var(--ink);
+		color: var(--cream);
+		font-family: inherit;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		border: none;
+		border-radius: 0.75rem;
+		cursor: pointer;
+		transition: background 0.15s, transform 0.1s;
 		margin-top: 0.5rem;
-		font-size: 1rem;
+	}
+	.submit-btn:hover { background: oklch(25% 0.016 50); }
+	.submit-btn:active { transform: scale(0.99); }
+	.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+	/* ── Footer links ── */
+	.auth-switch {
+		margin-top: 1.75rem;
+		font-size: 0.875rem;
+		color: var(--ink-3);
+		font-weight: 500;
+	}
+	.auth-switch a {
+		color: var(--ink);
+		font-weight: 700;
+		margin-left: 0.25rem;
+		transition: color 0.15s;
+	}
+	.auth-switch a:hover { color: var(--amber-deep); }
+
+	.auth-switch-school {
+		margin-top: 0.625rem;
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+	}
+	.auth-switch-school a {
+		color: var(--ink-3);
+		font-weight: 600;
+		margin-left: 0.25rem;
+		transition: color 0.15s;
+	}
+	.auth-switch-school a:hover { color: var(--ink); }
+
+	/* ── Aside ── */
+	.auth-aside {
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+		padding: 2rem;
 	}
 
-	.auth-footer { margin-top: 2.5rem; text-align: center; }
-	.auth-switch { font-size: 0.9375rem; color: #64748b; font-weight: 500; margin-bottom: 0.75rem; }
-	.auth-switch a { color: #f59e0b; font-weight: 800; margin-left: 0.25rem; }
-	
-	.auth-switch-alt { font-size: 0.875rem; color: #94a3b8; font-weight: 600; }
-	.auth-switch-alt a { color: #64748b; margin-left: 0.25rem; transition: color 0.2s; }
-	.auth-switch-alt a:hover { color: #f59e0b; }
+	.aside-quote {
+		border-left: 3px solid var(--amber);
+		padding-left: 1.5rem;
+	}
+	.aside-quote p {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-style: italic;
+		font-size: clamp(1.125rem, 2vw, 1.375rem);
+		font-weight: 400;
+		line-height: 1.55;
+		color: var(--ink);
+		margin-bottom: 1rem;
+	}
+	.aside-quote footer {
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+	}
 
-	.spinner {
-		width: 18px; height: 18px;
-		border: 2.5px solid rgba(255,255,255,0.3);
-		border-top-color: #fff;
+	.aside-stat-row {
+		display: flex;
+		gap: 2rem;
+	}
+	.aside-stat {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	.stat-n {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 2.5rem;
+		font-weight: 700;
+		color: var(--ink);
+		line-height: 1;
+	}
+	.stat-l {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--ink-3);
+		line-height: 1.45;
+	}
+
+	/* ── Spinners ── */
+	.spinner-ink {
+		width: 16px; height: 16px;
+		border: 2px solid oklch(18% 0.014 50 / 0.15);
+		border-top-color: var(--ink);
 		border-radius: 50%;
-		animation: spin 0.8s linear infinite;
+		animation: spin 0.75s linear infinite;
+		display: inline-block;
+		flex-shrink: 0;
+	}
+	.spinner-white {
+		width: 16px; height: 16px;
+		border: 2px solid oklch(97.5% 0.018 85 / 0.3);
+		border-top-color: var(--cream);
+		border-radius: 50%;
+		animation: spin 0.75s linear infinite;
+		display: inline-block;
+		flex-shrink: 0;
 	}
 	@keyframes spin { to { transform: rotate(360deg); } }
 
-	@media (max-width: 480px) {
-		.auth-card.glass-deck { padding: 2.5rem 1.5rem; border-radius: 1.5rem; }
+	/* ── Responsive ── */
+	@media (max-width: 900px) {
+		.auth-main {
+			grid-template-columns: 1fr;
+			max-width: 520px;
+			padding: 2rem 1.5rem 4rem;
+			gap: 2rem;
+		}
+		.auth-aside { padding: 0; }
+	}
+
+	@media (max-width: 560px) {
+		.auth-nav { padding: 1.25rem 1.25rem; }
+		.auth-nav-link { display: none; }
+		.auth-card { padding: 2rem 1.5rem; }
+		.auth-aside { display: none; }
 	}
 </style>
