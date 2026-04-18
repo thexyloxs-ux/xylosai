@@ -22,10 +22,10 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			.single();
 
 		if (profile?.onboarded) {
-			redirect(302, profile.role === 'school_admin' ? '/dashboard' : '/chat');
+			throw redirect(302, profile.role === 'school_admin' ? '/dashboard' : '/chat');
 		}
 	}
 
 	// New user or not onboarded yet
-	redirect(302, next ?? '/onboarding');
+	throw redirect(302, next ?? '/onboarding');
 };

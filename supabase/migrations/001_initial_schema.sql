@@ -121,16 +121,23 @@ create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
+-- Security definer functions to prevent infinite recursion
+create or replace function public.get_my_role()
+returns text
+language sql security definer set search_path = public stable
+as $$ select role from public.profiles where id = auth.uid(); $$;
+
+create or replace function public.get_my_org_id()
+returns uuid
+language sql security definer set search_path = public stable
+as $$ select org_id from public.profiles where id = auth.uid(); $$;
+
 -- School admins can read profiles of students in their org
 create policy "Admins can view org profiles"
   on public.profiles for select
   using (
-    exists (
-      select 1 from public.profiles as me
-      where me.id = auth.uid()
-        and me.role = 'school_admin'
-        and me.org_id = profiles.org_id
-    )
+    public.get_my_role() = 'school_admin'
+    and public.get_my_org_id() = org_id
   );
 
 -- organizations: admins read/write their own org; students can read their org

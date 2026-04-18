@@ -131,7 +131,12 @@ export interface Database {
 			};
 		};
 		Views: Record<string, never>;
-		Functions: Record<string, never>;
+		Functions: {
+			increment_student_activity: {
+				Args: { p_user_id: string; p_org_id: string; p_date: string };
+				Returns: void;
+			};
+		};
 		Enums: Record<string, never>;
 		CompositeTypes: Record<string, never>;
 	};

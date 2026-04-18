@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session, user } = await locals.safeGetSession();
 
-	if (!session || !user) redirect(302, '/auth/login');
+	if (!session || !user) throw redirect(302, '/auth/login');
 
 	const { data: profile } = await locals.supabase
 		.from('profiles')
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.eq('id', user.id)
 		.single();
 
-	if (!profile?.onboarded) redirect(302, '/onboarding');
+	if (!profile?.onboarded) throw redirect(302, '/onboarding');
 
 	let organization = null;
 	if (profile.org_id) {

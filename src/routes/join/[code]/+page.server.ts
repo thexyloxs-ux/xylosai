@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	if (orgErr || !org) {
 		// Invalid code: back to login with error
-		redirect(302, '/auth/login?error=invalid_invite');
+		throw redirect(302, '/auth/login?error=invalid_invite');
 	}
 
 	// 2. Handle based on auth status
@@ -33,13 +33,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		if (updateErr) {
 			console.error('Join error:', updateErr);
-			redirect(302, `/chat?error=join_failed`);
+			throw redirect(302, `/chat?error=join_failed`);
 		}
 
 		// Success: go to chat
-		redirect(302, '/chat?joined=' + encodeURIComponent(org.name));
+		throw redirect(302, '/chat?joined=' + encodeURIComponent(org.name));
 	} else {
 		// User is NOT logged in: redirect to signup with the code passed through
-		redirect(302, `/auth/signup?join=${code}`);
+		throw redirect(302, `/auth/signup?join=${code}`);
 	}
 };

@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session, user } = await locals.safeGetSession();
 
-	if (!session || !user) redirect(302, '/auth/login');
+	if (!session || !user) throw redirect(302, '/auth/login');
 
 	const { data: profile } = await locals.supabase
 		.from('profiles')
@@ -13,8 +13,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.single();
 
 	if (profile?.onboarded) {
-		if (profile.role === 'school_admin') redirect(302, '/dashboard');
-		else redirect(302, '/chat');
+		if (profile.role === 'school_admin') throw redirect(302, '/dashboard');
+		else throw redirect(302, '/chat');
 	}
 
 	return {};

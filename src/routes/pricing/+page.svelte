@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { isLoggedIn } from '$lib/stores/auth';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
 	const studentFeatures = {
 		free: [
@@ -61,24 +62,7 @@
 
 <div class="lp">
 
-<!-- ── Nav ── -->
-<header class="lp-nav-wrap">
-	<nav class="lp-nav">
-		<a href="/" class="lp-wordmark">XYLO</a>
-		<div class="lp-nav-links">
-			<a href="/#features">Features</a>
-			<a href="/pricing" class="active">Pricing</a>
-		</div>
-		<div class="lp-nav-ctas">
-			{#if $isLoggedIn}
-				<a href="/chat" class="lp-btn-primary">Open XYLO</a>
-			{:else}
-				<a href="/auth/login" class="lp-btn-ghost">Sign in</a>
-				<a href="/auth/signup" class="lp-btn-primary">Start free</a>
-			{/if}
-		</div>
-	</nav>
-</header>
+<SiteHeader activePage="pricing" />
 
 <!-- ── Hero ── -->
 <section class="pricing-hero">
@@ -264,18 +248,7 @@
 	</div>
 </section>
 
-<!-- ── Footer ── -->
-<footer class="lp-footer">
-	<div class="footer-inner">
-		<span class="footer-logo">XYLO</span>
-		<nav class="footer-links">
-			<a href="/privacy">Privacy</a>
-			<a href="/terms">Terms</a>
-			<a href="mailto:hello@xyloxs.com">Contact</a>
-		</nav>
-		<span class="footer-copy">© 2025 XYLO</span>
-	</div>
-</footer>
+<SiteFooter />
 
 </div>
 
@@ -297,78 +270,6 @@
 	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 	overflow-x: hidden;
 }
-
-/* ── Nav ── */
-.lp-nav-wrap {
-	position: sticky;
-	top: 1rem;
-	z-index: 50;
-	padding: 0 1.5rem;
-}
-
-.lp-nav {
-	max-width: 1100px;
-	margin: 0 auto;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1.5rem;
-	background: oklch(99% 0.008 85 / 0.85);
-	backdrop-filter: blur(20px);
-	border: 1px solid var(--border);
-	border-radius: 999px;
-	padding: 0.75rem 1.5rem;
-	box-shadow: 0 2px 16px oklch(18% 0.014 50 / 0.06);
-}
-
-.lp-wordmark {
-	font-size: 1.125rem;
-	font-weight: 800;
-	color: var(--amber);
-	letter-spacing: -0.05em;
-	flex-shrink: 0;
-}
-
-.lp-nav-links {
-	display: flex;
-	gap: 0.25rem;
-	flex: 1;
-	justify-content: center;
-}
-
-.lp-nav-links a {
-	font-size: 0.875rem;
-	font-weight: 600;
-	color: var(--ink-3);
-	padding: 0.375rem 0.875rem;
-	border-radius: 999px;
-	transition: color 0.12s, background 0.12s;
-}
-.lp-nav-links a:hover { color: var(--ink); background: var(--cream-warm); }
-.lp-nav-links a.active { color: var(--ink); font-weight: 700; }
-
-.lp-nav-ctas { display: flex; gap: 0.5rem; flex-shrink: 0; }
-
-.lp-btn-ghost {
-	padding: 0.4375rem 1rem;
-	font-size: 0.875rem;
-	font-weight: 700;
-	color: var(--ink-2);
-	border-radius: 999px;
-	transition: color 0.12s;
-}
-.lp-btn-ghost:hover { color: var(--ink); }
-
-.lp-btn-primary {
-	padding: 0.4375rem 1.125rem;
-	font-size: 0.875rem;
-	font-weight: 700;
-	background: var(--ink);
-	color: var(--cream);
-	border-radius: 999px;
-	transition: background 0.12s;
-}
-.lp-btn-primary:hover { background: oklch(25% 0.016 50); }
 
 /* ── Shared ── */
 .section-eyebrow {
@@ -826,31 +727,6 @@
 }
 .cta-btn-ghost:hover { color: oklch(75% 0.012 50); }
 
-/* ── Footer ── */
-.lp-footer {
-	background: var(--dark-base);
-	border-top: 1px solid oklch(25% 0.014 50);
-	padding: 1.75rem 2rem;
-}
-
-.footer-inner {
-	max-width: 1100px;
-	margin: 0 auto;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1.5rem;
-	flex-wrap: wrap;
-}
-
-.footer-logo { font-size: 1rem; font-weight: 800; color: var(--amber); letter-spacing: -0.04em; }
-
-.footer-links { display: flex; gap: 1.5rem; }
-.footer-links a { font-size: 0.8125rem; font-weight: 600; color: oklch(50% 0.014 50); transition: color 0.12s; }
-.footer-links a:hover { color: oklch(70% 0.012 50); }
-
-.footer-copy { font-size: 0.8125rem; color: oklch(40% 0.012 50); }
-
 /* ── Responsive ── */
 @media (max-width: 900px) {
 	.school-inner { grid-template-columns: 1fr; gap: 2.5rem; }
@@ -868,7 +744,6 @@
 	.pricing-hero { padding: 3.5rem 1.25rem 2.5rem; }
 	.plans-section, .school-section, .compare-section, .faq-section { padding: 0 1.25rem; }
 	.school-inner { padding: 2rem 1.5rem; }
-	.lp-nav-links { display: none; }
 	.cta-section { padding: 4rem 1.25rem; }
 }
 </style>

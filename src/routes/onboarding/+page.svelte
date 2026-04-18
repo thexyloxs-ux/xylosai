@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { User } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
-	import '../landing.css';
 
 	const { data } = $props<{ data: App.PageData }>();
 
@@ -9,11 +8,11 @@
 	const user     = data.user as User;
 	const profile  = data.profile;
 
-	const role         = profile?.role ?? (user.user_metadata?.role as string | undefined) ?? 'individual';
+	const role          = profile?.role ?? (user?.user_metadata?.role as string | undefined) ?? 'individual';
 	const isSchoolAdmin = role === 'school_admin';
-	const meta          = user.user_metadata as Record<string, string>;
+	const meta          = (user?.user_metadata || {}) as Record<string, string>;
 
-	// ── Step state ────────────────────────────────────────────────────────────────
+	// ── Step state ──────────────────────────────────────────────────────────────
 	let step = $state(1);
 
 	const TOTAL_STEPS  = isSchoolAdmin ? 3 : 4;
@@ -24,32 +23,32 @@
 		isSchoolAdmin ? step === 2 || step === 3 : step === 1 || step === 2 || step === 4,
 	);
 
-	// ── Field state ───────────────────────────────────────────────────────────────
-	let schoolName      = $state(meta.school_name ?? '');
-	let country         = $state(meta.country ?? '');
-	let curriculum      = $state('');
-	let studentCount    = $state('');
-	let level           = $state('');
+	// ── Field state ─────────────────────────────────────────────────────────────
+	let schoolName       = $state(meta.school_name ?? '');
+	let country          = $state(meta.country ?? '');
+	let curriculum       = $state('');
+	let studentCount     = $state('');
+	let level            = $state('');
 	let selectedSubjects = $state<string[]>([]);
-	let challenge       = $state('');
+	let challenge        = $state('');
 
 	let saving = $state(false);
 	let error  = $state('');
 
-	// ── Content ───────────────────────────────────────────────────────────────────
+	// ── Content ─────────────────────────────────────────────────────────────────
 	const LEVELS = [
-		{ value: 'primary',      label: 'Primary School',   icon: '📚' },
-		{ value: 'jss',          label: 'Junior Secondary',  icon: '✏️' },
-		{ value: 'sss',          label: 'Senior Secondary',  icon: '🎓' },
-		{ value: 'university',   label: 'University',        icon: '🏛️' },
-		{ value: 'professional', label: 'Professional',      icon: '💼' },
+		{ value: 'primary',      label: 'Primary School'   },
+		{ value: 'jss',          label: 'Junior Secondary'  },
+		{ value: 'sss',          label: 'Senior Secondary'  },
+		{ value: 'university',   label: 'University'        },
+		{ value: 'professional', label: 'Professional'      },
 	] as const;
 
 	const CURRICULA = [
-		{ value: 'WAEC',      label: 'WAEC',      sub: 'West Africa' },
-		{ value: 'KCSE',      label: 'KCSE',      sub: 'Kenya' },
-		{ value: 'BECE',      label: 'BECE',      sub: 'Ghana' },
-		{ value: 'Cambridge', label: 'Cambridge', sub: 'International' },
+		{ value: 'WAEC',      label: 'WAEC',      sub: 'West Africa'      },
+		{ value: 'KCSE',      label: 'KCSE',      sub: 'Kenya'            },
+		{ value: 'BECE',      label: 'BECE',      sub: 'Ghana'            },
+		{ value: 'Cambridge', label: 'Cambridge', sub: 'International'    },
 		{ value: 'Other',     label: 'Other',     sub: 'Different system' },
 	] as const;
 
@@ -62,10 +61,10 @@
 	};
 
 	const CHALLENGES = [
-		{ value: 'consistency',   label: 'Staying consistent',    icon: '⏰' },
-		{ value: 'understanding', label: 'Understanding concepts', icon: '💡' },
-		{ value: 'exam_pressure', label: 'Exam pressure',          icon: '😰' },
-		{ value: 'motivation',    label: 'Staying motivated',      icon: '🔋' },
+		{ value: 'consistency',   label: 'Staying consistent'    },
+		{ value: 'understanding', label: 'Understanding concepts' },
+		{ value: 'exam_pressure', label: 'Exam pressure'          },
+		{ value: 'motivation',    label: 'Staying motivated'      },
 	] as const;
 
 	const STUDENT_COUNTS = ['1–15', '16–30', '31–60', '61–100', '100+'] as const;
@@ -73,7 +72,11 @@
 	const SEAT_LIMIT: Record<string, number> = { '1–15': 15, '16–30': 30, '31–60': 60, '61–100': 100, '100+': 200 };
 
 	const subjectList = $derived(SUBJECTS[curriculum] ?? SUBJECTS.Other);
-	const stepTitle = $derived(isSchoolAdmin ? (['School Info', 'Curriculum', 'Students'][step - 1]) : (['Your Level', 'Curriculum', 'Subjects', 'Challenge'][step - 1]));
+	const stepTitle   = $derived(
+		isSchoolAdmin
+			? (['School Info', 'Curriculum', 'Students'][step - 1])
+			: (['Your Level',  'Curriculum',  'Subjects', 'Challenge'][step - 1])
+	);
 
 	function canProceed(): boolean {
 		if (isSchoolAdmin) {
@@ -132,22 +135,21 @@
 </script>
 
 <svelte:head>
-	<title>Get started | XYLO</title>
+	<title>Get started — XYLO</title>
 </svelte:head>
 
-<div class="aw-page ob-wrapper">
-	<div class="glow-aura"></div>
-	
-	<div class="auth-card glass-deck ob-card">
-		<!-- Stepper Header -->
-		<div class="ob-header">
-			<a href="/" class="aw-logo">XYLO</a>
-			<nav class="ob-stepper" aria-label="Progress">
-				<div class="stepper-rail">
+<div class="ob-page">
+	<div class="ob-card">
+
+		<!-- Logo + Stepper -->
+		<div class="ob-head">
+			<a href="/" class="ob-logo">XYLO</a>
+			<div class="ob-stepper" aria-label="Progress">
+				<div class="stepper-track">
 					<div class="stepper-fill" style="width: {progressPct}%"></div>
 				</div>
 				{#each stepNumbers as s}
-					<div class="step-node" class:done={s < step} class:active={s === step}>
+					<div class="step-dot" class:done={s < step} class:active={s === step}>
 						{#if s < step}
 							<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg>
 						{:else}
@@ -155,271 +157,590 @@
 						{/if}
 					</div>
 				{/each}
-			</nav>
+			</div>
 		</div>
 
 		{#key step}
-			<div class="step-container">
-				<header class="step-header">
-					<p class="step-pill">Step {step}: {stepTitle}</p>
-					
+			<div class="step-pane">
+
+				<!-- Step heading -->
+				<header class="step-head">
+					<p class="step-label">Step {step} · {stepTitle}</p>
+
 					{#if isSchoolAdmin}
 						{#if step === 1}
-							<h1 class="ob-title">Tell us about your school</h1>
-							<p class="ob-sub">We'll use this to personalize the study experience for your students.</p>
+							<h1 class="step-title">Tell us about your school.</h1>
+							<p class="step-desc">We'll personalize the study experience for your students.</p>
 						{:else if step === 2}
-							<h1 class="ob-title">Which curriculum?</h1>
-							<p class="ob-sub">XYLO matches its knowledge base to your students' specific exams.</p>
+							<h1 class="step-title">Which curriculum?</h1>
+							<p class="step-desc">XYLO matches its knowledge base to your students' specific exams.</p>
 						{:else if step === 3}
-							<h1 class="ob-title">Student count</h1>
-							<p class="ob-sub">Sets your initial seat limit. You can add more easily later.</p>
+							<h1 class="step-title">How many students?</h1>
+							<p class="step-desc">Sets your initial seat limit. You can adjust this any time.</p>
 						{/if}
 					{:else}
 						{#if step === 1}
-							<h1 class="ob-title">What's your study level?</h1>
-							<p class="ob-sub">XYLO adjusts its tone and depth to match your education stage.</p>
+							<h1 class="step-title">What's your study level?</h1>
+							<p class="step-desc">XYLO adjusts its tone and depth to match your stage.</p>
 						{:else if step === 2}
-							<h1 class="ob-title">Which curriculum?</h1>
-							<p class="ob-sub">This helps XYLO align with the exact syllabus you'll see in exams.</p>
+							<h1 class="step-title">Which curriculum?</h1>
+							<p class="step-desc">Aligns XYLO with the exact syllabus you'll face in exams.</p>
 						{:else if step === 3}
-							<h1 class="ob-title">Select your subjects</h1>
-							<p class="ob-sub">Choose up to 6. This tailors suggestions for your study sessions.</p>
+							<h1 class="step-title">Select your subjects.</h1>
+							<p class="step-desc">Pick up to 6. This tailors every study session.</p>
 						{:else if step === 4}
-							<h1 class="ob-title">Your biggest challenge?</h1>
-							<p class="ob-sub">Be honest — we'll shape your experience to help you improve here.</p>
+							<h1 class="step-title">Your biggest challenge?</h1>
+							<p class="step-desc">Be honest — we'll shape your experience around it.</p>
 						{/if}
 					{/if}
 				</header>
 
-				<div class="step-content">
-					<!-- School Steps -->
+				<!-- Step content -->
+				<div class="step-body">
+
 					{#if isSchoolAdmin}
+
 						{#if step === 1}
-							<div class="field-grid">
+							<div class="fields">
 								<div class="field">
-									<label for="sn">School Name</label>
-									<div class="field-island"><input id="sn" bind:value={schoolName} placeholder="St. Mary's College" /></div>
+									<label for="sn">School name</label>
+									<input id="sn" class="ob-input" bind:value={schoolName} placeholder="St. Mary's College" />
 								</div>
 								<div class="field">
 									<label for="ct">Country</label>
-									<div class="field-island select-wrap">
-										<select id="ct" bind:value={country}>
+									<div class="ob-select-wrap">
+										<select id="ct" class="ob-input ob-select" bind:value={country}>
 											<option value="">Select country</option>
 											{#each COUNTRIES as c}<option value={c}>{c}</option>{/each}
 										</select>
 									</div>
 								</div>
 							</div>
+
 						{:else if step === 2}
 							<div class="ob-grid">
 								{#each CURRICULA as c}
-									<button class="choice-island" class:active={curriculum === c.value} onclick={() => selectAndAdvance(() => (curriculum = c.value))}>
-										<span class="choice-label">{c.label}</span>
-										<span class="choice-sub">{c.sub}</span>
+									<button class="tile" class:active={curriculum === c.value} onclick={() => selectAndAdvance(() => (curriculum = c.value))}>
+										<span class="tile-label">{c.label}</span>
+										<span class="tile-sub">{c.sub}</span>
 									</button>
 								{/each}
 							</div>
+
 						{:else if step === 3}
-							<div class="ob-grid">
+							<div class="ob-grid compact">
 								{#each STUDENT_COUNTS as n}
-									<button class="choice-island compact" class:active={studentCount === n} onclick={() => selectAndAdvance(() => (studentCount = n))}>
-										<span class="choice-label">{n}</span>
-										<span class="choice-sub">Students</span>
+									<button class="tile" class:active={studentCount === n} onclick={() => selectAndAdvance(() => (studentCount = n))}>
+										<span class="tile-label">{n}</span>
+										<span class="tile-sub">students</span>
 									</button>
 								{/each}
 							</div>
 						{/if}
-					<!-- Student Steps -->
+
 					{:else}
+
 						{#if step === 1}
 							<div class="ob-list">
 								{#each LEVELS as l}
-									<button class="row-island" class:active={level === l.value} onclick={() => selectAndAdvance(() => (level = l.value))}>
-										<span class="row-icon">{l.icon}</span>
-										<div class="row-info"><span class="row-label">{l.label}</span></div>
-										<div class="row-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg></div>
+									<button class="row-tile" class:active={level === l.value} onclick={() => selectAndAdvance(() => (level = l.value))}>
+										<span class="row-label">{l.label}</span>
+										<span class="row-check">
+											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg>
+										</span>
 									</button>
 								{/each}
 							</div>
+
 						{:else if step === 2}
 							<div class="ob-grid">
 								{#each CURRICULA as c}
-									<button class="choice-island" class:active={curriculum === c.value} onclick={() => selectAndAdvance(() => (curriculum = c.value))}>
-										<span class="choice-label">{c.label}</span>
-										<span class="choice-sub">{c.sub}</span>
+									<button class="tile" class:active={curriculum === c.value} onclick={() => selectAndAdvance(() => (curriculum = c.value))}>
+										<span class="tile-label">{c.label}</span>
+										<span class="tile-sub">{c.sub}</span>
 									</button>
 								{/each}
 							</div>
+
 						{:else if step === 3}
-							<div class="chip-container">
+							<div class="chip-wrap">
 								{#each subjectList as s}
-									<button class="ob-chip" class:active={selectedSubjects.includes(s)} disabled={!selectedSubjects.includes(s) && selectedSubjects.length >= 6} onclick={() => toggleSubject(s)}>{s}</button>
+									<button
+										class="chip"
+										class:active={selectedSubjects.includes(s)}
+										disabled={!selectedSubjects.includes(s) && selectedSubjects.length >= 6}
+										onclick={() => toggleSubject(s)}
+									>{s}</button>
 								{/each}
 							</div>
-							<p class="chip-note">{selectedSubjects.length} of 6 selected</p>
+							<p class="chip-count">{selectedSubjects.length}/6 selected</p>
+
 						{:else if step === 4}
 							<div class="ob-list">
 								{#each CHALLENGES as ch}
-									<button class="row-island" class:active={challenge === ch.value} onclick={() => selectAndAdvance(() => (challenge = ch.value))}>
-										<span class="row-icon">{ch.icon}</span>
-										<div class="row-info"><span class="row-label">{ch.label}</span></div>
-										<div class="row-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg></div>
+									<button class="row-tile" class:active={challenge === ch.value} onclick={() => selectAndAdvance(() => (challenge = ch.value))}>
+										<span class="row-label">{ch.label}</span>
+										<span class="row-check">
+											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg>
+										</span>
 									</button>
 								{/each}
 							</div>
 						{/if}
+
 					{/if}
 				</div>
 
-				{#if error}<div class="auth-error-chip glass-red" style="margin-top: 1.5rem;">{error}</div>{/if}
+				{#if error}
+					<p class="ob-error">{error}</p>
+				{/if}
 
-				<footer class="ob-nav">
-					<button class="nav-back" disabled={step === 1} onclick={back}>
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+				<!-- Nav -->
+				<footer class="step-foot">
+					<button class="back-btn" disabled={step === 1} onclick={back}>
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
 						Back
 					</button>
-					
+
 					{#if step < TOTAL_STEPS}
-						<button class="aw-btn aw-btn-primary nav-next" disabled={!canProceed()} onclick={next}>
+						<button class="next-btn" disabled={!canProceed()} onclick={next}>
 							Continue
-							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 						</button>
 					{:else}
-						<button class="aw-btn aw-btn-primary nav-next" disabled={!canProceed() || saving} onclick={handleComplete}>
-							{#if saving}<span class="spinner"></span> Working…{:else}
-								Start Learning
-								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+						<button class="next-btn" disabled={!canProceed() || saving} onclick={handleComplete}>
+							{#if saving}
+								<span class="spinner"></span> Working…
+							{:else}
+								Start learning
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 							{/if}
 						</button>
 					{/if}
 				</footer>
+
 			</div>
 		{/key}
+
 	</div>
 </div>
 
 <style>
-	.ob-wrapper {
+	/* ── Tokens ── */
+	.ob-page {
+		--cream:      oklch(97.5% 0.018 85);
+		--cream-warm: oklch(94.5% 0.025 80);
+		--border:     oklch(87%   0.028 78);
+		--ink:        oklch(18%   0.014 50);
+		--ink-2:      oklch(40%   0.020 50);
+		--ink-3:      oklch(62%   0.016 55);
+		--amber:      oklch(72%   0.185 72);
+		--amber-deep: oklch(63%   0.175 68);
+		--amber-tint: oklch(96.5% 0.030 83);
+
 		min-height: 100dvh;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 2.5rem 1.5rem;
+		padding: 2rem 1.25rem;
+		background: var(--cream);
+		font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+		color: var(--ink);
+	}
+
+	/* ── Card ── */
+	.ob-card {
+		width: 100%;
+		max-width: 520px;
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 1.5rem;
+		padding: 2.75rem;
+		animation: ob-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+	@keyframes ob-in {
+		from { opacity: 0; transform: translateY(14px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+
+	/* ── Header ── */
+	.ob-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 2.5rem;
+	}
+
+	.ob-logo {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 1.375rem;
+		font-weight: 900;
+		color: var(--amber);
+		letter-spacing: -0.02em;
+		text-decoration: none;
+	}
+
+	/* ── Stepper ── */
+	.ob-stepper {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
 		position: relative;
+	}
+
+	.stepper-track {
+		position: absolute;
+		left: 11px;
+		right: 11px;
+		height: 2px;
+		background: var(--border);
+		border-radius: 2px;
 		overflow: hidden;
 	}
 
-	.glow-aura {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 800px;
-		height: 800px;
-		background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
-		pointer-events: none;
-		z-index: 0;
+	.stepper-fill {
+		height: 100%;
+		background: var(--amber);
+		transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
-	.ob-card.glass-deck {
-		width: 100%;
-		max-width: 540px;
-		background: rgba(255, 255, 255, 0.7);
-		backdrop-filter: blur(48px);
-		border-radius: 2.5rem;
-		padding: 3.5rem 2.75rem;
-		box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
+	.step-dot {
 		position: relative;
 		z-index: 1;
-		animation: auth-reveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background: var(--cream);
+		border: 2px solid var(--border);
+		display: grid;
+		place-items: center;
+		font-size: 0.625rem;
+		font-weight: 800;
+		color: var(--ink-3);
+		transition: border-color 0.25s, background 0.25s, color 0.25s;
 	}
-	@keyframes auth-reveal {
-		from { opacity: 0; transform: translateY(20px) scale(0.98); }
-		to { opacity: 1; transform: translateY(0) scale(1); }
+	.step-dot.active {
+		border-color: var(--amber);
+		color: var(--amber-deep);
 	}
-	.ob-card.glass-deck::before {
-		content: ''; position: absolute; inset: -1px; border-radius: 2.5rem; border: 1px solid rgba(0, 0, 0, 0.06); pointer-events: none;
+	.step-dot.done {
+		background: var(--amber);
+		border-color: var(--amber);
+		color: oklch(99% 0.01 85);
 	}
 
-	.ob-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
-	.aw-logo { font-size: 1.375rem; }
-
-	.ob-stepper { display: flex; align-items: center; gap: 0.75rem; position: relative; }
-	.stepper-rail { position: absolute; left: 10px; right: 10px; height: 3px; background: rgba(0,0,0,0.04); border-radius: 10px; overflow: hidden; }
-	.stepper-fill { height: 100%; background: #f59e0b; transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-	.step-node {
-		position: relative; z-index: 1; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid rgba(0,0,0,0.06);
-		display: grid; place-items: center; font-size: 0.625rem; font-weight: 800; color: #94a3b8; transition: all 0.3s;
+	/* ── Step pane ── */
+	.step-pane {
+		animation: step-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 	}
-	.step-node.active { border-color: #f59e0b; color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.2); }
-	.step-node.done { background: #f59e0b; border-color: #f59e0b; color: #fff; }
-
-	.step-container { animation: slide-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-	@keyframes slide-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-
-	.step-header { margin-bottom: 2.5rem; }
-	.step-pill { font-size: 0.75rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-	.ob-title { font-size: 1.75rem; font-weight: 900; color: #1e293b; letter-spacing: -0.04em; margin-bottom: 0.5rem; line-height: 1.25; }
-	.ob-sub { font-size: 0.9375rem; color: #64748b; line-height: 1.6; font-weight: 500; }
-
-	/* Grids & Selection */
-	.ob-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; }
-	.choice-island {
-		background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 1.25rem; padding: 1.25rem 1rem;
-		display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.25rem;
-		cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+	@keyframes step-in {
+		from { opacity: 0; transform: translateX(8px); }
+		to   { opacity: 1; transform: translateX(0); }
 	}
-	.choice-island:hover { transform: translateY(-3px); border-color: #f59e0b; background: #fffcf0; }
-	.choice-island.active { border-color: #f59e0b; background: #fffcf0; box-shadow: 0 8px 24px rgba(245,158,11,0.1); }
-	.choice-label { font-size: 1rem; font-weight: 800; color: #1e293b; }
-	.choice-sub { font-size: 0.75rem; font-weight: 600; color: #94a3b8; }
 
-	.ob-list { display: flex; flex-direction: column; gap: 0.75rem; }
-	.row-island {
-		display: flex; align-items: center; gap: 1.25rem; padding: 1rem 1.25rem;
-		background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 1.25rem;
-		cursor: pointer; transition: all 0.3s;
+	/* ── Step header ── */
+	.step-head { margin-bottom: 2rem; }
+
+	.step-label {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--amber-deep);
+		margin-bottom: 0.75rem;
 	}
-	.row-island:hover { background: #fffcf0; border-color: #f59e0b; }
-	.row-island.active { background: #fffcf0; border-color: #f59e0b; box-shadow: 0 4px 12px rgba(245,158,11,0.1); }
-	.row-icon { font-size: 1.25rem; }
-	.row-info { flex: 1; }
-	.row-label { font-size: 1rem; font-weight: 700; color: #1e293b; }
-	.row-check { width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; border: 1.5px solid rgba(0,0,0,0.04); display: grid; place-items: center; color: transparent; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-	.active .row-check { background: #f59e0b; color: #fff; border-color: #f59e0b; transform: scale(1.1); }
 
-	.chip-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-	.ob-chip {
-		padding: 0.625rem 1.25rem; border-radius: 999px; background: rgba(0,0,0,0.04); border: 1px solid transparent;
-		font-size: 0.875rem; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s;
+	.step-title {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 1.75rem;
+		font-weight: 700;
+		line-height: 1.2;
+		letter-spacing: -0.025em;
+		color: var(--ink);
+		margin-bottom: 0.5rem;
 	}
-	.ob-chip:hover:not(:disabled) { background: rgba(245,158,11,0.1); color: #b45309; }
-	.ob-chip.active { background: #f59e0b; color: #fff; box-shadow: 0 4px 12px rgba(245,158,11,0.25); }
-	.ob-chip:disabled { opacity: 0.3; cursor: not-allowed; }
-	.chip-note { font-size: 0.8125rem; color: #94a3b8; font-weight: 800; margin-top: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
-	/* Fields */
-	.field-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
-	.field { display: flex; flex-direction: column; gap: 0.625rem; }
-	.field label { font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
-	.field-island { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 1.25rem; padding: 0.125rem; }
-	.field-island input, .field-island select { width: 100%; padding: 0.875rem 1.25rem; background: transparent; border: none; outline: none; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; }
-	.select-wrap { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1.25rem center; }
-	.select-wrap select { appearance: none; padding-right: 2.5rem; }
+	.step-desc {
+		font-size: 0.9375rem;
+		color: var(--ink-3);
+		line-height: 1.6;
+	}
 
-	.auth-error-chip { padding: 0.875rem 1.25rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 1.25rem; color: #dc2626; font-size: 0.875rem; font-weight: 600; }
+	/* ── Tile grid ── */
+	.ob-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+		gap: 0.625rem;
+	}
+	.ob-grid.compact {
+		grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+	}
 
-	.ob-nav { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; }
-	.nav-back { border: none; background: transparent; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; font-weight: 800; color: #94a3b8; cursor: pointer; }
-	.nav-back:hover:not(:disabled) { color: #f59e0b; }
-	.nav-back:disabled { opacity: 0.3; cursor: not-allowed; }
-	.nav-next { min-width: 140px; }
+	.tile {
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		padding: 1.125rem 0.875rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 0.25rem;
+		cursor: pointer;
+		transition: border-color 0.2s, background 0.2s, transform 0.2s;
+		font-family: inherit;
+	}
+	.tile:hover {
+		border-color: var(--amber);
+		background: var(--amber-tint);
+		transform: translateY(-2px);
+	}
+	.tile.active {
+		border-color: var(--amber);
+		background: var(--amber-tint);
+		box-shadow: 0 4px 16px oklch(72% 0.185 72 / 0.12);
+	}
 
-	.spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+	.tile-label {
+		font-size: 1rem;
+		font-weight: 800;
+		color: var(--ink);
+	}
+	.tile.active .tile-label { color: var(--amber-deep); }
+
+	.tile-sub {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--ink-3);
+	}
+
+	/* ── Row list ── */
+	.ob-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.row-tile {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1rem 1.25rem;
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 1rem;
+		cursor: pointer;
+		transition: border-color 0.2s, background 0.2s;
+		text-align: left;
+		width: 100%;
+		font-family: inherit;
+	}
+	.row-tile:hover {
+		border-color: var(--amber);
+		background: var(--amber-tint);
+	}
+	.row-tile.active {
+		border-color: var(--amber);
+		background: var(--amber-tint);
+	}
+
+	.row-label {
+		font-size: 0.9375rem;
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.row-check {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		border: 1.5px solid var(--border);
+		display: grid;
+		place-items: center;
+		color: transparent;
+		flex-shrink: 0;
+		transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+	}
+	.row-tile.active .row-check {
+		background: var(--amber);
+		border-color: var(--amber);
+		color: oklch(99% 0.01 85);
+		transform: scale(1.1);
+	}
+
+	/* ── Subject chips ── */
+	.chip-wrap {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.chip {
+		padding: 0.5625rem 1.125rem;
+		border-radius: 999px;
+		background: oklch(94% 0.016 80);
+		border: 1px solid transparent;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--ink-2);
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s, color 0.15s;
+		font-family: inherit;
+	}
+	.chip:hover:not(:disabled) {
+		background: oklch(72% 0.185 72 / 0.12);
+		color: var(--amber-deep);
+	}
+	.chip.active {
+		background: var(--amber);
+		color: var(--ink);
+		font-weight: 700;
+	}
+	.chip:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	.chip-count {
+		margin-top: 1rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	/* ── Form fields ── */
+	.fields {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.field label {
+		font-size: 0.75rem;
+		font-weight: 800;
+		color: var(--ink-3);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+
+	.ob-input {
+		width: 100%;
+		padding: 0.8125rem 1rem;
+		background: oklch(99.5% 0.006 85);
+		border: 1px solid var(--border);
+		border-radius: 0.75rem;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--ink);
+		font-family: inherit;
+		transition: border-color 0.15s;
+		outline: none;
+		box-sizing: border-box;
+	}
+	.ob-input:focus { border-color: var(--amber); }
+	.ob-input::placeholder { color: var(--ink-3); font-weight: 500; }
+
+	.ob-select-wrap { position: relative; }
+	.ob-select-wrap::after {
+		content: '';
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 16px;
+		height: 16px;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23778490' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-size: contain;
+		pointer-events: none;
+	}
+	.ob-select { appearance: none; padding-right: 2.5rem; cursor: pointer; }
+
+	/* ── Error ── */
+	.ob-error {
+		margin-top: 1.25rem;
+		padding: 0.75rem 1rem;
+		background: oklch(95% 0.025 25);
+		border: 1px solid oklch(80% 0.05 25);
+		border-radius: 0.625rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: oklch(40% 0.12 25);
+	}
+
+	/* ── Nav footer ── */
+	.step-foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 3rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border);
+	}
+
+	.back-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: none;
+		border: none;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		cursor: pointer;
+		transition: color 0.15s;
+		padding: 0;
+	}
+	.back-btn:hover:not(:disabled) { color: var(--ink); }
+	.back-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+	.next-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		background: var(--ink);
+		color: oklch(97.5% 0.018 85);
+		font-family: inherit;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		border: none;
+		border-radius: 999px;
+		cursor: pointer;
+		transition: background 0.15s;
+		white-space: nowrap;
+	}
+	.next-btn:hover:not(:disabled) { background: oklch(25% 0.016 50); }
+	.next-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+	/* ── Spinner ── */
+	.spinner {
+		display: inline-block;
+		width: 15px;
+		height: 15px;
+		border: 2px solid oklch(97% 0.01 85 / 0.3);
+		border-top-color: oklch(97% 0.01 85);
+		border-radius: 50%;
+		animation: spin 0.7s linear infinite;
+	}
 	@keyframes spin { to { transform: rotate(360deg); } }
 
-	@media (max-width: 540px) {
-		.ob-card.glass-deck { padding: 2.5rem 1.5rem; border-radius: 1.5rem; }
+	/* ── Responsive ── */
+	@media (max-width: 560px) {
+		.ob-card { padding: 2rem 1.25rem; border-radius: 1.25rem; }
 		.ob-grid { grid-template-columns: 1fr 1fr; }
+		.step-title { font-size: 1.5rem; }
 	}
 </style>

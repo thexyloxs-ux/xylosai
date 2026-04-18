@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { isLoggedIn, profile } from '$lib/stores/auth';
+	import SiteHeader from '$lib/components/SiteHeader.svelte';
+	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
 	$effect(() => {
 		if ($isLoggedIn && $profile) {
@@ -41,7 +43,6 @@
 
 	let openFaq = $state<number | null>(null);
 	function toggleFaq(i: number) { openFaq = openFaq === i ? null : i; }
-	let mobileMenuOpen = $state(false);
 </script>
 
 <svelte:head>
@@ -54,55 +55,7 @@
 <!-- ═══════════════════════════════════════════════════
      § 1  HEADER
 ════════════════════════════════════════════════════ -->
-<header class="lp-header">
-	<div class="lp-header-inner">
-		<a href="/" class="lp-logo">XYLO</a>
-
-		<nav class="lp-nav" aria-label="Main navigation">
-			<a href="#features">Features</a>
-			<a href="#schools">Schools</a>
-			<a href="/pricing">Pricing</a>
-			<a href="#faq">FAQ</a>
-		</nav>
-
-		<div class="lp-header-ctas">
-			{#if $isLoggedIn}
-				<a href="/chat" class="lp-btn-primary">Open XYLO</a>
-			{:else}
-				<a href="/auth/login" class="lp-btn-ghost">Sign in</a>
-				<a href="/auth/signup" class="lp-btn-primary">Get started free</a>
-			{/if}
-		</div>
-
-		<button
-			class="lp-hamburger"
-			onclick={() => mobileMenuOpen = !mobileMenuOpen}
-			aria-label="Toggle menu"
-			aria-expanded={mobileMenuOpen}
-		>
-			<span class="lp-hamburger-line" class:open={mobileMenuOpen}></span>
-			<span class="lp-hamburger-line" class:open={mobileMenuOpen}></span>
-			<span class="lp-hamburger-line" class:open={mobileMenuOpen}></span>
-		</button>
-	</div>
-
-	{#if mobileMenuOpen}
-		<div class="lp-mobile-menu">
-			<a href="#features" onclick={() => mobileMenuOpen = false}>Features</a>
-			<a href="#schools" onclick={() => mobileMenuOpen = false}>Schools</a>
-			<a href="/pricing" onclick={() => mobileMenuOpen = false}>Pricing</a>
-			<a href="#faq" onclick={() => mobileMenuOpen = false}>FAQ</a>
-			<div class="lp-mobile-menu-actions">
-				{#if $isLoggedIn}
-					<a href="/chat" class="lp-btn-primary">Open XYLO</a>
-				{:else}
-					<a href="/auth/login" class="lp-btn-outline">Sign in</a>
-					<a href="/auth/signup" class="lp-btn-primary">Get started free</a>
-				{/if}
-			</div>
-		</div>
-	{/if}
-</header>
+<SiteHeader activePage="home" />
 
 
 <!-- ═══════════════════════════════════════════════════
@@ -413,45 +366,7 @@
 <!-- ═══════════════════════════════════════════════════
      § 11  FOOTER
 ════════════════════════════════════════════════════ -->
-<footer class="lp-footer">
-	<div class="lp-container lp-footer-grid">
-		<div class="lp-footer-brand">
-			<span class="lp-logo">XYLO</span>
-			<p>The AI study companion built for African students. Always available.</p>
-			<div class="lp-footer-social">
-				<a href="https://twitter.com" aria-label="Twitter">𝕏</a>
-				<a href="https://instagram.com" aria-label="Instagram">Ig</a>
-				<a href="https://linkedin.com" aria-label="LinkedIn">in</a>
-			</div>
-		</div>
-		<div class="lp-footer-col">
-			<p class="lp-footer-col-title">Product</p>
-			<a href="/pricing">Pricing</a>
-			<a href="#features">Features</a>
-			<a href="#schools">For Schools</a>
-			<a href="#faq">FAQ</a>
-		</div>
-		<div class="lp-footer-col">
-			<p class="lp-footer-col-title">Account</p>
-			<a href="/auth/login">Sign in</a>
-			<a href="/auth/signup">Get started free</a>
-			<a href="/auth/signup?type=school">School signup</a>
-		</div>
-		<div class="lp-footer-col">
-			<p class="lp-footer-col-title">Curricula</p>
-			<span>WAEC / NECO</span>
-			<span>JAMB</span>
-			<span>KCSE</span>
-			<span>BECE / WASSCE</span>
-			<span>Cambridge / IGCSE</span>
-		</div>
-	</div>
-	<div class="lp-footer-base">
-		<div class="lp-container">
-			© 2025 Xyloxs Ltd · AI wey understand your world 🌍
-		</div>
-	</div>
-</footer>
+<SiteFooter />
 
 </div><!-- /lp -->
 
@@ -594,116 +509,6 @@
 .lp-btn-ghost-dark:hover {
 	border-color: oklch(88% 0.01 85 / 0.6);
 	background: oklch(88% 0.01 85 / 0.08);
-}
-
-/* ─── § 1  HEADER ────────────────────────────────── */
-.lp-header {
-	position: sticky;
-	top: 1rem;
-	z-index: 100;
-	padding: 0 1rem;
-}
-.lp-header-inner {
-	max-width: 72rem;
-	margin: 0 auto;
-	height: 56px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1.5rem;
-	background: oklch(97% 0.018 85 / 0.85);
-	backdrop-filter: blur(24px);
-	-webkit-backdrop-filter: blur(24px);
-	border: 1px solid var(--lp-border);
-	border-radius: 999px;
-	padding: 0 1.25rem;
-}
-.lp-logo {
-	font-family: 'Fraunces', Georgia, serif;
-	font-optical-sizing: auto;
-	font-size: 1.375rem;
-	font-weight: 900;
-	color: var(--lp-amber);
-	letter-spacing: -0.02em;
-	text-decoration: none;
-	flex-shrink: 0;
-}
-.lp-nav {
-	display: flex;
-	gap: 0.25rem;
-	flex: 1;
-	justify-content: center;
-}
-.lp-nav a {
-	font-size: 0.875rem;
-	font-weight: 600;
-	color: var(--lp-ink-2);
-	padding: 0.375rem 0.875rem;
-	border-radius: 999px;
-	text-decoration: none;
-	transition: color 0.2s, background 0.2s;
-}
-.lp-nav a:hover { color: var(--lp-ink); background: oklch(91% 0.02 80); }
-.lp-header-ctas { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
-
-.lp-hamburger {
-	display: none;
-	flex-direction: column;
-	gap: 5px;
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 0.375rem;
-	border-radius: 0.5rem;
-}
-.lp-hamburger-line {
-	display: block;
-	width: 20px;
-	height: 2px;
-	background: var(--lp-ink);
-	border-radius: 1px;
-	transition: transform 0.25s, opacity 0.25s;
-	transform-origin: center;
-}
-.lp-hamburger-line.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.lp-hamburger-line.open:nth-child(2) { opacity: 0; }
-.lp-hamburger-line.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-.lp-mobile-menu {
-	max-width: 72rem;
-	margin: 0.5rem auto 0;
-	background: var(--lp-cream);
-	border: 1px solid var(--lp-border);
-	border-radius: 1.25rem;
-	padding: 1rem;
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-}
-.lp-mobile-menu a {
-	display: block;
-	padding: 0.75rem 1rem;
-	font-size: 0.9375rem;
-	font-weight: 600;
-	color: var(--lp-ink-2);
-	border-radius: 0.75rem;
-	text-decoration: none;
-	transition: background 0.15s, color 0.15s;
-}
-.lp-mobile-menu a:hover { background: var(--lp-cream-warm); color: var(--lp-ink); }
-.lp-mobile-menu-actions {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	padding-top: 0.75rem;
-	border-top: 1px solid var(--lp-border);
-	margin-top: 0.5rem;
-}
-.lp-mobile-menu-actions .lp-btn-primary,
-.lp-mobile-menu-actions .lp-btn-outline {
-	justify-content: center;
-	width: 100%;
-	border-radius: 0.875rem;
 }
 
 /* ─── § 2  HERO ──────────────────────────────────── */
@@ -1226,77 +1031,7 @@
 }
 .lp-cta-actions { display: flex; flex-wrap: wrap; gap: 0.875rem; }
 
-/* ─── § 11  FOOTER ───────────────────────────────── */
-.lp-footer {
-	border-top: 1px solid var(--lp-border);
-	background: var(--lp-cream);
-}
-.lp-footer-grid {
-	display: grid;
-	grid-template-columns: 1.5fr 1fr 1fr 1fr;
-	gap: 3rem;
-	padding-top: 3.5rem;
-	padding-bottom: 3.5rem;
-}
-.lp-footer-brand p {
-	font-size: 0.875rem;
-	color: var(--lp-ink-3);
-	line-height: 1.7;
-	margin: 0.875rem 0 1.25rem;
-	max-width: 26ch;
-}
-.lp-footer-social {
-	display: flex;
-	gap: 0.625rem;
-}
-.lp-footer-social a {
-	width: 32px; height: 32px;
-	border: 1px solid var(--lp-border);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 0.75rem;
-	font-weight: 700;
-	color: var(--lp-ink-2);
-	text-decoration: none;
-	transition: border-color 0.2s, color 0.2s;
-}
-.lp-footer-social a:hover { border-color: var(--lp-ink-2); color: var(--lp-ink); }
-.lp-footer-col {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-}
-.lp-footer-col-title {
-	font-size: 0.6875rem;
-	font-weight: 800;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-	color: var(--lp-ink);
-	margin-bottom: 0.25rem;
-}
-.lp-footer-col a,
-.lp-footer-col span {
-	font-size: 0.875rem;
-	color: var(--lp-ink-3);
-	text-decoration: none;
-	transition: color 0.15s;
-}
-.lp-footer-col a:hover { color: var(--lp-ink); }
-.lp-footer-base {
-	border-top: 1px solid var(--lp-border);
-	padding: 1.25rem 0;
-	font-size: 0.8125rem;
-	color: var(--lp-ink-3);
-}
-
 /* ─── Responsive ─────────────────────────────────── */
-@media (max-width: 1024px) {
-	.lp-nav { display: none; }
-	.lp-header-ctas { display: none; }
-	.lp-hamburger { display: flex; }
-}
 
 @media (max-width: 768px) {
 	.lp-hero-grid {
@@ -1342,20 +1077,12 @@
 	}
 	.lp-faq-header { position: static; }
 
-	.lp-footer-grid {
-		grid-template-columns: 1fr 1fr;
-		gap: 2rem;
-	}
-	.lp-footer-brand { grid-column: 1 / -1; }
-
 	.lp-cta-inner { align-items: flex-start; }
 }
 
 @media (max-width: 480px) {
 	.lp-steps { grid-template-columns: 1fr; }
 	.lp-step { border-right: none; padding: 1.5rem 0; }
-
-	.lp-footer-grid { grid-template-columns: 1fr; }
 
 	.lp-hero-actions { flex-direction: column; }
 	.lp-hero-actions > * { justify-content: center; }

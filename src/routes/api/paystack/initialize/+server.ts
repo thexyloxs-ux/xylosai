@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const { session, user } = await locals.safeGetSession();
 
 	if (!session || !user) {
-		redirect(302, '/auth/login?next=/pricing');
+		throw redirect(302, '/auth/login?next=/pricing');
 	}
 
 	const plan = url.searchParams.get('plan');
@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			callbackUrl: `${PUBLIC_APP_URL}/settings?success=true`
 		});
 
-		redirect(303, authorization_url);
+		throw redirect(303, authorization_url);
 	} catch (err: unknown) {
 		// Re-throw SvelteKit redirects
 		if (typeof err === 'object' && err !== null && 'status' in err) throw err;
