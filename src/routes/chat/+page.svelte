@@ -217,9 +217,10 @@
 					<h1 class="empty-heading">What are we studying today?</h1>
 					<p class="empty-sub">Ask me anything — or pick a suggestion below.</p>
 					<div class="suggestions">
-						{#each suggestions as s}
+						{#each suggestions as s, i}
 							<button class="suggestion" onclick={() => { input = s; sendMessage(); }}>
-								{s}
+								<span class="sug-num">{String(i + 1).padStart(2, '0')}</span>
+								<span>{s}</span>
 							</button>
 						{/each}
 					</div>
@@ -573,29 +574,39 @@
 	}
 
 	.suggestions {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		border-top: 1px solid var(--border);
 	}
 
 	.suggestion {
-		padding: 1.125rem 1.25rem;
-		background: oklch(99% 0.008 85);
-		border: 1px solid var(--border);
-		border-radius: 0.75rem;
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 1rem 0;
+		border: none;
+		border-bottom: 1px solid var(--border);
+		background: none;
 		text-align: left;
 		font-family: inherit;
-		font-size: 0.875rem;
+		font-size: 0.9375rem;
 		font-weight: 600;
 		color: var(--ink-2);
 		cursor: pointer;
-		transition: border-color 0.15s, color 0.15s, transform 0.1s;
-		line-height: 1.45;
+		transition: color 0.15s, padding-left 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		line-height: 1.5;
+		width: 100%;
 	}
-	.suggestion:hover {
-		border-color: var(--amber);
-		color: var(--ink);
-		transform: translateY(-2px);
+	.suggestion:hover { color: var(--ink); padding-left: 0.375rem; }
+	.sug-num {
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-weight: 300;
+		font-size: 1.25rem;
+		color: var(--amber);
+		line-height: 1.3;
+		flex-shrink: 0;
+		width: 2rem;
 	}
 
 	/* ── Messages ── */
@@ -622,14 +633,16 @@
 
 	.msg-avatar-ai {
 		width: 30px; height: 30px;
-		background: var(--ink);
-		color: var(--cream);
+		background: var(--amber);
+		color: oklch(14% 0.01 50);
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.6875rem;
-		font-weight: 800;
+		font-family: 'Fraunces', Georgia, serif;
+		font-optical-sizing: auto;
+		font-size: 0.8125rem;
+		font-weight: 700;
 		flex-shrink: 0;
 		margin-top: 2px;
 	}
@@ -773,7 +786,7 @@
 		box-shadow: 0 2px 12px oklch(18% 0.014 50 / 0.06);
 	}
 	.input-box:focus-within {
-		border-color: oklch(72% 0.04 78);
+		border-color: var(--amber);
 	}
 
 	textarea {
@@ -794,18 +807,18 @@
 
 	.send-btn {
 		width: 40px; height: 40px;
-		background: var(--ink);
+		background: var(--amber);
 		border: none;
 		border-radius: 0.625rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--cream);
+		color: oklch(14% 0.01 50);
 		cursor: pointer;
 		flex-shrink: 0;
 		transition: background 0.12s, transform 0.1s;
 	}
-	.send-btn:hover { background: oklch(25% 0.016 50); }
+	.send-btn:hover { background: var(--amber-deep); }
 	.send-btn:active { transform: scale(0.95); }
 	.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
@@ -845,7 +858,7 @@
 	}
 
 	@media (max-width: 600px) {
-		.suggestions { grid-template-columns: 1fr; }
+		.suggestions { gap: 0; }
 		.mode-bar { overflow-x: auto; max-width: 100%; }
 		.input-area { padding: 0.75rem 1rem 1.25rem; }
 	}

@@ -7,7 +7,12 @@
 	let mobileOpen = $state(false);
 
 	function close() { mobileOpen = false; }
+	function onKeydown(e: KeyboardEvent) { if (e.key === 'Escape') close(); }
 </script>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<svelte:window onkeydown={onKeydown} />
 
 <header class="site-header">
 	<div class="site-header-inner">
@@ -60,6 +65,28 @@
 </header>
 
 <style>
+	/* ── Skip link ── */
+	.skip-link {
+		position: fixed;
+		top: 0.75rem;
+		left: 50%;
+		transform: translateX(-50%) translateY(-120%);
+		z-index: 9999;
+		padding: 0.625rem 1.25rem;
+		background: oklch(18% 0.014 50);
+		color: oklch(97.5% 0.018 85);
+		font-size: 0.875rem;
+		font-weight: 700;
+		border-radius: 999px;
+		text-decoration: none;
+		transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.skip-link:focus-visible {
+		transform: translateX(-50%) translateY(0);
+		outline: 2px solid oklch(72% 0.185 72);
+		outline-offset: 2px;
+	}
+
 	/* ── Tokens ── */
 	.site-header {
 		--cream:      oklch(97.5% 0.018 85);

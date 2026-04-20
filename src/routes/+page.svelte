@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { isLoggedIn, profile } from '$lib/stores/auth';
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
@@ -43,6 +44,11 @@
 
 	let openFaq = $state<number | null>(null);
 	function toggleFaq(i: number) { openFaq = openFaq === i ? null : i; }
+
+	onMount(() => {
+		// Add lp-js just for the stagger animation trigger
+		document.querySelector('.lp')?.classList.add('lp-js');
+	});
 </script>
 
 <svelte:head>
@@ -66,7 +72,7 @@
 
 		<!-- Text side -->
 		<div class="lp-hero-text">
-			<p class="lp-eyebrow">AI wey understand your world 🌍</p>
+			<p class="lp-eyebrow">AI wey understand your world</p>
 
 			<h1 class="lp-hero-h1">
 				Smarter Learning.<br>
@@ -123,38 +129,94 @@
 
 
 <!-- ═══════════════════════════════════════════════════
-     § 3  CURRICULUM STRIP
+     § 3  CURRICULUM MARQUEE
 ════════════════════════════════════════════════════ -->
-<div class="lp-strip">
-	<div class="lp-container lp-strip-inner">
-		<span class="lp-strip-label">Supports</span>
-		{#each ['WAEC', 'NECO', 'JAMB', 'KCSE', 'BECE', 'WASSCE', 'Cambridge', 'IGCSE'] as c}
-			<span class="lp-chip">{c}</span>
-		{/each}
+<div class="lp-marquee-section">
+	<p class="lp-marquee-label">Curriculum coverage</p>
+	<div class="lp-marquee-track-wrap">
+		<!-- Row 1: left to right -->
+		<div class="lp-marquee-track">
+			<div class="lp-marquee-inner">
+				{#each ['WAEC', 'NECO', 'JAMB', 'KCSE', 'BECE', 'WASSCE', 'Cambridge', 'IGCSE', 'WAEC', 'NECO', 'JAMB', 'KCSE', 'BECE', 'WASSCE', 'Cambridge', 'IGCSE'] as c}
+					<span class="lp-marquee-chip">{c}</span>
+				{/each}
+			</div>
+		</div>
 	</div>
 </div>
 
 
 <!-- ═══════════════════════════════════════════════════
-     § 4  FEATURES  (editorial numbered list)
+     § 4  FEATURES  (bento grid)
 ════════════════════════════════════════════════════ -->
 <section class="lp-section" id="features">
 	<div class="lp-container">
-		<div class="lp-section-intro">
+		<div class="lp-section-intro lp-reveal">
 			<p class="lp-eyebrow">What XYLO does</p>
-			<h2 class="lp-h2">Six capabilities.<br>One companion.</h2>
+			<h2 class="lp-h2" style="font-size: clamp(1.75rem, 3vw, 2.5rem);">Six capabilities.<br>One companion.</h2>
 		</div>
 
-		<div class="lp-features-grid">
-			{#each features as f}
-				<div class="lp-feature">
-					<span class="lp-feature-num">{f.num}</span>
-					<div class="lp-feature-body">
-						<h3 class="lp-feature-title">{f.title}</h3>
-						<p class="lp-feature-desc">{f.desc}</p>
-					</div>
+		<div class="lp-bento lp-reveal">
+
+			<!-- Card 1: Hero — Curriculum-Aligned (spans 2 cols, row 1) -->
+			<div class="lp-bento-card lp-bento-a lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
 				</div>
-			{/each}
+				<h3 class="lp-bento-title">Curriculum-Aligned</h3>
+				<p class="lp-bento-desc">Knows WAEC, JAMB, KCSE, BECE, and Cambridge by name — not by guess. Every answer is shaped by your actual syllabus.</p>
+				<div class="lp-bento-tags">
+					{#each ['WAEC', 'JAMB', 'KCSE', 'BECE', 'Cambridge'] as tag}
+						<span class="lp-bento-tag">{tag}</span>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Card 2: Study Plans (row 1, col 3) -->
+			<div class="lp-bento-card lp-bento-b lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+				</div>
+				<h3 class="lp-bento-title">Personalized Study Plans</h3>
+				<p class="lp-bento-desc">Give XYLO your exam date. Get a day-by-day plan built around your actual life, not a generic template.</p>
+			</div>
+
+			<!-- Card 3: Daily Consistency (row 2, col 1) -->
+			<div class="lp-bento-card lp-bento-c lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-6"/></svg>
+				</div>
+				<h3 class="lp-bento-title">Daily Consistency</h3>
+				<p class="lp-bento-desc">Streaks and gentle check-ins that build lasting habits. Not motivation bursts. Real change over time.</p>
+			</div>
+
+			<!-- Card 4: Emotionally Intelligent (row 2, cols 2-3) -->
+			<div class="lp-bento-card lp-bento-d lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+				</div>
+				<h3 class="lp-bento-title">Emotionally Intelligent</h3>
+				<p class="lp-bento-desc">Academic pressure is real. XYLO acknowledges how you feel before diving into content. Never judgmental.</p>
+			</div>
+
+			<!-- Card 5: Progress Tracking (row 3, cols 1-2) -->
+			<div class="lp-bento-card lp-bento-e lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+				</div>
+				<h3 class="lp-bento-title">Progress Tracking</h3>
+				<p class="lp-bento-desc">See exactly what you've covered, what still needs work, and how your consistency compares week over week.</p>
+			</div>
+
+			<!-- Card 6: School Dashboard (row 3, col 3) -->
+			<div class="lp-bento-card lp-bento-f lp-stagger">
+				<div class="lp-bento-icon">
+					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+				</div>
+				<h3 class="lp-bento-title">School Dashboard</h3>
+				<p class="lp-bento-desc">Admins see who's engaged and who's struggling — without ever reading a student's private messages.</p>
+			</div>
+
 		</div>
 	</div>
 </section>
@@ -166,7 +228,7 @@
 <section class="lp-section lp-section-warm" id="modes">
 	<div class="lp-container lp-split">
 
-		<div class="lp-split-text">
+		<div class="lp-split-text lp-reveal">
 			<p class="lp-eyebrow">Four study modes</p>
 			<h2 class="lp-h2">Pick how you want to learn today</h2>
 			<p class="lp-body-lg">
@@ -175,14 +237,14 @@
 			</p>
 		</div>
 
-		<div class="lp-modes-list">
+		<div class="lp-modes-list lp-reveal">
 			{#each [
-				{ accent: '#3b82f6', label: 'Help me understand this topic', desc: 'Concepts broken down clearly with examples and follow-up questions' },
-				{ accent: '#8b5cf6', label: 'Quiz me on what I know', desc: 'One question at a time, with feedback and a score at the end' },
+				{ accent: 'oklch(32% 0.016 55)', label: 'Help me understand this topic', desc: 'Concepts broken down clearly with examples and follow-up questions' },
+				{ accent: 'oklch(50% 0.022 60)', label: 'Quiz me on what I know', desc: 'One question at a time, with feedback and a score at the end' },
 				{ accent: 'var(--lp-amber)', label: 'Create a study plan for me', desc: 'A structured daily plan based on your exam date and weak areas' },
-				{ accent: '#22c55e', label: 'Exam prep mode', desc: 'High-yield topics, past question patterns, and tight summaries' },
+				{ accent: 'oklch(62% 0.018 65)', label: 'Exam prep mode', desc: 'High-yield topics, past question patterns, and tight summaries' },
 			] as m, i}
-				<div class="lp-mode-row">
+				<div class="lp-mode-row lp-stagger">
 					<div class="lp-mode-index">{String(i + 1).padStart(2, '0')}</div>
 					<div class="lp-mode-accent-bar" style="background:{m.accent}"></div>
 					<div>
@@ -202,14 +264,14 @@
 ════════════════════════════════════════════════════ -->
 <section class="lp-section">
 	<div class="lp-container">
-		<div class="lp-section-intro">
+		<div class="lp-section-intro lp-reveal">
 			<p class="lp-eyebrow">How it works</p>
 			<h2 class="lp-h2">Up and studying<br>in four steps</h2>
 		</div>
 
-		<div class="lp-steps">
+		<div class="lp-steps lp-reveal">
 			{#each steps as s}
-				<div class="lp-step">
+				<div class="lp-step lp-stagger">
 					<div class="lp-step-num">{s.num}</div>
 					<h3 class="lp-step-title">{s.title}</h3>
 					<p class="lp-step-desc">{s.desc}</p>
@@ -225,11 +287,11 @@
 ════════════════════════════════════════════════════ -->
 <section class="lp-section lp-section-warm" id="testimonials">
 	<div class="lp-container">
-		<p class="lp-eyebrow" style="margin-bottom: 3rem">What students say</p>
+		<p class="lp-eyebrow lp-reveal" style="margin-bottom: 3rem">What students say</p>
 
-		<div class="lp-quotes">
+		<div class="lp-quotes lp-reveal">
 			{#each testimonials as t, i}
-				<figure class="lp-quote" class:lp-quote-featured={i === 0}>
+				<figure class="lp-quote lp-stagger" class:lp-quote-featured={i === 0}>
 					<blockquote class="lp-quote-text">"{t.quote}"</blockquote>
 					<figcaption class="lp-quote-attr">
 						<strong>{t.name}</strong>
@@ -249,7 +311,7 @@
 	<div class="lp-container lp-split lp-split-flip">
 
 		<!-- Dark school card -->
-		<div class="lp-school-card">
+		<div class="lp-school-card lp-reveal">
 			<div class="lp-school-card-head">
 				<p class="lp-school-plan-label">School Plan</p>
 				<p class="lp-school-plan-trial">14-day free trial · No credit card</p>
@@ -273,7 +335,7 @@
 		</div>
 
 		<!-- Text -->
-		<div class="lp-split-text">
+		<div class="lp-split-text lp-reveal">
 			<p class="lp-eyebrow">For Schools & Institutions</p>
 			<h2 class="lp-h2">Give every student a personal AI tutor</h2>
 			<p class="lp-body-lg">
@@ -311,7 +373,7 @@
 <section class="lp-section lp-section-warm" id="faq">
 	<div class="lp-container lp-faq-layout">
 
-		<div class="lp-faq-header">
+		<div class="lp-faq-header lp-reveal">
 			<p class="lp-eyebrow">FAQ</p>
 			<h2 class="lp-h2">Common questions, honest answers</h2>
 		</div>
@@ -349,7 +411,7 @@
      § 10  FINAL CTA
 ════════════════════════════════════════════════════ -->
 <section class="lp-cta-band">
-	<div class="lp-container lp-cta-inner">
+	<div class="lp-container lp-cta-inner lp-reveal">
 		<h2 class="lp-cta-h2">Ready to study smarter?</h2>
 		<p class="lp-cta-sub">Join thousands of African students preparing for their exams with XYLO.</p>
 		<div class="lp-cta-actions">
@@ -513,7 +575,7 @@
 
 /* ─── § 2  HERO ──────────────────────────────────── */
 .lp-hero {
-	padding: clamp(4rem, 10vw, 7rem) 0 clamp(3rem, 8vw, 5rem);
+	padding: clamp(3rem, 6vw, 5rem) 0 clamp(2.5rem, 5vw, 4rem);
 	position: relative;
 	overflow: hidden;
 }
@@ -540,19 +602,19 @@
 .lp-hero-h1 {
 	font-family: 'Fraunces', Georgia, serif;
 	font-optical-sizing: auto;
-	font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+	font-size: clamp(2rem, 3.5vw, 3rem);
 	font-weight: 800;
-	line-height: 1.04;
+	line-height: 1.08;
 	letter-spacing: -0.03em;
 	color: var(--lp-ink);
-	margin-bottom: 1.5rem;
+	margin-bottom: 1.25rem;
 }
 .lp-hero-body {
-	font-size: clamp(1rem, 1.5vw, 1.1875rem);
+	font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
 	color: var(--lp-ink-2);
 	line-height: 1.75;
-	margin-bottom: 2.25rem;
-	max-width: 48ch;
+	margin-bottom: 1.75rem;
+	max-width: 44ch;
 }
 .lp-hero-actions {
 	display: flex;
@@ -667,38 +729,79 @@
 	30% { transform: translateY(-4px); opacity: 1; }
 }
 
-/* ─── § 3  STRIP ─────────────────────────────────── */
-.lp-strip {
+/* ─── § 3  MARQUEE ───────────────────────────────── */
+.lp-marquee-section {
 	border-top: 1px solid var(--lp-border);
 	border-bottom: 1px solid var(--lp-border);
 	background: oklch(95.5% 0.022 82);
-	padding: 1.25rem 0;
+	padding: 1.5rem 0;
+	overflow: hidden;
 }
-.lp-strip-inner {
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.625rem;
-}
-.lp-strip-label {
-	font-size: 0.6875rem;
+.lp-marquee-label {
+	text-align: center;
+	font-size: 0.6rem;
 	font-weight: 800;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	color: var(--lp-ink-3);
-	margin-right: 0.25rem;
+	margin-bottom: 0.875rem;
 }
-.lp-chip {
+.lp-marquee-track-wrap {
+	position: relative;
+	overflow: hidden;
+}
+.lp-marquee-track-wrap::before,
+.lp-marquee-track-wrap::after {
+	content: '';
+	position: absolute;
+	top: 0; bottom: 0;
+	width: 5rem;
+	z-index: 2;
+	pointer-events: none;
+}
+.lp-marquee-track-wrap::before {
+	left: 0;
+	background: linear-gradient(to right, oklch(95.5% 0.022 82), transparent);
+}
+.lp-marquee-track-wrap::after {
+	right: 0;
+	background: linear-gradient(to left, oklch(95.5% 0.022 82), transparent);
+}
+.lp-marquee-track {
+	display: flex;
+	width: max-content;
+	animation: lp-marquee 22s linear infinite;
+}
+@keyframes lp-marquee {
+	from { transform: translateX(0); }
+	to   { transform: translateX(-50%); }
+}
+.lp-marquee-inner {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+	padding-right: 0.75rem;
+}
+.lp-marquee-chip {
 	display: inline-flex;
 	align-items: center;
-	padding: 0.3rem 0.875rem;
+	padding: 0.375rem 1.125rem;
 	background: var(--lp-cream);
 	border: 1px solid var(--lp-border);
 	border-radius: 999px;
-	font-size: 0.75rem;
+	font-size: 0.8125rem;
 	font-weight: 700;
 	color: var(--lp-ink-2);
-	letter-spacing: 0.03em;
+	letter-spacing: 0.04em;
+	white-space: nowrap;
+	transition: border-color 0.2s, color 0.2s;
+}
+.lp-marquee-chip:hover {
+	border-color: var(--lp-amber);
+	color: var(--lp-amber-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+	.lp-marquee-track { animation: none; }
 }
 
 /* ─── Sections ───────────────────────────────────── */
@@ -707,49 +810,93 @@
 }
 .lp-section-warm { background: oklch(95.5% 0.022 82); }
 .lp-section-intro {
-	margin-bottom: clamp(2.5rem, 5vw, 4rem);
+	margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
-/* ─── § 4  FEATURES ──────────────────────────────── */
-.lp-features-grid {
+/* ─── § 4  BENTO FEATURES ───────────────────────── */
+.lp-bento {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 0;
-	border-top: 1px solid var(--lp-border);
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-areas:
+		"a a b"
+		"c d d"
+		"e e f";
+	gap: 1rem;
 }
-.lp-feature {
+.lp-bento-a { grid-area: a; background: var(--lp-amber-pale); }
+.lp-bento-b { grid-area: b; }
+.lp-bento-c { grid-area: c; }
+.lp-bento-d { grid-area: d; }
+.lp-bento-e { grid-area: e; }
+.lp-bento-f { grid-area: f; }
+.lp-bento-card {
+	background: oklch(99% 0.01 85);
+	border: 1px solid var(--lp-border);
+	border-radius: 1.25rem;
+	padding: 2rem;
 	display: flex;
-	align-items: flex-start;
-	gap: 1.5rem;
-	padding: 2rem 2rem 2rem 0;
-	border-bottom: 1px solid var(--lp-border);
-	border-right: 1px solid var(--lp-border);
-	transition: background 0.2s;
+	flex-direction: column;
+	gap: 0.75rem;
+	position: relative;
+	overflow: hidden;
+	transition: box-shadow 0.25s, border-color 0.25s, transform 0.25s;
 }
-.lp-feature:nth-child(even) { padding-left: 2rem; border-right: none; }
-.lp-feature:hover { background: oklch(95.5% 0.022 82); }
-.lp-feature-num {
-	font-family: 'Fraunces', Georgia, serif;
-	font-optical-sizing: auto;
-	font-size: 2rem;
-	font-weight: 300;
-	color: var(--lp-amber);
-	line-height: 1;
+.lp-bento-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(circle at 0% 0%, oklch(72% 0.185 72 / 0.07), transparent 60%);
+	opacity: 0;
+	transition: opacity 0.3s;
+	pointer-events: none;
+}
+.lp-bento-card:hover {
+	border-color: oklch(87% 0.05 78);
+	box-shadow: 0 8px 32px oklch(18% 0.014 50 / 0.07);
+	transform: translateY(-2px);
+}
+.lp-bento-card:hover::before { opacity: 1; }
+.lp-bento-icon {
+	width: 44px;
+	height: 44px;
+	background: var(--lp-amber-pale);
+	border: 1px solid oklch(87% 0.05 78);
+	border-radius: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--lp-amber-dark);
 	flex-shrink: 0;
-	width: 2.5rem;
-	margin-top: 0.125rem;
+	margin-bottom: 0.25rem;
 }
-.lp-feature-title {
-	font-weight: 700;
+.lp-bento-title {
 	font-size: 1.0625rem;
+	font-weight: 700;
 	color: var(--lp-ink);
-	margin-bottom: 0.5rem;
 	line-height: 1.3;
 }
-.lp-feature-desc {
+.lp-bento-hero .lp-bento-title { font-size: 1.25rem; }
+.lp-bento-desc {
 	font-size: 0.9375rem;
 	color: var(--lp-ink-2);
 	line-height: 1.7;
+	flex: 1;
+}
+.lp-bento-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+	margin-top: 0.5rem;
+}
+.lp-bento-tag {
+	padding: 0.2rem 0.625rem;
+	background: var(--lp-amber-pale);
+	border: 1px solid oklch(87% 0.06 80);
+	border-radius: 999px;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	color: var(--lp-amber-dark);
+	letter-spacing: 0.04em;
 }
 
 /* ─── § 5  STUDY MODES ───────────────────────────── */
@@ -816,6 +963,22 @@
 	border-right: 1px solid var(--lp-border);
 	position: relative;
 }
+.lp-step::before {
+	content: '';
+	position: absolute;
+	top: -5px;
+	left: 0;
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: var(--lp-border);
+	border: 2px solid var(--lp-cream);
+	transform: translateY(-50%);
+}
+.lp-step:first-child::before {
+	background: var(--lp-amber);
+	box-shadow: 0 0 0 3px var(--lp-amber-pale);
+}
 .lp-step:last-child { border-right: none; }
 .lp-step:not(:first-child) { padding-left: 2rem; }
 .lp-step-num {
@@ -854,8 +1017,26 @@
 }
 .lp-quote:last-child { border-right: none; }
 .lp-quote:not(:first-child) { padding-left: 2rem; }
+.lp-quote-featured {
+	position: relative;
+	padding-top: 4rem;
+}
+.lp-quote-featured::before {
+	content: '\201C';
+	font-family: 'Fraunces', Georgia, serif;
+	font-optical-sizing: auto;
+	font-size: 7rem;
+	line-height: 1;
+	font-weight: 300;
+	color: var(--lp-amber);
+	position: absolute;
+	top: 0;
+	left: -0.125rem;
+}
 .lp-quote-featured .lp-quote-text {
-	font-size: clamp(1rem, 1.8vw, 1.25rem);
+	font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+	line-height: 1.45;
+	font-style: italic;
 }
 .lp-quote-text {
 	font-family: 'Fraunces', Georgia, serif;
@@ -1033,26 +1214,62 @@
 
 /* ─── Responsive ─────────────────────────────────── */
 
+/* ── Mid-size laptops & wide tablets ──────────────── */
+@media (max-width: 1024px) {
+	.lp-hero-grid {
+		grid-template-columns: 1fr 1fr;
+		gap: clamp(1.5rem, 3vw, 3rem);
+	}
+	.lp-hero-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem); }
+	.lp-chat-card { max-width: 340px; }
+}
+
+/* ── Tablet ────────────────────────────────────────── */
 @media (max-width: 768px) {
+	/* Hero — stacked, centered */
+	.lp-hero {
+		padding: clamp(3rem, 8vw, 5rem) 0 clamp(2.5rem, 6vw, 4rem);
+	}
 	.lp-hero-grid {
 		grid-template-columns: 1fr;
+		gap: 2.5rem;
+		text-align: center;
 	}
-	.lp-hero-text { padding-right: 0; }
+	.lp-hero-text {
+		padding-right: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.lp-eyebrow { margin-left: auto; margin-right: auto; }
+	.lp-hero-body { max-width: 52ch; text-align: center; }
+	.lp-hero-h1 { font-size: clamp(2.125rem, 6vw, 3rem); }
+	.lp-hero-actions {
+		justify-content: center;
+		gap: 0.75rem;
+	}
+	.lp-hero-note { text-align: center; }
+
+	/* Chat card — flat, centered, slightly smaller */
 	.lp-hero-visual { justify-content: center; }
 	.lp-chat-card {
+		max-width: 420px;
+		width: 100%;
 		transform: none;
 		animation: none;
 		opacity: 1;
 	}
 	.lp-chat-card:hover { transform: none; }
 
-	.lp-features-grid {
-		grid-template-columns: 1fr;
-	}
-	.lp-feature,
-	.lp-feature:nth-child(even) {
-		padding: 1.5rem 0;
-		border-right: none;
+	/* Bento — 2 cols on tablet */
+	.lp-bento {
+		grid-template-columns: repeat(2, 1fr);
+		grid-template-areas:
+			"a a"
+			"b c"
+			"d d"
+			"e e"
+			"f f";
 	}
 
 	.lp-split {
@@ -1080,19 +1297,86 @@
 	.lp-cta-inner { align-items: flex-start; }
 }
 
+/* ── Mobile ────────────────────────────────────────── */
 @media (max-width: 480px) {
+	/* Hero — compact, stacked, full-width buttons */
+	.lp-hero {
+		padding: 2.5rem 0 2rem;
+	}
+	.lp-hero-h1 {
+		font-size: clamp(1.875rem, 8vw, 2.5rem);
+		margin-bottom: 1rem;
+	}
+	.lp-hero-body {
+		font-size: 1rem;
+		margin-bottom: 1.75rem;
+	}
+	.lp-hero-actions {
+		flex-direction: column;
+		align-items: stretch;
+		width: 100%;
+		max-width: 320px;
+	}
+	.lp-hero-actions > * {
+		justify-content: center;
+		width: 100%;
+		text-align: center;
+	}
+
+	/* Compact chat card on mobile */
+	.lp-chat-card { max-width: 100%; }
+	.lp-chat-body { padding: 1rem; gap: 0.625rem; }
+	.lp-msg { font-size: 0.8125rem; padding: 0.625rem 0.875rem; }
+	/* Hide the long AI response on mobile to keep card compact */
+	.lp-msg-ai:nth-child(3) { display: none; }
+
 	.lp-steps { grid-template-columns: 1fr; }
 	.lp-step { border-right: none; padding: 1.5rem 0; }
 
-	.lp-hero-actions { flex-direction: column; }
-	.lp-hero-actions > * { justify-content: center; }
+	/* Bento — single column on mobile */
+	.lp-bento {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			"a" "b" "c" "d" "e" "f";
+	}
+
 	.lp-cta-actions { flex-direction: column; }
 
 	.lp-quotes { border-top: none; }
 }
 
+/* ─── Scroll reveals — CSS-only, always visible ── */
+@keyframes lp-fade-up {
+	from { opacity: 0; transform: translateY(20px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes lp-fade-up-sm {
+	from { opacity: 0; transform: translateY(14px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+.lp-reveal {
+	animation: lp-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.lp-stagger {
+	animation: lp-fade-up-sm 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delays for child items */
+.lp-stagger:nth-child(1) { animation-delay: 0.05s; }
+.lp-stagger:nth-child(2) { animation-delay: 0.13s; }
+.lp-stagger:nth-child(3) { animation-delay: 0.21s; }
+.lp-stagger:nth-child(4) { animation-delay: 0.29s; }
+.lp-stagger:nth-child(5) { animation-delay: 0.37s; }
+.lp-stagger:nth-child(6) { animation-delay: 0.45s; }
+
 /* ─── Reduced motion ─────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+	.lp-reveal, .lp-stagger {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
+	}
 	.lp-chat-card { animation: none; opacity: 1; transform: none; }
 	.lp-typing span { animation: none; opacity: 0.5; }
 	* { transition-duration: 0.01ms !important; }
