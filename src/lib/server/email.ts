@@ -85,7 +85,7 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
 					</a>
 					<hr style="border: none; border-top: 1px solid #2e3347; margin: 32px 0;" />
 					<p style="font-size: 12px; color: #6b7280;">
-						© 2025 Xyloxs. AI wey understand your world.
+						© 2025 Xyloxs. AI that understands your world.
 					</p>
 				</div>
 			</body>

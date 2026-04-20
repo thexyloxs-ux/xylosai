@@ -108,7 +108,7 @@
 				</div>
 				<div class="lp-chat-body">
 					<div class="lp-msg lp-msg-ai">
-						<strong>XYLO:</strong> How far! What do you want to learn today? 🌍
+						<strong>XYLO:</strong> Hi there! What would you like to learn today? 🌍
 					</div>
 					<div class="lp-msg lp-msg-user">
 						Help me understand photosynthesis for WAEC

@@ -46,7 +46,7 @@
 	<div class="sf-base">
 		<div class="sf-inner sf-base-inner">
 			<span>© 2025 Xyloxs Ltd</span>
-			<span class="sf-tagline">AI wey understand your world 🌍</span>
+			<span class="sf-tagline">AI that understands your world 🌍</span>
 			<nav class="sf-legal">
 				<a href="/privacy">Privacy</a>
 				<a href="/terms">Terms</a>
