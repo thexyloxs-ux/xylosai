@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { randomBytes } from 'crypto';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import type { RequestHandler } from './$types';
 
@@ -17,8 +18,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const admin = createSupabaseAdminClient();
 
+	// Idempotency guard — reject if this user already has an org
+	const { data: existing } = await admin
+		.from('profiles')
+		.select('org_id')
+		.eq('id', user.id)
+		.single();
+
+	if (existing?.org_id) {
+		throw error(409, 'Organization already set up for this account');
+	}
+
 	// 1. Create the Organization
-	const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+	const inviteCode = randomBytes(4).toString('hex').toUpperCase();
 	
 	const { data: org, error: orgErr } = await admin
 		.from('organizations')
