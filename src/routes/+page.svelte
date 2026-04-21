@@ -75,7 +75,7 @@
 
 		<!-- Text side -->
 		<div class="lp-hero-text">
-			<p class="lp-eyebrow">AI wey understand your world</p>
+			<p class="lp-eyebrow">AI that understands your world</p>
 
 			<h1 class="lp-hero-h1">
 				Smarter Learning.<br>
