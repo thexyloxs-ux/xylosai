@@ -7,7 +7,10 @@
 
 	$effect(() => {
 		if ($isLoggedIn && $profile) {
-			goto($profile.role === 'school_admin' ? '/dashboard' : '/chat');
+			const preview = new URLSearchParams(window.location.search).has('preview');
+			if (!preview) {
+				goto($profile.role === 'school_admin' ? '/dashboard' : '/chat');
+			}
 		}
 	});
 

@@ -23,7 +23,7 @@
 	<header class="dash-header">
 		<div class="header-inner">
 			<div class="header-left">
-				<a href="/" class="wordmark">XYLO</a>
+				<a href="/?preview" class="wordmark">XYLO</a>
 				<span class="admin-pill">School Admin</span>
 			</div>
 			<button

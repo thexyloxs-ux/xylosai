@@ -137,7 +137,7 @@
 	<!-- ── Sidebar ───────────────────────────────────── -->
 	<aside class="sidebar" class:open={sidebarOpen}>
 		<div class="sidebar-top">
-			<a href="/" class="wordmark">XYLO</a>
+			<a href="/?preview" class="wordmark">XYLO</a>
 			<button class="new-chat-btn" onclick={startNewChat}>
 				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
 				New chat
