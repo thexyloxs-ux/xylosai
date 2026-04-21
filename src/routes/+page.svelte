@@ -637,26 +637,55 @@
 .lp-chat-card {
 	width: 100%;
 	max-width: 400px;
-	background: oklch(99% 0.01 85);
-	border: 1px solid var(--lp-border);
+	/* Liquid Glass — hero chat preview */
+	background: oklch(100% 0 0 / 0.82);
+	backdrop-filter: blur(32px) saturate(180%);
+	-webkit-backdrop-filter: blur(32px) saturate(180%);
+	border: 1px solid oklch(100% 0 0 / 0.95);
 	border-radius: 1.25rem;
 	overflow: hidden;
 	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
 		0 2px 4px oklch(18% 0.01 50 / 0.04),
-		0 16px 40px oklch(18% 0.01 50 / 0.08),
-		0 32px 80px oklch(72% 0.18 72 / 0.08);
+		0 16px 48px oklch(18% 0.01 50 / 0.09),
+		0 32px 80px oklch(72% 0.18 72 / 0.1);
 	transform: perspective(1200px) rotateX(7deg) rotateY(-5deg) rotateZ(1deg);
 	transform-origin: center right;
 	animation: chat-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+	position: relative;
+	isolation: isolate;
+}
+/* Top reflection */
+.lp-chat-card::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 5%;
+	right: 5%;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(100% 0 0 / 0.6) 25%,
+		oklch(100% 0 0 / 0.9) 50%,
+		oklch(100% 0 0 / 0.6) 75%,
+		transparent 100%
+	);
+	pointer-events: none;
+	z-index: 2;
 }
 @keyframes chat-reveal {
 	from { opacity: 0; transform: perspective(1200px) translateY(30px) rotateX(18deg) rotateY(-10deg) rotateZ(2deg); }
 	to   { opacity: 1; transform: perspective(1200px) rotateX(7deg) rotateY(-5deg) rotateZ(1deg); }
 }
 .lp-chat-card:hover {
+	background: oklch(100% 0 0 / 0.9);
 	transform: perspective(1200px) rotateX(2deg) rotateY(-2deg) rotateZ(0deg) scale(1.02);
-	box-shadow: 0 24px 60px oklch(18% 0.01 50 / 0.12), 0 48px 100px oklch(72% 0.18 72 / 0.12);
-	transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s;
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 24px 60px oklch(18% 0.01 50 / 0.12),
+		0 48px 100px oklch(72% 0.18 72 / 0.14);
+	transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s, background 0.5s;
 }
 .lp-chat-card-bar {
 	background: var(--lp-cream-warm);
@@ -733,9 +762,14 @@
 .lp-marquee-section {
 	border-top: 1px solid var(--lp-border);
 	border-bottom: 1px solid var(--lp-border);
-	background: oklch(95.5% 0.022 82);
+	/* Liquid glass strip */
+	background: oklch(100% 0 0 / 0.45);
+	backdrop-filter: blur(16px) saturate(140%);
+	-webkit-backdrop-filter: blur(16px) saturate(140%);
 	padding: 1.5rem 0;
 	overflow: hidden;
+	position: relative;
+	box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.7);
 }
 .lp-marquee-label {
 	text-align: center;
@@ -823,15 +857,29 @@
 		"e e f";
 	gap: 1rem;
 }
-.lp-bento-a { grid-area: a; background: var(--lp-amber-pale); }
+.lp-bento-a {
+	grid-area: a;
+	/* Amber liquid glass — featured card */
+	background: oklch(72% 0.185 72 / 0.06) !important;
+	backdrop-filter: blur(24px) saturate(160%);
+	-webkit-backdrop-filter: blur(24px) saturate(160%);
+	border-color: oklch(72% 0.185 72 / 0.22) !important;
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 0.8),
+		0 4px 20px oklch(72% 0.185 72 / 0.12),
+		0 1px 3px oklch(18% 0.014 50 / 0.06) !important;
+}
 .lp-bento-b { grid-area: b; }
 .lp-bento-c { grid-area: c; }
 .lp-bento-d { grid-area: d; }
 .lp-bento-e { grid-area: e; }
 .lp-bento-f { grid-area: f; }
 .lp-bento-card {
-	background: oklch(99% 0.01 85);
-	border: 1px solid var(--lp-border);
+	/* Liquid Glass — light surface variant */
+	background: oklch(100% 0 0 / 0.68);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	border: 1px solid oklch(100% 0 0 / 0.88);
 	border-radius: 1.25rem;
 	padding: 2rem;
 	display: flex;
@@ -839,21 +887,54 @@
 	gap: 0.75rem;
 	position: relative;
 	overflow: hidden;
-	transition: box-shadow 0.25s, border-color 0.25s, transform 0.25s;
+	isolation: isolate;
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 2px 8px oklch(18% 0.014 50 / 0.04),
+		0 8px 24px oklch(18% 0.014 50 / 0.04);
+	transition: box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+	            border-color 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+	            transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+	            background 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+/* Top light refraction line */
+.lp-bento-card::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 8%;
+	right: 8%;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(100% 0 0 / 0.5) 30%,
+		oklch(100% 0 0 / 0.75) 50%,
+		oklch(100% 0 0 / 0.5) 70%,
+		transparent 100%
+	);
+	pointer-events: none;
+	z-index: 1;
+}
+/* Ambient amber hover glow */
 .lp-bento-card::before {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: radial-gradient(circle at 0% 0%, oklch(72% 0.185 72 / 0.07), transparent 60%);
+	background: radial-gradient(circle at 0% 100%, oklch(72% 0.185 72 / 0.08), transparent 60%);
 	opacity: 0;
 	transition: opacity 0.3s;
 	pointer-events: none;
+	z-index: 0;
 }
 .lp-bento-card:hover {
-	border-color: oklch(87% 0.05 78);
-	box-shadow: 0 8px 32px oklch(18% 0.014 50 / 0.07);
-	transform: translateY(-2px);
+	background: oklch(100% 0 0 / 0.88);
+	border-color: oklch(72% 0.185 72 / 0.25);
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 12px 40px oklch(18% 0.014 50 / 0.09),
+		0 4px 12px oklch(72% 0.185 72 / 0.06);
+	transform: translateY(-3px);
 }
 .lp-bento-card:hover::before { opacity: 1; }
 .lp-bento-icon {
@@ -1064,12 +1145,52 @@
 
 /* ─── § 8  SCHOOLS ───────────────────────────────── */
 .lp-school-card {
-	background: oklch(16% 0.014 50);
+	/* Dark Liquid Glass — school card */
+	background: oklch(14% 0.012 50 / 0.92);
+	backdrop-filter: blur(28px) saturate(160%);
+	-webkit-backdrop-filter: blur(28px) saturate(160%);
+	border: 1px solid oklch(100% 0 0 / 0.08);
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 0.1),
+		inset 0 -1px 0 oklch(0% 0 0 / 0.2),
+		0 4px 6px oklch(0% 0 0 / 0.1),
+		0 20px 60px oklch(0% 0 0 / 0.25),
+		0 0 80px oklch(72% 0.185 72 / 0.06);
 	color: oklch(93% 0.01 85);
 	border-radius: 1.5rem;
 	padding: clamp(2rem, 4vw, 2.75rem);
 	display: flex;
 	flex-direction: column;
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+}
+/* Ambient amber glow */
+.lp-school-card::before {
+	content: '';
+	position: absolute;
+	top: -40px; right: -40px;
+	width: 220px; height: 220px;
+	background: radial-gradient(circle, oklch(72% 0.185 72 / 0.14) 0%, transparent 65%);
+	pointer-events: none;
+	z-index: 0;
+}
+/* Top reflection */
+.lp-school-card::after {
+	content: '';
+	position: absolute;
+	top: 0; left: 8%; right: 8%;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(100% 0 0 / 0.18) 30%,
+		oklch(100% 0 0 / 0.3) 50%,
+		oklch(100% 0 0 / 0.18) 70%,
+		transparent 100%
+	);
+	pointer-events: none;
+	z-index: 1;
 }
 .lp-school-card-head { margin-bottom: 2rem; }
 .lp-school-plan-label {
@@ -1185,8 +1306,29 @@
 
 /* ─── § 10  CTA BAND ─────────────────────────────── */
 .lp-cta-band {
-	background: oklch(16% 0.014 50);
+	/* Dark Liquid Glass CTA */
+	background: oklch(13% 0.012 50 / 0.96);
+	backdrop-filter: blur(32px) saturate(160%);
+	-webkit-backdrop-filter: blur(32px) saturate(160%);
+	border-top: 1px solid oklch(100% 0 0 / 0.06);
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 0.08),
+		0 0 120px oklch(72% 0.185 72 / 0.08);
 	padding: clamp(4rem, 8vw, 6rem) 0;
+	position: relative;
+	overflow: hidden;
+}
+/* Ambient amber atmosphere */
+.lp-cta-band::before {
+	content: '';
+	position: absolute;
+	top: -100px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 600px;
+	height: 400px;
+	background: radial-gradient(ellipse, oklch(72% 0.185 72 / 0.1) 0%, transparent 65%);
+	pointer-events: none;
 }
 .lp-cta-inner {
 	display: flex;

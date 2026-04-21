@@ -178,8 +178,15 @@
 		position: sticky;
 		top: 0;
 		z-index: 50;
-		background: oklch(99% 0.008 85);
+		/* Liquid Glass header */
+		background: oklch(100% 0 0 / 0.78);
+		backdrop-filter: blur(20px) saturate(150%);
+		-webkit-backdrop-filter: blur(20px) saturate(150%);
 		border-bottom: 1px solid var(--border);
+		box-shadow:
+			inset 0 -1px 0 oklch(100% 0 0 / 0.6),
+			0 1px 0 oklch(87% 0.028 78 / 0.5),
+			0 4px 16px oklch(18% 0.014 50 / 0.04);
 	}
 
 	.header-inner {
@@ -315,10 +322,18 @@
 		align-items: center;
 		gap: 0;
 		margin-bottom: 3.5rem;
-		border: 1px solid var(--border);
+		border: 1px solid oklch(100% 0 0 / 0.88);
 		border-radius: 0.875rem;
-		background: oklch(99% 0.008 85);
+		/* Liquid Glass stats container */
+		background: oklch(100% 0 0 / 0.65);
+		backdrop-filter: blur(20px) saturate(150%);
+		-webkit-backdrop-filter: blur(20px) saturate(150%);
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 8px oklch(18% 0.014 50 / 0.04),
+			0 8px 24px oklch(18% 0.014 50 / 0.05);
 		overflow: hidden;
+		position: relative;
 	}
 
 	.stat-item {
@@ -355,8 +370,15 @@
 
 	/* ── Table section ── */
 	.table-section {
-		background: oklch(99% 0.008 85);
-		border: 1px solid var(--border);
+		/* Liquid Glass table container */
+		background: oklch(100% 0 0 / 0.62);
+		backdrop-filter: blur(20px) saturate(140%);
+		-webkit-backdrop-filter: blur(20px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 8px oklch(18% 0.014 50 / 0.03),
+			0 8px 24px oklch(18% 0.014 50 / 0.04);
 		border-radius: 1rem;
 		overflow: hidden;
 	}
