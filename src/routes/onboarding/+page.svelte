@@ -115,13 +115,20 @@
 		error = '';
 		try {
 			if (isSchoolAdmin) {
-				const inviteCode = Array.from(crypto.getRandomValues(new Uint8Array(6))).map(b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
-				const { data: org, error: orgErr } = await supabase.from('organizations').insert({
-					name: schoolName.trim(), country, curriculum, invite_code: inviteCode, seat_limit: SEAT_LIMIT[studentCount] ?? 30,
-				}).select('id').single();
-				if (orgErr) throw new Error(orgErr.message);
-				const { error: profErr } = await supabase.from('profiles').update({ org_id: org.id, onboarded: true }).eq('id', user.id);
-				if (profErr) throw new Error(profErr.message);
+				const res = await fetch('/api/auth/setup-org', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						schoolName: schoolName.trim(),
+						country,
+						curriculum,
+						seatLimit: SEAT_LIMIT[studentCount] ?? 30,
+					})
+				});
+				if (!res.ok) {
+					const body = await res.json().catch(() => ({}));
+					throw new Error(body.message || 'Could not set up your school');
+				}
 				goto('/dashboard');
 			} else {
 				const { error: profErr } = await supabase.from('profiles').update({

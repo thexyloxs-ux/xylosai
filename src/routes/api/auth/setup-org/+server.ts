@@ -10,7 +10,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(401, 'Unauthorized');
 	}
 
-	const { schoolName, country } = await request.json();
+	const { schoolName, country, curriculum, seatLimit } = await request.json();
 
 	if (!schoolName) {
 		throw error(400, 'School name is required');
@@ -31,13 +31,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	// 1. Create the Organization
 	const inviteCode = randomBytes(4).toString('hex').toUpperCase();
-	
+
 	const { data: org, error: orgErr } = await admin
 		.from('organizations')
 		.insert({
 			name: schoolName,
 			country,
+			curriculum,
 			invite_code: inviteCode,
+			seat_limit: seatLimit ?? 30,
 			plan: 'school',
 			plan_status: 'trialing'
 		})
@@ -49,12 +51,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(500, 'Could not create organization');
 	}
 
-	// 2. Link the Admin Profile
+	// 2. Link the Admin Profile (service role bypasses RLS — safe to set org_id and role)
 	const { error: profileErr } = await admin
 		.from('profiles')
 		.update({
 			org_id: org.id,
-			role: 'school_admin'
+			role: 'school_admin',
+			onboarded: true
 		})
 		.eq('id', user.id);
 
@@ -63,5 +66,5 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(500, 'Could not link admin profile');
 	}
 
-	return json({ success: true, orgId: org.id });
+	return json({ success: true, orgId: org.id, inviteCode });
 };
