@@ -321,20 +321,45 @@
 }
 
 .plan-card {
-	background: oklch(99% 0.008 85);
-	border: 1px solid var(--border);
+	background: oklch(100% 0 0 / 0.68);
+	backdrop-filter: blur(20px) saturate(150%);
+	border: 1px solid oklch(100% 0 0 / 0.85);
 	border-radius: 1.25rem;
 	padding: 2.25rem;
 	display: flex;
 	flex-direction: column;
 	gap: 1.75rem;
 	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 2px 4px oklch(18% 0.014 50 / 0.04),
+		0 8px 24px oklch(18% 0.014 50 / 0.08);
+	transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+.plan-card:hover {
+	transform: translateY(-2px);
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 4px 8px oklch(18% 0.014 50 / 0.06),
+		0 16px 40px oklch(18% 0.014 50 / 0.12);
 }
 
 .plan-card.featured {
-	background: var(--ink);
-	border-color: transparent;
-	box-shadow: 0 8px 32px oklch(18% 0.014 50 / 0.2);
+	background: oklch(18% 0.014 50 / 0.92);
+	backdrop-filter: blur(24px) saturate(160%);
+	border: 1px solid oklch(100% 0 0 / 0.08);
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 0.10),
+		0 8px 32px oklch(18% 0.014 50 / 0.30),
+		0 0 0 1px oklch(72% 0.185 72 / 0.15);
+}
+.plan-card.featured:hover {
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 0.12),
+		0 16px 48px oklch(18% 0.014 50 / 0.40),
+		0 0 0 1px oklch(72% 0.185 72 / 0.25);
 }
 
 .plan-badge {
@@ -487,10 +512,18 @@
 	grid-template-columns: 1.1fr 0.9fr;
 	gap: 4rem;
 	align-items: center;
-	background: oklch(99% 0.008 85);
-	border: 1px solid var(--border);
+	background: oklch(100% 0 0 / 0.68);
+	backdrop-filter: blur(20px) saturate(150%);
+	border: 1px solid oklch(100% 0 0 / 0.85);
 	border-radius: 1.25rem;
 	padding: 3rem;
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	box-shadow:
+		inset 0 1px 0 oklch(100% 0 0 / 1),
+		0 4px 8px oklch(18% 0.014 50 / 0.04),
+		0 16px 48px oklch(18% 0.014 50 / 0.10);
 }
 
 .school-left { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -686,6 +719,9 @@
 .cta-section {
 	margin: 5rem 0 0;
 	background: var(--dark-base);
+	background-image:
+		radial-gradient(ellipse 70% 60% at 20% 50%, oklch(72% 0.185 72 / 0.08) 0%, transparent 60%),
+		radial-gradient(ellipse 50% 80% at 80% 30%, oklch(60% 0.12 240 / 0.06) 0%, transparent 55%);
 	padding: 5rem 2rem;
 }
 

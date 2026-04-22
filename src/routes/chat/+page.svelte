@@ -325,10 +325,12 @@
 		display: flex;
 		flex-direction: column;
 		height: 100dvh;
-		background: oklch(99% 0.008 85);
-		border-right: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.65);
+		backdrop-filter: blur(20px) saturate(150%);
+		border-right: 1px solid oklch(100% 0 0 / 0.70);
 		padding: 1.5rem 1.25rem;
 		overflow: hidden;
+		box-shadow: inset -1px 0 0 oklch(100% 0 0 / 0.5), 2px 0 12px oklch(18% 0.014 50 / 0.06);
 	}
 
 	.sidebar-top {
@@ -508,8 +510,10 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.875rem 1rem;
-		border-bottom: 1px solid var(--border);
-		background: oklch(99% 0.008 85);
+		border-bottom: 1px solid oklch(100% 0 0 / 0.70);
+		background: oklch(100% 0 0 / 0.75);
+		backdrop-filter: blur(16px) saturate(140%);
+		box-shadow: inset 0 -1px 0 oklch(100% 0 0 / 0.5), 0 2px 8px oklch(18% 0.014 50 / 0.05);
 	}
 
 	.menu-btn, .new-chat-mobile {
@@ -664,8 +668,10 @@
 	}
 
 	.bubble.assistant {
-		background: oklch(99% 0.008 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.72);
+		backdrop-filter: blur(16px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 2px 8px oklch(18% 0.014 50 / 0.06);
 		color: var(--ink);
 		border-bottom-left-radius: 0.25rem;
 	}
@@ -739,7 +745,7 @@
 		left: 0;
 		right: 0;
 		padding: 1rem 1.5rem 1.5rem;
-		background: linear-gradient(to top, var(--cream) 60%, transparent);
+		background: linear-gradient(to top, oklch(97.5% 0.018 85 / 0.95) 55%, transparent);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -749,9 +755,12 @@
 		display: flex;
 		gap: 0.25rem;
 		padding: 0.25rem;
-		background: oklch(93% 0.022 82);
+		background: oklch(93% 0.022 82 / 0.7);
+		backdrop-filter: blur(8px);
+		border: 1px solid oklch(100% 0 0 / 0.6);
 		border-radius: 0.625rem;
 		margin-bottom: 0.75rem;
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.8);
 	}
 
 	.mode-btn {
@@ -768,9 +777,9 @@
 		white-space: nowrap;
 	}
 	.mode-btn.active {
-		background: oklch(99% 0.008 85);
+		background: oklch(100% 0 0 / 0.85);
 		color: var(--ink);
-		box-shadow: 0 1px 3px oklch(18% 0.014 50 / 0.06);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 1px 3px oklch(18% 0.014 50 / 0.06);
 	}
 
 	.input-box {
@@ -779,14 +788,16 @@
 		display: flex;
 		align-items: flex-end;
 		gap: 0.75rem;
-		background: oklch(99% 0.008 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.78);
+		backdrop-filter: blur(20px) saturate(150%);
+		border: 1px solid oklch(100% 0 0 / 0.90);
 		border-radius: 1rem;
 		padding: 0.625rem 0.625rem 0.625rem 1.125rem;
-		box-shadow: 0 2px 12px oklch(18% 0.014 50 / 0.06);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 4px 20px oklch(18% 0.014 50 / 0.10);
 	}
 	.input-box:focus-within {
-		border-color: var(--amber);
+		border-color: oklch(72% 0.185 72 / 0.5);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 4px 20px oklch(18% 0.014 50 / 0.10), 0 0 0 3px oklch(72% 0.185 72 / 0.10);
 	}
 
 	textarea {

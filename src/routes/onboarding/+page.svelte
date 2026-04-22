@@ -352,10 +352,18 @@
 	.ob-card {
 		width: 100%;
 		max-width: 520px;
-		background: oklch(99.5% 0.006 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.72);
+		backdrop-filter: blur(24px) saturate(160%);
+		border: 1px solid oklch(100% 0 0 / 0.88);
 		border-radius: 1.5rem;
 		padding: 2.75rem;
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 4px 8px oklch(18% 0.014 50 / 0.04),
+			0 16px 48px oklch(18% 0.014 50 / 0.10);
+		position: relative;
+		isolation: isolate;
+		overflow: hidden;
 		animation: ob-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 	}
 	@keyframes ob-in {
@@ -479,8 +487,9 @@
 	}
 
 	.tile {
-		background: oklch(99.5% 0.006 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.55);
+		backdrop-filter: blur(12px) saturate(130%);
+		border: 1px solid oklch(100% 0 0 / 0.75);
 		border-radius: 1rem;
 		padding: 1.125rem 0.875rem;
 		display: flex;
@@ -489,18 +498,20 @@
 		text-align: center;
 		gap: 0.25rem;
 		cursor: pointer;
-		transition: border-color 0.2s, background 0.2s, transform 0.2s;
+		transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
 		font-family: inherit;
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9);
 	}
 	.tile:hover {
-		border-color: var(--amber);
-		background: var(--amber-tint);
+		border-color: oklch(72% 0.185 72 / 0.5);
+		background: oklch(100% 0 0 / 0.75);
 		transform: translateY(-2px);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 4px 12px oklch(18% 0.014 50 / 0.08);
 	}
 	.tile.active {
-		border-color: var(--amber);
-		background: var(--amber-tint);
-		box-shadow: 0 4px 16px oklch(72% 0.185 72 / 0.12);
+		border-color: oklch(72% 0.185 72 / 0.6);
+		background: oklch(72% 0.185 72 / 0.08);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9), 0 4px 16px oklch(72% 0.185 72 / 0.12);
 	}
 
 	.tile-label {
@@ -529,22 +540,26 @@
 		justify-content: space-between;
 		gap: 1rem;
 		padding: 1rem 1.25rem;
-		background: oklch(99.5% 0.006 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.55);
+		backdrop-filter: blur(12px) saturate(130%);
+		border: 1px solid oklch(100% 0 0 / 0.75);
 		border-radius: 1rem;
 		cursor: pointer;
-		transition: border-color 0.2s, background 0.2s;
+		transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 		text-align: left;
 		width: 100%;
 		font-family: inherit;
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9);
 	}
 	.row-tile:hover {
-		border-color: var(--amber);
-		background: var(--amber-tint);
+		border-color: oklch(72% 0.185 72 / 0.5);
+		background: oklch(100% 0 0 / 0.75);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 2px 8px oklch(18% 0.014 50 / 0.06);
 	}
 	.row-tile.active {
-		border-color: var(--amber);
-		background: var(--amber-tint);
+		border-color: oklch(72% 0.185 72 / 0.6);
+		background: oklch(72% 0.185 72 / 0.08);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9), 0 2px 8px oklch(72% 0.185 72 / 0.10);
 	}
 
 	.row-label {

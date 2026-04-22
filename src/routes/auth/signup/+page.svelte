@@ -373,13 +373,18 @@
 
 	/* ── Auth card ── */
 	.auth-card {
-		background: oklch(99.5% 0.006 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.72);
+		backdrop-filter: blur(24px) saturate(160%);
+		border: 1px solid oklch(100% 0 0 / 0.88);
 		border-radius: 1.25rem;
 		padding: 2.5rem;
 		box-shadow:
-			0 1px 3px oklch(18% 0.014 50 / 0.04),
-			0 8px 32px oklch(18% 0.014 50 / 0.06);
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 4px oklch(18% 0.014 50 / 0.04),
+			0 12px 40px oklch(18% 0.014 50 / 0.10);
+		position: relative;
+		isolation: isolate;
+		overflow: hidden;
 		animation: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 	}
 	@keyframes card-in {
@@ -424,7 +429,8 @@
 	/* ── Type toggle ── */
 	.type-toggle {
 		display: flex;
-		background: oklch(91% 0.022 80);
+		background: oklch(91% 0.022 80 / 0.6);
+		backdrop-filter: blur(8px);
 		border-radius: 0.625rem;
 		padding: 0.25rem;
 		margin-bottom: 1.75rem;
@@ -441,9 +447,9 @@
 		transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 	}
 	.toggle-btn.active {
-		background: oklch(99.5% 0.006 85);
+		background: oklch(100% 0 0 / 0.82);
 		color: var(--ink);
-		box-shadow: 0 1px 3px oklch(18% 0.014 50 / 0.08);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 1px 3px oklch(18% 0.014 50 / 0.08);
 	}
 
 	/* ── Google button ── */
@@ -454,21 +460,23 @@
 		justify-content: center;
 		gap: 0.75rem;
 		padding: 0.8125rem 1.25rem;
-		background: oklch(99.5% 0.006 85);
-		border: 1px solid var(--border);
+		background: oklch(100% 0 0 / 0.60);
+		backdrop-filter: blur(12px) saturate(130%);
+		border: 1px solid oklch(100% 0 0 / 0.80);
 		border-radius: 0.75rem;
 		font-family: inherit;
 		font-size: 0.9375rem;
 		font-weight: 700;
 		color: var(--ink);
 		cursor: pointer;
-		transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
-		box-shadow: 0 1px 3px oklch(18% 0.014 50 / 0.06);
+		transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.1s;
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9), 0 1px 4px oklch(18% 0.014 50 / 0.06);
 		margin-bottom: 0.25rem;
 	}
 	.google-btn:hover {
-		border-color: oklch(72% 0.04 78);
-		box-shadow: 0 4px 12px oklch(18% 0.014 50 / 0.08);
+		background: oklch(100% 0 0 / 0.82);
+		border-color: oklch(72% 0.04 78 / 0.5);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 4px 16px oklch(18% 0.014 50 / 0.10);
 		transform: translateY(-1px);
 	}
 	.google-btn:active { transform: translateY(0); }
