@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Profile, Organization, SessionType } from '$lib/types/database';
+import type { Database, Profile, Organization } from '$lib/types/database';
 import { groq, buildSystemPrompt, GROQ_MODEL } from '$lib/server/groq';
 import { getOrCreateConversation, saveMessage } from '$lib/server/repositories/conversation';
 import { incrementStudentActivity } from '$lib/server/repositories/activity';
@@ -19,8 +19,6 @@ export class RateLimitError extends Error {
 
 export interface ChatRequest {
 	messages: { role: 'user' | 'assistant'; content: string }[];
-	sessionType?: string;
-	subject?: string;
 	conversationId?: string;
 }
 
@@ -71,8 +69,6 @@ export async function streamChatResponse(
 ): Promise<{ stream: ReadableStream; conversationId: string }> {
 	const conversationId = await getOrCreateConversation(ctx.admin, ctx.userId, {
 		conversationId: req.conversationId,
-		subject: req.subject,
-		sessionType: req.sessionType,
 	});
 
 	// Persist the user's message before streaming starts
@@ -81,12 +77,7 @@ export async function streamChatResponse(
 		await saveMessage(ctx.admin, conversationId, 'user', lastUserMsg.content);
 	}
 
-	const systemPrompt = buildSystemPrompt(
-		ctx.profile,
-		ctx.org,
-		req.sessionType as SessionType | undefined,
-		req.subject
-	);
+	const systemPrompt = buildSystemPrompt(ctx.profile, ctx.org);
 
 	const groqStream = await groq.chat.completions.create({
 		model: GROQ_MODEL,

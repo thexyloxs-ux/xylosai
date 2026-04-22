@@ -6,21 +6,15 @@ type AdminClient = SupabaseClient<Database>;
 export async function getOrCreateConversation(
 	admin: AdminClient,
 	userId: string,
-	opts: { conversationId?: string; subject?: string; sessionType?: string }
+	opts: { conversationId?: string }
 ): Promise<string> {
 	if (opts.conversationId) return opts.conversationId;
-
-	const title = opts.subject
-		? `${opts.subject} — ${new Date().toLocaleDateString()}`
-		: `Chat — ${new Date().toLocaleDateString()}`;
 
 	const { data, error } = await admin
 		.from('conversations')
 		.insert({
 			user_id: userId,
-			title,
-			subject: opts.subject ?? null,
-			session_type: opts.sessionType ?? null,
+			title: `Chat — ${new Date().toLocaleDateString()}`,
 		})
 		.select('id')
 		.single();

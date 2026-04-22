@@ -19,8 +19,6 @@
 	let chatWindow: HTMLElement;
 	let sidebarOpen = $state(false);
 
-	let sessionType = $state('understand');
-	let subject = $state(profile?.subjects?.[0] || '');
 	let conversationId = $state<string | null>(null);
 
 	async function loadConversation(id: string) {
@@ -73,8 +71,6 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					messages: messages.map(m => ({ role: m.role, content: m.content })),
-					sessionType,
-					subject,
 					conversationId
 				})
 			});
@@ -115,13 +111,6 @@
 		"Quiz me on English grammar for BECE",
 		"How does the kidney work?"
 	];
-
-	const modes = [
-		{ id: 'understand', label: 'Understand' },
-		{ id: 'quiz',       label: 'Quiz Me' },
-		{ id: 'study_plan', label: 'Study Plan' },
-		{ id: 'exam_prep',  label: 'Exam Prep' },
-	];
 </script>
 
 <svelte:head>
@@ -142,18 +131,6 @@
 				<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
 				New chat
 			</button>
-		</div>
-
-		<div class="sidebar-section">
-			<p class="section-label">Subject</p>
-			<div class="select-wrap">
-				<select bind:value={subject}>
-					<option value="">General help</option>
-					{#each profile?.subjects || ['Mathematics', 'English', 'Biology', 'Physics', 'Chemistry', 'Economics'] as s}
-						<option value={s}>{s}</option>
-					{/each}
-				</select>
-			</div>
 		</div>
 
 		<div class="sidebar-section grow">
@@ -259,18 +236,6 @@
 
 		<!-- Input area -->
 		<div class="input-area">
-			<div class="mode-bar">
-				{#each modes as m}
-					<button
-						class="mode-btn"
-						class:active={sessionType === m.id}
-						onclick={() => sessionType = m.id}
-					>
-						{m.label}
-					</button>
-				{/each}
-			</div>
-
 			<div class="input-box">
 				<textarea
 					placeholder="Ask XYLO anything…"
@@ -376,40 +341,6 @@
 		letter-spacing: 0.08em;
 		color: var(--ink-3);
 		margin-bottom: 0.625rem;
-	}
-
-	.select-wrap {
-		position: relative;
-	}
-	.select-wrap::after {
-		content: '';
-		position: absolute;
-		right: 0.75rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 0; height: 0;
-		border-left: 4px solid transparent;
-		border-right: 4px solid transparent;
-		border-top: 4px solid var(--ink-3);
-		pointer-events: none;
-	}
-	.select-wrap select {
-		width: 100%;
-		padding: 0.5625rem 2rem 0.5625rem 0.75rem;
-		background: var(--cream);
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		font-family: inherit;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--ink);
-		appearance: none;
-		cursor: pointer;
-		min-height: 36px;
-	}
-	.select-wrap select:focus {
-		outline: none;
-		border-color: var(--amber);
 	}
 
 	.history-list {
@@ -749,37 +680,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-	}
-
-	.mode-bar {
-		display: flex;
-		gap: 0.25rem;
-		padding: 0.25rem;
-		background: oklch(93% 0.022 82 / 0.7);
-		backdrop-filter: blur(8px);
-		border: 1px solid oklch(100% 0 0 / 0.6);
-		border-radius: 0.625rem;
-		margin-bottom: 0.75rem;
-		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.8);
-	}
-
-	.mode-btn {
-		padding: 0.375rem 0.875rem;
-		border-radius: 0.4375rem;
-		border: none;
-		background: none;
-		font-family: inherit;
-		font-size: 0.8125rem;
-		font-weight: 700;
-		color: var(--ink-3);
-		cursor: pointer;
-		transition: background 0.12s, color 0.12s;
-		white-space: nowrap;
-	}
-	.mode-btn.active {
-		background: oklch(100% 0 0 / 0.85);
-		color: var(--ink);
-		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 1px 3px oklch(18% 0.014 50 / 0.06);
 	}
 
 	.input-box {
