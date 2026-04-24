@@ -1,5 +1,6 @@
-import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
+import { createSupabaseAdminClient } from '$lib/server/supabase';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -24,14 +25,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.eq('id', profile.org_id)
 		.single();
 
-	// Fetch students in this org (exclude the admin)
 	const { data: rawStudents } = await locals.supabase
 		.from('profiles')
 		.select('id, full_name, email, level, curriculum, messages_today, messages_today_reset_at')
 		.eq('org_id', profile.org_id)
 		.neq('role', 'school_admin');
 
-	// Fetch last 7 days of activity for this org
 	const sevenDaysAgo = new Date();
 	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 	const cutoff = sevenDaysAgo.toISOString().slice(0, 10);
@@ -42,7 +41,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.eq('org_id', profile.org_id)
 		.gte('date', cutoff);
 
-	// Build per-student weekly summary
 	const activityByStudent = new Map<string, { totalMessages: number; lastActive: string | null }>();
 	for (const row of weeklyActivity ?? []) {
 		const existing = activityByStudent.get(row.user_id) ?? { totalMessages: 0, lastActive: null };
@@ -60,9 +58,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			new Date(s.messages_today_reset_at).toDateString() === todayStr
 				? (s.messages_today ?? 0)
 				: 0;
-
 		const weekly = activityByStudent.get(s.id);
-
 		return {
 			id: s.id,
 			full_name: s.full_name,
@@ -76,4 +72,45 @@ export const load: PageServerLoad = async ({ locals }) => {
 	});
 
 	return { profile, org, students };
+};
+
+export const actions: Actions = {
+	removeStudent: async ({ request, locals }) => {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) return fail(401, { message: 'Unauthorized' });
+
+		const { data: adminProfile } = await locals.supabase
+			.from('profiles')
+			.select('role, org_id')
+			.eq('id', user.id)
+			.single();
+
+		if (adminProfile?.role !== 'school_admin' || !adminProfile.org_id) {
+			return fail(403, { message: 'Forbidden' });
+		}
+
+		const formData = await request.formData();
+		const studentId = formData.get('studentId') as string;
+		if (!studentId) return fail(400, { message: 'Missing studentId' });
+
+		// Verify the student actually belongs to this admin's org before removing
+		const { data: student } = await locals.supabase
+			.from('profiles')
+			.select('id, org_id')
+			.eq('id', studentId)
+			.eq('org_id', adminProfile.org_id)
+			.single();
+
+		if (!student) return fail(404, { message: 'Student not found in your organisation' });
+
+		const admin = createSupabaseAdminClient();
+		const { error } = await admin
+			.from('profiles')
+			.update({ org_id: null, role: 'individual' })
+			.eq('id', studentId);
+
+		if (error) return fail(500, { message: error.message });
+
+		return { success: true, removedId: studentId };
+	}
 };

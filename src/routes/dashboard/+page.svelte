@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 
 	const { data } = $props<{ data: App.PageData & { org: any; students: any[] } }>();
-	const { org, students, profile } = data;
+	const { org, profile } = data;
 
-	let totalStudents = students.length;
-	let activeToday = students.filter((s: any) => s.messages_today > 0).length;
-	let activeThisWeek = students.filter((s: any) => s.messages_this_week > 0).length;
-	let totalMessagesToday = students.reduce((sum: number, s: any) => sum + (s.messages_today || 0), 0);
-	let weeklyEngagement = totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0;
+	let students = $state<any[]>(data.students);
+
+	let totalStudents = $derived(students.length);
+	let activeToday = $derived(students.filter((s) => s.messages_today > 0).length);
+	let activeThisWeek = $derived(students.filter((s) => s.messages_this_week > 0).length);
+	let totalMessagesToday = $derived(students.reduce((sum: number, s) => sum + (s.messages_today || 0), 0));
+	let weeklyEngagement = $derived(totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0);
 
 	let codeCopied = $state(false);
 	function copyInviteCode() {
@@ -17,6 +20,8 @@
 		codeCopied = true;
 		setTimeout(() => { codeCopied = false; }, 2000);
 	}
+
+	let confirmId = $state<string | null>(null);
 
 	let search = $state('');
 	let filteredStudents = $derived(
@@ -161,11 +166,12 @@
 									<th>Curriculum</th>
 									<th>Last active</th>
 									<th class="right">This week</th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each filteredStudents as student}
-									<tr>
+									<tr class:confirming={confirmId === student.id}>
 										<td class="name-cell">{student.full_name || 'Anonymous'}</td>
 										<td>{student.level || '—'}</td>
 										<td>
@@ -190,6 +196,28 @@
 											<span class="msg-count" class:has-msgs={student.messages_this_week > 0}>
 												{student.messages_this_week}
 											</span>
+										</td>
+										<td class="action-cell">
+											{#if confirmId === student.id}
+												<span class="confirm-label">Remove?</span>
+												<form method="POST" action="?/removeStudent"
+													use:enhance={() => {
+														return ({ result }) => {
+															if (result.type === 'success') {
+																students = students.filter((s: any) => s.id !== student.id);
+															}
+															confirmId = null;
+														};
+													}}>
+													<input type="hidden" name="studentId" value={student.id} />
+													<button type="submit" class="btn-confirm">Yes</button>
+												</form>
+												<button class="btn-cancel" onclick={() => confirmId = null}>No</button>
+											{:else}
+												<button class="btn-remove" onclick={() => confirmId = student.id} title="Remove student">
+													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+												</button>
+											{/if}
 										</td>
 									</tr>
 								{/each}
@@ -647,6 +675,67 @@
 		color: var(--ink-3);
 	}
 	.msg-count.has-msgs { color: var(--ink); }
+
+	/* ── Row actions ── */
+	.action-cell {
+		text-align: right;
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.375rem;
+		padding-right: 1.25rem;
+	}
+
+	tr .btn-remove {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px; height: 26px;
+		border: none;
+		background: none;
+		border-radius: 0.375rem;
+		color: var(--ink-3);
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 0.12s, background 0.12s, color 0.12s;
+	}
+	tr:hover .btn-remove, tr.confirming .btn-remove { opacity: 1; }
+	.btn-remove:hover { background: oklch(92% 0.08 20 / 0.15); color: oklch(52% 0.2 20); }
+
+	.confirm-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: oklch(52% 0.2 20);
+	}
+
+	.btn-confirm {
+		padding: 0.2rem 0.625rem;
+		background: oklch(52% 0.2 20);
+		color: #fff;
+		border: none;
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.75rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: opacity 0.12s;
+	}
+	.btn-confirm:hover { opacity: 0.85; }
+
+	.btn-cancel {
+		padding: 0.2rem 0.625rem;
+		background: none;
+		border: 1px solid var(--border);
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		cursor: pointer;
+		transition: border-color 0.12s, color 0.12s;
+	}
+	.btn-cancel:hover { border-color: var(--ink-3); color: var(--ink); }
 
 	/* ── Responsive ── */
 	@media (max-width: 900px) {
