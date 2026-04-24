@@ -18,6 +18,20 @@
 		setTimeout(() => { codeCopied = false; }, 2000);
 	}
 
+	let search = $state('');
+	let filteredStudents = $derived(
+		search.trim()
+			? students.filter((s: any) => {
+					const q = search.toLowerCase();
+					return (
+						s.full_name?.toLowerCase().includes(q) ||
+						s.level?.toLowerCase().includes(q) ||
+						s.curriculum?.toLowerCase().includes(q)
+					);
+				})
+			: students
+	);
+
 </script>
 
 <svelte:head>
@@ -102,7 +116,13 @@
 				<div class="table-head">
 					<div class="table-head-left">
 						<h2 class="table-title">Student Directory</h2>
-						<span class="student-count">{totalStudents} student{totalStudents !== 1 ? 's' : ''}</span>
+						<span class="student-count">
+							{filteredStudents.length}{search ? ` of ${totalStudents}` : ''} student{totalStudents !== 1 ? 's' : ''}
+						</span>
+					</div>
+					<div class="search-wrap">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+						<input class="search-input" type="search" placeholder="Search by name, level, curriculum…" bind:value={search} />
 					</div>
 					{#if org.invite_code}
 						<div class="invite-row">
@@ -126,6 +146,11 @@
 						<p class="empty-heading">No students yet</p>
 						<p class="empty-sub">Share your invite code above to add your first students.</p>
 					</div>
+				{:else if filteredStudents.length === 0}
+					<div class="table-empty">
+						<p class="empty-heading">No results for "{search}"</p>
+						<p class="empty-sub">Try a different name, level, or curriculum.</p>
+					</div>
 				{:else}
 					<div class="table-wrap">
 						<table>
@@ -139,7 +164,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each students as student}
+								{#each filteredStudents as student}
 									<tr>
 										<td class="name-cell">{student.full_name || 'Anonymous'}</td>
 										<td>{student.level || '—'}</td>
@@ -421,7 +446,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1.5rem 2rem;
+		padding: 1.25rem 1.5rem;
 		border-bottom: 1px solid var(--border);
 		gap: 1rem;
 		flex-wrap: wrap;
@@ -448,6 +473,33 @@
 		border-radius: 999px;
 		border: 1px solid var(--border);
 	}
+
+	.search-wrap {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem;
+		background: oklch(99% 0.008 85);
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		color: var(--ink-3);
+		transition: border-color 0.12s, box-shadow 0.12s;
+	}
+	.search-wrap:focus-within {
+		border-color: var(--amber);
+		box-shadow: 0 0 0 3px oklch(72% 0.185 72 / 0.12);
+	}
+	.search-input {
+		border: none;
+		background: transparent;
+		outline: none;
+		font-family: inherit;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--ink);
+		width: 220px;
+	}
+	.search-input::placeholder { color: var(--ink-3); }
 
 	.invite-row {
 		display: flex;
