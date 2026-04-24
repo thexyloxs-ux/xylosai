@@ -69,16 +69,6 @@
 				body: JSON.stringify({ name: fullName, email })
 			}).catch(() => {});
 
-			if (isSchool) {
-				await fetch('/api/auth/setup-org', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ schoolName, country })
-				}).catch(err => {
-					console.error('Setup Org Error:', err);
-				});
-			}
-
 			if (joinCode) goto(`/join/${joinCode}`);
 			else goto('/onboarding');
 		}
