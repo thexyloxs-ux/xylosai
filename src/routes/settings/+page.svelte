@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { slide, fade } from 'svelte/transition';
-	import '../landing.css';
+	import { fade } from 'svelte/transition';
 
-	const { data, form } = $props<{ data: any, form: any }>();
+	const { data, form } = $props<{ data: any; form: any }>();
 	const { profile, organization } = data;
 
-	let activeTab = $state('profile'); // 'profile' | 'academic' | 'organization' | 'billing'
+	let activeTab = $state('profile');
 	let saving = $state(false);
 
 	const CURRICULA = ['WAEC', 'KCSE', 'BECE', 'Cambridge', 'Other'];
@@ -16,231 +15,246 @@
 		{ value: 'sss', label: 'Senior Secondary' },
 		{ value: 'university', label: 'University' }
 	];
-
-	const SUBJECT_OPTIONS = ['English', 'Mathematics', 'Biology', 'Chemistry', 'Physics', 'Economics', 'Geography', 'Government', 'Accounting', 'French'];
+	const SUBJECT_OPTIONS = [
+		'English', 'Mathematics', 'Biology', 'Chemistry', 'Physics',
+		'Economics', 'Geography', 'Government', 'Accounting', 'French'
+	];
 
 	let selectedSubjects = $state<string[]>(profile?.subjects || []);
+	let codeCopied = $state(false);
 
 	function toggleSubject(s: string) {
 		if (selectedSubjects.includes(s)) {
-			selectedSubjects = selectedSubjects.filter((item) => item !== s);
+			selectedSubjects = selectedSubjects.filter((x) => x !== s);
 		} else if (selectedSubjects.length < 6) {
 			selectedSubjects = [...selectedSubjects, s];
 		}
 	}
+
+	function copyInviteCode() {
+		if (!organization?.invite_code) return;
+		navigator.clipboard.writeText(organization.invite_code);
+		codeCopied = true;
+		setTimeout(() => { codeCopied = false; }, 2000);
+	}
 </script>
 
 <svelte:head>
-	<title>Settings | XYLO</title>
+	<title>Settings — XYLO</title>
 </svelte:head>
 
-<div class="aw-page settings-page">
-	<div class="glow-aura"></div>
-
-	<div class="settings-layout">
-		<!-- Sidebar Navigation -->
-		<aside class="settings-sidebar glass-deck">
-			<div class="sidebar-header">
-				<a href="/chat" class="aw-logo">XYLO</a>
-				<p class="sidebar-sub">User Settings</p>
+<div class="page">
+	<!-- ── Header ── -->
+	<header class="page-header">
+		<div class="header-inner">
+			<div class="header-left">
+				<a href="/chat" class="wordmark">XYLO</a>
+				<span class="page-pill">Settings</span>
 			</div>
+			<a href="/chat" class="back-link">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+				Back to Chat
+			</a>
+		</div>
+	</header>
 
-			<nav class="settings-tabs">
-				<button class="tab-link" class:active={activeTab === 'profile'} onclick={() => activeTab = 'profile'}>
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+	<div class="page-body">
+		<!-- ── Sidebar nav ── -->
+		<aside class="settings-nav">
+			<nav>
+				<button class="nav-item" class:active={activeTab === 'profile'} onclick={() => activeTab = 'profile'}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 					Personal Info
 				</button>
-				<button class="tab-link" class:active={activeTab === 'academic'} onclick={() => activeTab = 'academic'}>
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+				<button class="nav-item" class:active={activeTab === 'academic'} onclick={() => activeTab = 'academic'}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
 					Academic Focus
 				</button>
 				{#if profile?.role === 'school_admin'}
-					<button class="tab-link" class:active={activeTab === 'organization'} onclick={() => activeTab = 'organization'}>
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 21v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/></svg>
+					<button class="nav-item" class:active={activeTab === 'organization'} onclick={() => activeTab = 'organization'}>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 21v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/></svg>
 						My School
 					</button>
 				{/if}
-				<button class="tab-link" class:active={activeTab === 'billing'} onclick={() => activeTab = 'billing'}>
-					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+				<button class="nav-item" class:active={activeTab === 'billing'} onclick={() => activeTab = 'billing'}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
 					Membership
 				</button>
 			</nav>
-
-			<div class="sidebar-footer">
-				<a href="/chat" class="aw-btn aw-btn-secondary back-to-chat">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-					Back to Chat
-				</a>
-			</div>
 		</aside>
 
-		<!-- Main Settings Content -->
+		<!-- ── Main content ── -->
 		<main class="settings-main">
 			{#key activeTab}
-				<div class="tab-panel" in:fade={{ duration: 200, delay: 100 }}>
-					
-					<!-- ── Personal Info ──────────────── -->
+				<div in:fade={{ duration: 180 }}>
+
+					<!-- ── Personal Info ── -->
 					{#if activeTab === 'profile'}
-						<div class="settings-header">
-							<h1>Personal Information</h1>
-							<p>Manage your account identity and contact details.</p>
+						<div class="section-head">
+							<p class="eyebrow">Account</p>
+							<h1 class="section-title">Personal Information</h1>
+							<p class="section-desc">Manage your name and contact details.</p>
 						</div>
 
-						<form method="POST" action="?/updateProfile" use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }} class="settings-form">
-							<div class="glass-deck form-section">
+						<form method="POST" action="?/updateProfile"
+							use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }}>
+							<div class="card">
 								<div class="field">
 									<label for="fullName">Full Name</label>
-									<div class="field-island">
-										<input id="fullName" name="fullName" type="text" value={profile?.full_name} placeholder="e.g. Amara Okafor" required />
-									</div>
+									<input id="fullName" name="fullName" type="text" value={profile?.full_name} placeholder="e.g. Amara Okafor" required />
 								</div>
 								<div class="field">
 									<label>Email Address</label>
-									<div class="field-island disabled">
-										<input type="email" value={profile?.email} disabled />
-										<span class="lock-icon">🔒</span>
-									</div>
-									<p class="field-hint">Email cannot be changed directly. Contact support if needed.</p>
+									<input type="email" value={profile?.email} disabled />
+									<p class="hint">Email cannot be changed. Contact support if needed.</p>
 								</div>
-								<button type="submit" class="aw-btn aw-btn-primary" disabled={saving}>
-									{saving ? 'Saving...' : 'Update Profile'}
+								<button type="submit" class="btn-primary" disabled={saving}>
+									{saving ? 'Saving…' : 'Update Profile'}
 								</button>
 							</div>
 						</form>
 
-					<!-- ── Academic Focus ──────────────── -->
+					<!-- ── Academic Focus ── -->
 					{:else if activeTab === 'academic'}
-						<div class="settings-header">
-							<h1>Academic Focus</h1>
-							<p>Adjust your level and subjects so XYLO stays relevant to your studies.</p>
+						<div class="section-head">
+							<p class="eyebrow">AI Personalisation</p>
+							<h1 class="section-title">Academic Focus</h1>
+							<p class="section-desc">XYLO uses this to tailor every response to your level and goals.</p>
 						</div>
 
-						<form method="POST" action="?/updateProfile" use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }} class="settings-form">
-							<!-- Level & Curriculum -->
-							<div class="glass-deck form-section mb-6">
-								<div class="field-grid">
+						<form method="POST" action="?/updateProfile"
+							use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }}>
+
+							<div class="card" style="margin-bottom: 1.5rem;">
+								<div class="field-row">
 									<div class="field">
 										<label for="level">Study Level</label>
-										<div class="field-island select-wrap">
+										<div class="select-wrap">
 											<select id="level" name="level" value={profile?.level}>
 												{#each LEVELS as l}<option value={l.value}>{l.label}</option>{/each}
 											</select>
+											<svg class="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
 										</div>
 									</div>
 									<div class="field">
 										<label for="curriculum">Curriculum</label>
-										<div class="field-island select-wrap">
+										<div class="select-wrap">
 											<select id="curriculum" name="curriculum" value={profile?.curriculum}>
 												{#each CURRICULA as c}<option value={c}>{c}</option>{/each}
 											</select>
+											<svg class="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
 										</div>
 									</div>
 								</div>
 							</div>
 
-							<!-- Study challenge -->
-							<div class="glass-deck form-section mb-6">
+							<div class="card" style="margin-bottom: 1.5rem;">
 								<div class="field">
 									<label for="studyChallenge">Biggest Study Challenge</label>
-									<div class="field-island">
-										<textarea id="studyChallenge" name="studyChallenge" rows="3" placeholder="e.g. I struggle with maths formulas and essay writing under time pressure">{profile?.study_challenge || ''}</textarea>
-									</div>
-									<p class="field-hint">XYLO uses this to personalise your study sessions.</p>
+									<textarea id="studyChallenge" name="studyChallenge" rows="3"
+										placeholder="e.g. I struggle with maths formulas and essay writing under time pressure"
+									>{profile?.study_challenge || ''}</textarea>
+									<p class="hint">XYLO reads this before every session.</p>
 								</div>
 							</div>
 
-						<!-- Subjects -->
-							<div class="glass-deck form-section">
-								<label class="section-label">Selected Subjects (Max 6)</label>
+							<div class="card">
+								<p class="field-label">Subjects <span class="count-pill">{selectedSubjects.length} / 6</span></p>
 								<div class="subjects-grid">
 									{#each SUBJECT_OPTIONS as s}
-										<label class="subject-island" class:active={selectedSubjects.includes(s)}>
-											<input type="checkbox" name="subjects" value={s} checked={selectedSubjects.includes(s)} onchange={() => toggleSubject(s)} class="hidden-input" />
-											<span class="subject-name">{s}</span>
-											{#if selectedSubjects.includes(s)}
-												<span class="check-dot" in:slide={{ axis: 'x', duration: 200 }}>✓</span>
-											{/if}
+										<label class="subject-chip" class:active={selectedSubjects.includes(s)}>
+											<input type="checkbox" name="subjects" value={s}
+												checked={selectedSubjects.includes(s)}
+												onchange={() => toggleSubject(s)} />
+											{s}
 										</label>
 									{/each}
 								</div>
-								<button type="submit" class="aw-btn aw-btn-primary mt-8" disabled={saving}>
-									{saving ? 'Saving Focus...' : 'Save Academic Focus'}
+								<button type="submit" class="btn-primary" style="margin-top: 2rem;" disabled={saving}>
+									{saving ? 'Saving…' : 'Save Academic Focus'}
 								</button>
 							</div>
 						</form>
 
-					<!-- ── Organization (Admin Only) ────── -->
+					<!-- ── My School ── -->
 					{:else if activeTab === 'organization'}
-						<div class="settings-header">
-							<h1>School Settings</h1>
-							<p>Manage your school's identity and invite code.</p>
+						<div class="section-head">
+							<p class="eyebrow">Admin</p>
+							<h1 class="section-title">School Settings</h1>
+							<p class="section-desc">Manage your school's profile and student invite code.</p>
 						</div>
 
-						<form method="POST" action="?/updateOrg" use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }} class="settings-form">
-							<div class="glass-deck form-section">
+						<form method="POST" action="?/updateOrg"
+							use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }}>
+							<div class="card">
 								<div class="field">
 									<label for="orgName">School Name</label>
-									<div class="field-island">
-										<input id="orgName" name="name" type="text" value={organization?.name} required />
-									</div>
-								</div>
-								
-								<div class="field">
-									<label>Invite Code</label>
-									<div class="field-island code-island">
-										<span class="invite-code">{organization?.invite_code}</span>
-										<button type="button" class="copy-pill" onclick={() => navigator.clipboard.writeText(organization.invite_code)}>Copy Link</button>
-									</div>
-									<p class="field-hint">Share this code with students to join your school on XYLO.</p>
+									<input id="orgName" name="name" type="text" value={organization?.name} required />
 								</div>
 
-								<button type="submit" class="aw-btn aw-btn-primary" disabled={saving}>
-									{saving ? 'Saving...' : 'Update School Details'}
+								<div class="field">
+									<label>Invite Code</label>
+									<div class="invite-row">
+										<code class="invite-code">{organization?.invite_code}</code>
+										<button type="button" class="btn-ghost" onclick={copyInviteCode}>
+											{#if codeCopied}
+												<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+												Copied
+											{:else}
+												<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+												Copy
+											{/if}
+										</button>
+									</div>
+									<p class="hint">Share this with students so they can join your school on XYLO.</p>
+								</div>
+
+								<button type="submit" class="btn-primary" disabled={saving}>
+									{saving ? 'Saving…' : 'Update School Details'}
 								</button>
 							</div>
 						</form>
 
-					<!-- ── Membership / Billing ────────── -->
+					<!-- ── Membership ── -->
 					{:else if activeTab === 'billing'}
-						<div class="settings-header">
-							<h1>Membership & Billing</h1>
-							<p>Manage your subscription and usage limits.</p>
+						<div class="section-head">
+							<p class="eyebrow">Plan</p>
+							<h1 class="section-title">Membership</h1>
+							<p class="section-desc">Your current plan and daily usage.</p>
 						</div>
 
-						<div class="glass-deck billing-card">
-							<div class="plan-status">
-								<div class="plan-info">
+						<div class="card billing-card">
+							<div class="plan-row">
+								<div>
 									<span class="plan-badge">{profile?.plan?.toUpperCase() || 'FREE'}</span>
-									<h2 class="plan-title">{profile?.plan === 'free' ? 'Xylo Standard' : 'Xylo Pro'}</h2>
-									<p class="plan-expiry">Next reset: Tomorrow</p>
+									<p class="plan-name">{profile?.plan === 'free' ? 'XYLO Standard' : 'XYLO Pro'}</p>
+									<p class="plan-reset">Resets daily at midnight</p>
 								</div>
-								<div class="usage-meter">
+								<div class="meter-wrap">
 									<div class="meter-labels">
-										<span>Daily Usage</span>
-										<span>{profile?.messages_today || 0} / 20 msgs</span>
+										<span>Daily messages</span>
+										<span>{profile?.messages_today || 0} / 20</span>
 									</div>
 									<div class="meter-rail">
-										<div class="meter-fill" style="width: {(profile?.messages_today / 20) * 100}%"></div>
+										<div class="meter-fill" style="width: {Math.min(((profile?.messages_today || 0) / 20) * 100, 100)}%"></div>
 									</div>
 								</div>
 							</div>
-
-							{#if profile?.plan === 'free'}
-								<div class="upgrade-banner">
-									<div class="banner-content">
-										<h3>Ready for unlimited learning?</h3>
-										<p>Get priority AI access, unlimited messages, and specialized exam prep tools.</p>
-									</div>
-									<a href="/pricing" class="aw-btn aw-btn-primary">Upgrade — $5/mo</a>
-								</div>
-							{/if}
 						</div>
+
+						{#if profile?.plan === 'free'}
+							<div class="upgrade-card">
+								<div class="upgrade-text">
+									<h3>Upgrade to Pro</h3>
+									<p>Unlimited messages, priority AI access, and advanced exam tools.</p>
+								</div>
+								<a href="/pricing" class="btn-primary">Upgrade — $5 / mo</a>
+							</div>
+						{/if}
 					{/if}
 
 					{#if form?.message}
-						<div class="feedback-toast" class:error={!form.success} in:slide>
-							{form.message}
-						</div>
+						<div class="toast" class:toast-error={!form?.success}>{form.message}</div>
 					{/if}
 
 				</div>
@@ -250,135 +264,470 @@
 </div>
 
 <style>
-	.settings-page {
+	/* ── Tokens (match dashboard + chat exactly) ── */
+	.page {
+		--cream:      oklch(97.5% 0.018 85);
+		--cream-warm: oklch(94.5% 0.025 80);
+		--border:     oklch(87%   0.028 78);
+		--ink:        oklch(18%   0.014 50);
+		--ink-2:      oklch(40%   0.020 50);
+		--ink-3:      oklch(62%   0.016 55);
+		--amber:      oklch(72%   0.185 72);
+		--amber-deep: oklch(63%   0.175 68);
+		--success:    oklch(60%   0.16  145);
+
 		min-height: 100dvh;
+		background: var(--cream);
+		color: var(--ink);
+		font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	}
+
+	/* ── Header ── */
+	.page-header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: oklch(100% 0 0 / 0.78);
+		backdrop-filter: blur(20px) saturate(150%);
+		-webkit-backdrop-filter: blur(20px) saturate(150%);
+		border-bottom: 1px solid var(--border);
+		box-shadow:
+			inset 0 -1px 0 oklch(100% 0 0 / 0.6),
+			0 4px 16px oklch(18% 0.014 50 / 0.04);
+	}
+
+	.header-inner {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		height: 60px;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		padding: 2.5rem;
-		position: relative;
-		overflow: hidden;
+		justify-content: space-between;
 	}
 
-	.glow-aura {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 1000px;
-		height: 1000px;
-		background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
-		pointer-events: none;
+	.header-left { display: flex; align-items: center; gap: 1rem; }
+
+	.wordmark {
+		font-size: 1.125rem;
+		font-weight: 800;
+		color: var(--amber);
+		letter-spacing: -0.05em;
+		text-decoration: none;
 	}
 
-	.settings-layout {
-		width: 100%;
-		max-width: 1100px;
+	.page-pill {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+		background: var(--cream-warm);
+		border: 1px solid var(--border);
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+	}
+
+	.back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--ink-3);
+		text-decoration: none;
+		transition: color 0.12s;
+	}
+	.back-link:hover { color: var(--ink); }
+
+	/* ── Page body ── */
+	.page-body {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 3rem 2rem 5rem;
 		display: grid;
-		grid-template-columns: 320px 1fr;
-		gap: 2.5rem;
-		position: relative;
-		z-index: 1;
+		grid-template-columns: 220px 1fr;
+		gap: 3rem;
+		align-items: start;
 	}
 
-	/* ── Sidebar Navigation ────────── */
-	.settings-sidebar {
-		padding: 3rem 2rem;
+	/* ── Sidebar nav ── */
+	.settings-nav {
+		position: sticky;
+		top: 80px;
+		background: oklch(100% 0 0 / 0.62);
+		backdrop-filter: blur(20px) saturate(140%);
+		-webkit-backdrop-filter: blur(20px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 8px oklch(18% 0.014 50 / 0.04);
+		border-radius: 1rem;
+		padding: 0.5rem;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		background: none;
+		border: none;
+		border-radius: 0.625rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--ink-3);
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.12s, color 0.12s;
+	}
+	.nav-item:hover { background: var(--cream-warm); color: var(--ink-2); }
+	.nav-item.active { background: var(--cream-warm); color: var(--amber-deep); font-weight: 700; }
+	.nav-item.active svg { stroke: var(--amber); }
+
+	/* ── Section head ── */
+	.section-head { margin-bottom: 2rem; }
+
+	.eyebrow {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--amber-deep);
+		margin-bottom: 0.5rem;
+	}
+
+	.section-title {
+		font-family: 'Fraunces', Georgia, serif;
+		font-size: clamp(1.5rem, 3vw, 2rem);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		color: var(--ink);
+		margin-bottom: 0.375rem;
+	}
+
+	.section-desc {
+		font-size: 0.9375rem;
+		color: var(--ink-3);
+	}
+
+	/* ── Card ── */
+	.card {
+		background: oklch(100% 0 0 / 0.62);
+		backdrop-filter: blur(20px) saturate(140%);
+		-webkit-backdrop-filter: blur(20px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 8px oklch(18% 0.014 50 / 0.03),
+			0 8px 24px oklch(18% 0.014 50 / 0.04);
+		border-radius: 1rem;
+		padding: 2rem;
+	}
+
+	/* ── Form fields ── */
+	.field {
 		display: flex;
 		flex-direction: column;
-		height: fit-content;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+	}
+	.field:last-of-type { margin-bottom: 0; }
+
+	.field label, .field-label {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
-	.sidebar-header { margin-bottom: 3.5rem; }
-	.sidebar-sub { font-size: 0.8125rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
-
-	.settings-tabs { display: flex; flex-direction: column; gap: 0.5rem; }
-	.tab-link {
-		display: flex; align-items: center; gap: 1rem;
-		padding: 1rem 1.25rem;
-		border: none; background: transparent;
-		font-size: 1rem; font-weight: 700; color: #64748b;
-		border-radius: 1.25rem;
-		cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-		text-align: left;
+	.field input, .field textarea, .select-wrap select {
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		background: oklch(99% 0.008 85);
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: var(--ink);
+		outline: none;
+		transition: border-color 0.12s, box-shadow 0.12s;
+		box-sizing: border-box;
 	}
-	.tab-link:hover { background: rgba(0,0,0,0.03); color: #1e293b; }
-	.tab-link.active {
-		background: #fff; color: #f59e0b;
-		box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-		transform: scale(1.02);
+	.field input:focus, .field textarea:focus, .select-wrap select:focus {
+		border-color: var(--amber);
+		box-shadow: 0 0 0 3px oklch(72% 0.185 72 / 0.15);
+	}
+	.field input:disabled {
+		background: var(--cream-warm);
+		color: var(--ink-3);
+		cursor: not-allowed;
+	}
+	.field textarea {
+		resize: vertical;
+		min-height: 80px;
+		line-height: 1.6;
 	}
 
-	.sidebar-footer { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.04); }
-	.back-to-chat { width: 100%; justify-content: center; }
-
-	/* ── Main Content ────────── */
-	.settings-main { min-height: 600px; }
-	.settings-header { margin-bottom: 3rem; }
-	.settings-header h1 { font-size: 2.25rem; font-weight: 900; color: #1e293b; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
-	.settings-header p { font-size: 1.0625rem; color: #64748b; font-weight: 500; }
-
-	.form-section { padding: 3rem; }
-	.field { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
-	.field:last-of-type { margin-bottom: 2.5rem; }
-	.field label { font-size: 0.8125rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
-	
-	.field-island { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 1.25rem; padding: 0.125rem; transition: all 0.3s; }
-	.field-island:focus-within { border-color: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
-	.field-island input, .field-island select, .field-island textarea { width: 100%; padding: 0.875rem 1.25rem; background: transparent; border: none; outline: none; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; }
-	.field-island textarea { resize: vertical; min-height: 80px; line-height: 1.6; font-weight: 500; }
-	
-	.field-island.disabled { background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; }
-	.lock-icon { margin-right: 1.25rem; opacity: 0.4; }
-	.field-hint { font-size: 0.8125rem; color: #94a3b8; font-weight: 500; }
-
-	.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-
-	.section-label { font-size: 0.8125rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; display: block; }
-	
-	.subjects-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-	.subject-island {
-		padding: 0.75rem 1.25rem;
-		background: #fff; border: 1px solid rgba(0,0,0,0.06);
-		border-radius: 999px; cursor: pointer;
-		display: flex; align-items: center; gap: 0.75rem;
-		transition: all 0.3s;
-		font-weight: 700; color: #64748b;
+	.field-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
 	}
-	.subject-island:hover { background: #fffcf0; border-color: #f59e0b; }
-	.subject-island.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
-	.hidden-input { display: none; }
 
-	/* Billing Card */
-	.billing-card { padding: 0; overflow: hidden; }
-	.plan-status { padding: 3.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
-	.plan-badge { font-size: 0.75rem; font-weight: 900; color: #f59e0b; background: rgba(245,158,11,0.1); padding: 0.25rem 0.75rem; border-radius: 999px; letter-spacing: 0.05em; }
-	.plan-title { font-size: 2rem; font-weight: 900; color: #1e293b; margin-top: 0.5rem; }
-	.plan-expiry { font-size: 0.875rem; color: #94a3b8; font-weight: 600; margin-top: 0.25rem; }
-	
-	.usage-meter { width: 240px; }
-	.meter-labels { display: flex; justify-content: space-between; font-size: 0.8125rem; font-weight: 800; color: #64748b; margin-bottom: 0.75rem; }
-	.meter-rail { height: 8px; background: rgba(0,0,0,0.04); border-radius: 4px; overflow: hidden; }
-	.meter-fill { height: 100%; background: #f59e0b; transition: width 0.4s; }
-
-	.upgrade-banner {
-		background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-		padding: 3rem 3.5rem;
-		display: flex; align-items: center; justify-content: space-between;
+	.select-wrap {
+		position: relative;
 	}
-	.banner-content h3 { color: #fff; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
-	.banner-content p { color: #94a3b8; font-size: 1rem; font-weight: 500; max-width: 400px; }
-
-	.feedback-toast {
-		position: fixed; bottom: 2rem; right: 2rem;
-		background: #059669; color: #fff;
-		padding: 1rem 2rem; border-radius: 1rem;
-		font-weight: 700; box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+	.select-wrap select {
+		appearance: none;
+		-webkit-appearance: none;
+		padding-right: 2.25rem;
+		cursor: pointer;
 	}
-	.feedback-toast.error { background: #dc2626; }
+	.select-chevron {
+		position: absolute;
+		right: 0.75rem;
+		top: 50%;
+		transform: translateY(-50%);
+		pointer-events: none;
+		color: var(--ink-3);
+	}
 
+	.hint {
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+		line-height: 1.5;
+	}
+
+	/* ── Subjects ── */
+	.count-pill {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		background: var(--cream-warm);
+		border: 1px solid var(--border);
+		padding: 0.125rem 0.5rem;
+		border-radius: 999px;
+		text-transform: none;
+		letter-spacing: 0;
+	}
+
+	.subjects-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+
+	.subject-chip {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.375rem 0.875rem;
+		background: oklch(99% 0.008 85);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--ink-2);
+		cursor: pointer;
+		transition: all 0.12s;
+	}
+	.subject-chip input { display: none; }
+	.subject-chip:hover { border-color: var(--amber); color: var(--amber-deep); background: oklch(96% 0.04 80); }
+	.subject-chip.active { background: oklch(96% 0.04 80); border-color: var(--amber); color: var(--amber-deep); font-weight: 700; box-shadow: 0 0 0 3px oklch(72% 0.185 72 / 0.12); }
+
+	/* ── Invite code ── */
+	.invite-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.invite-code {
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--amber-deep);
+		background: oklch(96% 0.04 80);
+		border: 1px solid oklch(85% 0.06 78);
+		padding: 0.375rem 0.875rem;
+		border-radius: 0.375rem;
+		letter-spacing: 0.06em;
+	}
+
+	/* ── Billing ── */
+	.billing-card { margin-bottom: 1.5rem; }
+
+	.plan-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: 2rem;
+		flex-wrap: wrap;
+	}
+
+	.plan-badge {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--amber-deep);
+		background: oklch(96% 0.04 80);
+		border: 1px solid oklch(85% 0.06 78);
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+		display: inline-block;
+		margin-bottom: 0.5rem;
+	}
+
+	.plan-name {
+		font-family: 'Fraunces', Georgia, serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 0.25rem;
+	}
+
+	.plan-reset {
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+	}
+
+	.meter-wrap { min-width: 200px; }
+	.meter-labels {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		margin-bottom: 0.5rem;
+	}
+	.meter-rail {
+		height: 6px;
+		background: var(--cream-warm);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+	.meter-fill {
+		height: 100%;
+		background: var(--amber);
+		border-radius: 999px;
+		transition: width 0.4s;
+	}
+
+	.upgrade-card {
+		background: oklch(100% 0 0 / 0.62);
+		backdrop-filter: blur(20px) saturate(140%);
+		-webkit-backdrop-filter: blur(20px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 1), 0 2px 8px oklch(18% 0.014 50 / 0.03);
+		border-radius: 1rem;
+		padding: 1.75rem 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+		flex-wrap: wrap;
+		border-left: 3px solid var(--amber);
+	}
+
+	.upgrade-text h3 {
+		font-family: 'Fraunces', Georgia, serif;
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 0.25rem;
+	}
+	.upgrade-text p { font-size: 0.875rem; color: var(--ink-3); }
+
+	/* ── Buttons ── */
+	.btn-primary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.625rem 1.375rem;
+		background: var(--amber);
+		color: oklch(18% 0.014 50);
+		border: none;
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		cursor: pointer;
+		text-decoration: none;
+		transition: background 0.12s, opacity 0.12s;
+	}
+	.btn-primary:hover { background: var(--amber-deep); }
+	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+	.btn-ghost {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		background: none;
+		border: 1px solid var(--border);
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		cursor: pointer;
+		transition: color 0.12s, border-color 0.12s, background 0.12s;
+	}
+	.btn-ghost:hover { color: var(--ink); border-color: var(--ink-3); background: var(--cream-warm); }
+
+	/* ── Toast ── */
+	.toast {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		padding: 0.875rem 1.5rem;
+		background: var(--success);
+		color: #fff;
+		border-radius: 0.625rem;
+		font-size: 0.875rem;
+		font-weight: 700;
+		box-shadow: 0 8px 24px oklch(18% 0.014 50 / 0.12);
+		z-index: 100;
+	}
+	.toast-error { background: oklch(52% 0.2 20); }
+
+	/* ── Responsive ── */
 	@media (max-width: 900px) {
-		.settings-layout { grid-template-columns: 1fr; }
-		.settings-sidebar { display: none; }
+		.page-body {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+		.settings-nav {
+			position: static;
+			display: flex;
+			overflow-x: auto;
+			padding: 0.375rem;
+			gap: 0.25rem;
+			border-radius: 0.75rem;
+		}
+		.settings-nav nav {
+			display: flex;
+			gap: 0.25rem;
+			width: max-content;
+		}
+		.nav-item { white-space: nowrap; }
+	}
+
+	@media (max-width: 600px) {
+		.header-inner { padding: 0 1rem; }
+		.page-body { padding: 1.5rem 1rem 4rem; }
+		.field-row { grid-template-columns: 1fr; }
+		.plan-row { flex-direction: column; align-items: flex-start; }
+		.meter-wrap { width: 100%; }
 	}
 </style>
