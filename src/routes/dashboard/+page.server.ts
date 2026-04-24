@@ -1,6 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { sendInviteEmail } from '$lib/server/email';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -112,5 +113,56 @@ export const actions: Actions = {
 		if (error) return fail(500, { message: error.message });
 
 		return { success: true, removedId: studentId };
+	},
+
+	inviteStudents: async ({ request, locals }) => {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) return fail(401, { message: 'Unauthorized' });
+
+		const { data: adminProfile } = await locals.supabase
+			.from('profiles')
+			.select('role, org_id')
+			.eq('id', user.id)
+			.single();
+
+		if (adminProfile?.role !== 'school_admin' || !adminProfile.org_id) {
+			return fail(403, { message: 'Forbidden' });
+		}
+
+		const { data: org } = await locals.supabase
+			.from('organizations')
+			.select('name, invite_code')
+			.eq('id', adminProfile.org_id)
+			.single();
+
+		const inviteCode = org?.invite_code;
+		if (!inviteCode) return fail(400, { message: 'No invite code found' });
+
+		const formData = await request.formData();
+		const raw = (formData.get('emails') as string) ?? '';
+
+		const emails = raw
+			.split(/[\n,]+/)
+			.map((e) => e.trim().toLowerCase())
+			.filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+
+		if (emails.length === 0) return fail(400, { message: 'No valid email addresses found' });
+		if (emails.length > 100) return fail(400, { message: 'Maximum 100 emails per batch' });
+
+		const results = await Promise.allSettled(
+			emails.map((email) => sendInviteEmail(email, org.name, inviteCode))
+		);
+
+		const sent = results.filter((r) => r.status === 'fulfilled').length;
+		const failed = results.length - sent;
+
+		return {
+			success: true,
+			sent,
+			failed,
+			message: failed > 0
+				? `Sent ${sent} invite${sent !== 1 ? 's' : ''}. ${failed} failed.`
+				: `Sent ${sent} invite${sent !== 1 ? 's' : ''} successfully.`
+		};
 	}
 };

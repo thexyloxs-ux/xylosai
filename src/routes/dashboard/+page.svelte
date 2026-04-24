@@ -23,6 +23,10 @@
 
 	let confirmId = $state<string | null>(null);
 
+	let inviteEmails = $state('');
+	let inviteSending = $state(false);
+	let inviteResult = $state<{ sent: number; failed: number; message: string } | null>(null);
+
 	let search = $state('');
 	let filteredStudents = $derived(
 		search.trim()
@@ -116,6 +120,64 @@
 				</div>
 			</div>
 
+			<!-- ── Invite students ── -->
+			<div class="invite-card">
+				<div class="invite-card-head">
+					<div>
+						<h2 class="invite-card-title">Invite Students</h2>
+						<p class="invite-card-sub">Paste email addresses — one per line or comma-separated. Max 100 per batch.</p>
+					</div>
+					{#if org.invite_code}
+						<div class="invite-code-row">
+							<span class="invite-code-label">Invite code</span>
+							<code class="invite-code">{org.invite_code}</code>
+							<button class="copy-code-btn" onclick={copyInviteCode}>
+								{#if codeCopied}
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+									Copied
+								{:else}
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+									Copy
+								{/if}
+							</button>
+						</div>
+					{/if}
+				</div>
+				<form method="POST" action="?/inviteStudents"
+					use:enhance={() => {
+						inviteSending = true;
+						inviteResult = null;
+						return ({ result }) => {
+							inviteSending = false;
+							if (result.type === 'success' && result.data) {
+								inviteResult = { sent: result.data.sent as number, failed: result.data.failed as number, message: result.data.message as string };
+								if ((result.data.failed as number) === 0) inviteEmails = '';
+							}
+						};
+					}}>
+					<textarea
+						class="invite-textarea"
+						name="emails"
+						bind:value={inviteEmails}
+						placeholder="student@school.edu&#10;another@school.edu&#10;..."
+						rows="4"
+					></textarea>
+					{#if inviteResult}
+						<p class="invite-result" class:invite-result-error={inviteResult.failed > 0}>
+							{inviteResult.message}
+						</p>
+					{/if}
+					<button type="submit" class="invite-send-btn" disabled={inviteSending || !inviteEmails.trim()}>
+						{#if inviteSending}
+							Sending…
+						{:else}
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+							Send Invites
+						{/if}
+					</button>
+				</form>
+			</div>
+
 			<!-- ── Student table ── -->
 			<div class="table-section">
 				<div class="table-head">
@@ -129,21 +191,6 @@
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
 						<input class="search-input" type="search" placeholder="Search by name, level, curriculum…" bind:value={search} />
 					</div>
-					{#if org.invite_code}
-						<div class="invite-row">
-							<span class="invite-label">Invite code</span>
-							<code class="invite-code">{org.invite_code}</code>
-							<button class="copy-code-btn" onclick={copyInviteCode}>
-								{#if codeCopied}
-									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-									Copied
-								{:else}
-									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-									Copy
-								{/if}
-							</button>
-						</div>
-					{/if}
 				</div>
 
 				{#if students.length === 0}
@@ -554,6 +601,105 @@
 		border-radius: 0.375rem;
 		letter-spacing: 0.04em;
 	}
+
+	/* ── Invite card ── */
+	.invite-card {
+		background: oklch(100% 0 0 / 0.62);
+		backdrop-filter: blur(20px) saturate(140%);
+		-webkit-backdrop-filter: blur(20px) saturate(140%);
+		border: 1px solid oklch(100% 0 0 / 0.85);
+		box-shadow:
+			inset 0 1px 0 oklch(100% 0 0 / 1),
+			0 2px 8px oklch(18% 0.014 50 / 0.03),
+			0 8px 24px oklch(18% 0.014 50 / 0.04);
+		border-radius: 1rem;
+		padding: 1.5rem 2rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.invite-card-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1.5rem;
+		flex-wrap: wrap;
+		margin-bottom: 1rem;
+	}
+
+	.invite-card-title {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--ink);
+		margin-bottom: 0.25rem;
+	}
+
+	.invite-card-sub {
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+	}
+
+	.invite-code-row {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		flex-shrink: 0;
+	}
+
+	.invite-code-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ink-3);
+	}
+
+	.invite-textarea {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		background: oklch(99% 0.008 85);
+		border: 1px solid var(--border);
+		border-radius: 0.625rem;
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		font-size: 0.8125rem;
+		color: var(--ink);
+		resize: vertical;
+		outline: none;
+		box-sizing: border-box;
+		transition: border-color 0.12s, box-shadow 0.12s;
+		display: block;
+		margin-bottom: 0.75rem;
+	}
+	.invite-textarea:focus {
+		border-color: var(--amber);
+		box-shadow: 0 0 0 3px oklch(72% 0.185 72 / 0.12);
+	}
+	.invite-textarea::placeholder { color: var(--ink-3); }
+
+	.invite-result {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--success);
+		margin-bottom: 0.75rem;
+	}
+	.invite-result-error { color: oklch(52% 0.2 20); }
+
+	.invite-send-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1.125rem;
+		background: var(--amber);
+		color: var(--ink);
+		border: none;
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.12s, opacity 0.12s;
+	}
+	.invite-send-btn:hover { background: var(--amber-deep); }
+	.invite-send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 	.copy-code-btn {
 		display: inline-flex;
