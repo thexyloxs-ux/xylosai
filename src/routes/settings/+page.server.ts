@@ -37,6 +37,7 @@ export const actions: Actions = {
 		const level = formData.get('level') as string;
 		const curriculum = formData.get('curriculum') as string;
 		const subjects = formData.getAll('subjects') as string[];
+		const studyChallenge = formData.get('studyChallenge') as string | null;
 
 		const { error } = await locals.supabase
 			.from('profiles')
@@ -44,7 +45,8 @@ export const actions: Actions = {
 				full_name: fullName,
 				level,
 				curriculum,
-				subjects
+				subjects,
+				...(studyChallenge !== null && { study_challenge: studyChallenge || null })
 			})
 			.eq('id', user.id);
 

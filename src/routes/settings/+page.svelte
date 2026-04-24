@@ -138,7 +138,18 @@
 								</div>
 							</div>
 
-							<!-- Subjects -->
+							<!-- Study challenge -->
+							<div class="glass-deck form-section mb-6">
+								<div class="field">
+									<label for="studyChallenge">Biggest Study Challenge</label>
+									<div class="field-island">
+										<textarea id="studyChallenge" name="studyChallenge" rows="3" placeholder="e.g. I struggle with maths formulas and essay writing under time pressure">{profile?.study_challenge || ''}</textarea>
+									</div>
+									<p class="field-hint">XYLO uses this to personalise your study sessions.</p>
+								</div>
+							</div>
+
+						<!-- Subjects -->
 							<div class="glass-deck form-section">
 								<label class="section-label">Selected Subjects (Max 6)</label>
 								<div class="subjects-grid">
@@ -314,7 +325,8 @@
 	
 	.field-island { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 1.25rem; padding: 0.125rem; transition: all 0.3s; }
 	.field-island:focus-within { border-color: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
-	.field-island input, .field-island select { width: 100%; padding: 0.875rem 1.25rem; background: transparent; border: none; outline: none; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; }
+	.field-island input, .field-island select, .field-island textarea { width: 100%; padding: 0.875rem 1.25rem; background: transparent; border: none; outline: none; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; }
+	.field-island textarea { resize: vertical; min-height: 80px; line-height: 1.6; font-weight: 500; }
 	
 	.field-island.disabled { background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; }
 	.lock-icon { margin-right: 1.25rem; opacity: 0.4; }

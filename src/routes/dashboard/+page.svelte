@@ -9,6 +9,14 @@
 	let totalMessagesToday = students.reduce((sum: number, s: { messages_today: number }) => sum + (s.messages_today || 0), 0);
 	let engagementRate = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
 
+	let codeCopied = $state(false);
+	function copyInviteCode() {
+		if (!org?.invite_code) return;
+		navigator.clipboard.writeText(org.invite_code);
+		codeCopied = true;
+		setTimeout(() => { codeCopied = false; }, 2000);
+	}
+
 	function getLevelLabel(level: string | null) {
 		return level || 'Unknown';
 	}
@@ -26,12 +34,15 @@
 				<a href="/?preview" class="wordmark">XYLO</a>
 				<span class="admin-pill">School Admin</span>
 			</div>
-			<button
-				class="signout-btn"
-				onclick={async () => { await data.supabase.auth.signOut(); goto('/auth/login'); }}
-			>
-				Sign out
-			</button>
+			<div class="header-actions">
+				<a href="/settings" class="settings-link">Settings</a>
+				<button
+					class="signout-btn"
+					onclick={async () => { await data.supabase.auth.signOut(); goto('/auth/login'); }}
+				>
+					Sign out
+				</button>
+			</div>
 		</div>
 	</header>
 
@@ -94,6 +105,15 @@
 						<div class="invite-row">
 							<span class="invite-label">Invite code</span>
 							<code class="invite-code">{org.invite_code}</code>
+							<button class="copy-code-btn" onclick={copyInviteCode}>
+								{#if codeCopied}
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+									Copied
+								{:else}
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+									Copy
+								{/if}
+							</button>
 						</div>
 					{/if}
 				</div>
@@ -223,6 +243,17 @@
 		padding: 0.25rem 0.625rem;
 		border-radius: 999px;
 	}
+
+	.header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+	.settings-link {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--ink-3);
+		text-decoration: none;
+		transition: color 0.12s;
+	}
+	.settings-link:hover { color: var(--ink); }
 
 	.signout-btn {
 		padding: 0.375rem 0.875rem;
@@ -440,6 +471,23 @@
 		border-radius: 0.375rem;
 		letter-spacing: 0.04em;
 	}
+
+	.copy-code-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.625rem;
+		background: none;
+		border: 1px solid var(--border);
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		cursor: pointer;
+		transition: color 0.12s, border-color 0.12s, background 0.12s;
+	}
+	.copy-code-btn:hover { color: var(--ink); border-color: var(--ink-3); background: var(--cream-warm); }
 
 	/* ── Empty ── */
 	.table-empty {

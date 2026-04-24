@@ -158,13 +158,14 @@
 		</div>
 
 		<div class="sidebar-foot">
-			<div class="user-row">
+			<a href="/settings" class="user-row user-row-link">
 				<div class="avatar">{profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}</div>
 				<div class="user-info">
 					<span class="user-name">{profile?.full_name || 'Student'}</span>
 					<span class="user-level">{profile?.level || 'Free'}</span>
 				</div>
-			</div>
+				<svg class="settings-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+			</a>
 			<button
 				class="signout-btn"
 				onclick={async () => { await data.supabase.auth.signOut(); goto('/'); }}
@@ -401,6 +402,17 @@
 		gap: 0.75rem;
 		margin-bottom: 0.875rem;
 	}
+
+	.user-row-link {
+		text-decoration: none;
+		border-radius: 0.625rem;
+		padding: 0.375rem 0.5rem;
+		margin: -0.375rem -0.5rem 0.5rem;
+		transition: background 0.15s;
+	}
+	.user-row-link:hover { background: var(--cream-warm); }
+	.user-row-link:hover .settings-icon { opacity: 1; }
+	.settings-icon { margin-left: auto; color: var(--ink-3); opacity: 0; flex-shrink: 0; transition: opacity 0.15s; }
 
 	.avatar {
 		width: 34px; height: 34px;
