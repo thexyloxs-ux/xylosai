@@ -5,9 +5,10 @@
 	const { org, students, profile } = data;
 
 	let totalStudents = students.length;
-	let activeStudents = students.filter((s: { messages_today: number }) => s.messages_today > 0).length;
-	let totalMessagesToday = students.reduce((sum: number, s: { messages_today: number }) => sum + (s.messages_today || 0), 0);
-	let engagementRate = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : 0;
+	let activeToday = students.filter((s: any) => s.messages_today > 0).length;
+	let activeThisWeek = students.filter((s: any) => s.messages_this_week > 0).length;
+	let totalMessagesToday = students.reduce((sum: number, s: any) => sum + (s.messages_today || 0), 0);
+	let weeklyEngagement = totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0;
 
 	let codeCopied = $state(false);
 	function copyInviteCode() {
@@ -17,9 +18,6 @@
 		setTimeout(() => { codeCopied = false; }, 2000);
 	}
 
-	function getLevelLabel(level: string | null) {
-		return level || 'Unknown';
-	}
 </script>
 
 <svelte:head>
@@ -75,22 +73,27 @@
 			<div class="stats-row">
 				<div class="stat-item">
 					<span class="stat-num">{totalStudents}</span>
-					<span class="stat-label">Enrolled students</span>
+					<span class="stat-label">Enrolled</span>
 				</div>
 				<div class="stat-divider"></div>
 				<div class="stat-item">
-					<span class="stat-num active">{activeStudents}</span>
+					<span class="stat-num active">{activeToday}</span>
 					<span class="stat-label">Active today</span>
 				</div>
 				<div class="stat-divider"></div>
 				<div class="stat-item">
-					<span class="stat-num">{totalMessagesToday}</span>
-					<span class="stat-label">AI messages today</span>
+					<span class="stat-num">{activeThisWeek}</span>
+					<span class="stat-label">Active this week</span>
 				</div>
 				<div class="stat-divider"></div>
 				<div class="stat-item">
-					<span class="stat-num">{engagementRate}%</span>
-					<span class="stat-label">Engagement rate</span>
+					<span class="stat-num">{totalMessagesToday}</span>
+					<span class="stat-label">Messages today</span>
+				</div>
+				<div class="stat-divider"></div>
+				<div class="stat-item">
+					<span class="stat-num">{weeklyEngagement}%</span>
+					<span class="stat-label">Weekly engagement</span>
 				</div>
 			</div>
 
@@ -129,17 +132,17 @@
 							<thead>
 								<tr>
 									<th>Name</th>
-									<th>Class</th>
+									<th>Level</th>
 									<th>Curriculum</th>
-									<th>Status</th>
-									<th class="right">Msgs today</th>
+									<th>Last active</th>
+									<th class="right">This week</th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each students as student}
 									<tr>
 										<td class="name-cell">{student.full_name || 'Anonymous'}</td>
-										<td>{getLevelLabel(student.level)}</td>
+										<td>{student.level || '—'}</td>
 										<td>
 											{#if student.curriculum}
 												<span class="curriculum-tag">{student.curriculum}</span>
@@ -148,19 +151,19 @@
 											{/if}
 										</td>
 										<td>
-											{#if student.messages_today > 0}
-												<span class="status active">
-													<span class="status-dot active"></span> Active
-												</span>
+											{#if student.last_active}
+												{#if student.messages_today > 0}
+													<span class="status active"><span class="status-dot active"></span> Today</span>
+												{:else}
+													<span class="status inactive"><span class="status-dot"></span> {new Date(student.last_active).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+												{/if}
 											{:else}
-												<span class="status inactive">
-													<span class="status-dot"></span> Inactive
-												</span>
+												<span class="not-set">Never</span>
 											{/if}
 										</td>
 										<td class="right">
-											<span class="msg-count" class:has-msgs={student.messages_today > 0}>
-												{student.messages_today}
+											<span class="msg-count" class:has-msgs={student.messages_this_week > 0}>
+												{student.messages_this_week}
 											</span>
 										</td>
 									</tr>
