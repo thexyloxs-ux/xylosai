@@ -158,6 +158,12 @@
 		</div>
 
 		<div class="sidebar-foot">
+			{#if profile?.role === 'school_admin'}
+				<a href="/dashboard" class="dashboard-link">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+					School Dashboard
+				</a>
+			{/if}
 			<a href="/settings" class="user-row user-row-link">
 				<div class="avatar">{profile?.full_name?.charAt(0)?.toUpperCase() || 'U'}</div>
 				<div class="user-info">
@@ -402,6 +408,23 @@
 		gap: 0.75rem;
 		margin-bottom: 0.875rem;
 	}
+
+	.dashboard-link {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		margin-bottom: 0.5rem;
+		border-radius: 0.5rem;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: var(--amber-deep);
+		text-decoration: none;
+		background: oklch(96% 0.04 80 / 0.6);
+		border: 1px solid oklch(85% 0.06 78 / 0.6);
+		transition: background 0.12s, border-color 0.12s;
+	}
+	.dashboard-link:hover { background: oklch(94% 0.05 80); border-color: oklch(80% 0.08 78); }
 
 	.user-row-link {
 		text-decoration: none;
