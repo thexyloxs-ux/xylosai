@@ -1,4 +1,5 @@
 import { error, json } from '@sveltejs/kit';
+import { logger } from '$lib/server/logger';
 import { verifyWebhookSignature } from '$lib/server/paystack';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { activatePlan, cancelSubscription } from '$lib/server/services/subscription';
@@ -15,21 +16,31 @@ export const POST: RequestHandler = async ({ request }) => {
 	const event = JSON.parse(body);
 	const admin = createSupabaseAdminClient();
 
-	switch (event.event) {
-		case 'charge.success': {
-			const { metadata } = event.data;
-			if (metadata?.userId) {
-				await activatePlan(admin, metadata.userId, metadata.planType ?? 'pro');
+	try {
+		switch (event.event) {
+			case 'charge.success': {
+				const { metadata } = event.data;
+				if (metadata?.userId) {
+					await activatePlan(admin, metadata.userId, metadata.planType ?? 'pro');
+					logger.info({ userId: metadata.userId, planType: metadata.planType }, 'Plan activated');
+				}
+				break;
 			}
-			break;
-		}
-		case 'subscription.disable': {
-			const email = event.data?.customer?.email;
-			if (email) {
-				await cancelSubscription(admin, email);
+			case 'subscription.disable': {
+				const email = event.data?.customer?.email;
+				if (email) {
+					await cancelSubscription(admin, email);
+					logger.info({ email }, 'Subscription cancelled');
+				}
+				break;
 			}
-			break;
+			default:
+				logger.info({ eventType: event.event }, 'Unhandled Paystack event');
 		}
+	} catch (err) {
+		logger.error({ err, eventType: event.event }, 'Paystack webhook processing failed');
+		// Return 500 so Paystack retries the event
+		throw error(500, 'Webhook processing failed');
 	}
 
 	return json({ received: true });

@@ -70,7 +70,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.eq('id', user.id);
 
 	if (profileErr) {
-		logger.error({ err: profileErr, userId: user.id, orgId: org.id }, 'Profile link failed');
+		// Compensating delete — roll back the org so the user can retry
+		await admin.from('organizations').delete().eq('id', org.id);
+		logger.error({ err: profileErr, userId: user.id, orgId: org.id }, 'Profile link failed; org rolled back');
 		throw error(500, 'Could not link admin profile');
 	}
 
