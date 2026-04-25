@@ -540,21 +540,6 @@
 }
 .lp-btn-outline.lp-btn-lg { padding: 0.875rem 1.875rem; font-size: 1rem; }
 
-.lp-btn-ghost {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.625rem 1rem;
-	background: transparent;
-	color: var(--lp-ink-2);
-	font-size: 0.9375rem;
-	font-weight: 600;
-	border-radius: 999px;
-	border: none;
-	cursor: pointer;
-	text-decoration: none;
-	transition: color 0.2s;
-}
-.lp-btn-ghost:hover { color: var(--lp-ink); }
 
 .lp-btn-ghost-dark {
 	display: inline-flex;
@@ -959,7 +944,6 @@
 	color: var(--lp-ink);
 	line-height: 1.3;
 }
-.lp-bento-hero .lp-bento-title { font-size: 1.25rem; }
 .lp-bento-desc {
 	font-size: 0.9375rem;
 	color: var(--lp-ink-2);

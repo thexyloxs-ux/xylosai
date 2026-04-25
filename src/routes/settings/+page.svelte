@@ -3,7 +3,8 @@
 	import { fade } from 'svelte/transition';
 
 	const { data, form } = $props<{ data: any; form: any }>();
-	const { profile, organization } = data;
+	const profile = $derived(data.profile);
+	const organization = $derived(data.organization);
 
 	let activeTab = $state('profile');
 	let saving = $state(false);
@@ -104,8 +105,8 @@
 									<input id="fullName" name="fullName" type="text" value={profile?.full_name} placeholder="e.g. Amara Okafor" required />
 								</div>
 								<div class="field">
-									<label>Email Address</label>
-									<input type="email" value={profile?.email} disabled />
+									<label for="emailDisplay">Email Address</label>
+									<input id="emailDisplay" type="email" value={profile?.email} disabled />
 									<p class="hint">Email cannot be changed. Contact support if needed.</p>
 								</div>
 								<button type="submit" class="btn-primary" disabled={saving}>
@@ -193,7 +194,7 @@
 								</div>
 
 								<div class="field">
-									<label>Invite Code</label>
+									<p class="field-label">Invite Code</p>
 									<div class="invite-row">
 										<code class="invite-code">{organization?.invite_code}</code>
 										<button type="button" class="btn-ghost" onclick={copyInviteCode}>

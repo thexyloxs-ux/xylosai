@@ -4,9 +4,9 @@
 
 	const { data } = $props<{ data: App.PageData }>();
 
-	const supabase = data.supabase;
-	const user     = data.user as User;
-	const profile  = data.profile;
+	const supabase = $derived(data.supabase);
+	const user     = $derived(data.user as User);
+	const profile  = $derived(data.profile);
 
 	const role          = profile?.role ?? (user?.user_metadata?.role as string | undefined) ?? 'individual';
 	const isSchoolAdmin = role === 'school_admin';

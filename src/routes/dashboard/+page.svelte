@@ -3,9 +3,10 @@
 	import { enhance } from '$app/forms';
 
 	const { data } = $props<{ data: App.PageData & { org: any; students: any[] } }>();
-	const { org, profile } = data;
+	const org = $derived(data.org);
 
 	let students = $state<any[]>(data.students);
+	$effect(() => { students = data.students; });
 
 	let totalStudents = $derived(students.length);
 	let activeToday = $derived(students.filter((s) => s.messages_today > 0).length);
@@ -575,20 +576,6 @@
 		width: 220px;
 	}
 	.search-input::placeholder { color: var(--ink-3); }
-
-	.invite-row {
-		display: flex;
-		align-items: center;
-		gap: 0.625rem;
-	}
-
-	.invite-label {
-		font-size: 0.75rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--ink-3);
-	}
 
 	.invite-code {
 		font-family: 'JetBrains Mono', 'Fira Code', monospace;

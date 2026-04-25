@@ -7,8 +7,9 @@
 	const { data } = $props<{
 		data: App.PageData & { profile: Profile | null; organization: Organization | null; conversations: any[] };
 	}>();
-	const { profile, organization: _org, conversations: initialConversations } = data;
-	let conversations = $state(initialConversations);
+	const profile = $derived(data.profile);
+	let conversations = $state(data.conversations);
+	$effect(() => { conversations = data.conversations; });
 
 	type Message = { role: 'user' | 'assistant'; content: string };
 
