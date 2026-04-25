@@ -21,7 +21,8 @@
 		'Economics', 'Geography', 'Government', 'Accounting', 'French'
 	];
 
-	let selectedSubjects = $state<string[]>(profile?.subjects || []);
+	let selectedSubjects = $state<string[]>([]);
+	$effect(() => { selectedSubjects = profile?.subjects ?? []; });
 	let codeCopied = $state(false);
 
 	function toggleSubject(s: string) {

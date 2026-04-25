@@ -2,13 +2,13 @@
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
-	import type { Organization, Profile } from '$lib/types/database';
+	import type { Conversation, Organization, Profile } from '$lib/types/database';
 
 	const { data } = $props<{
 		data: App.PageData & { profile: Profile | null; organization: Organization | null; conversations: any[] };
 	}>();
 	const profile = $derived(data.profile);
-	let conversations = $state(data.conversations);
+	let conversations = $state<Conversation[]>([]);
 	$effect(() => { conversations = data.conversations; });
 
 	type Message = { role: 'user' | 'assistant'; content: string };

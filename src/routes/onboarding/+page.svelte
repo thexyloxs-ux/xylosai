@@ -8,14 +8,14 @@
 	const user     = $derived(data.user as User);
 	const profile  = $derived(data.profile);
 
-	const role          = profile?.role ?? (user?.user_metadata?.role as string | undefined) ?? 'individual';
-	const isSchoolAdmin = role === 'school_admin';
-	const meta          = (user?.user_metadata || {}) as Record<string, string>;
+	const role          = $derived(profile?.role ?? (user?.user_metadata?.role as string | undefined) ?? 'individual');
+	const isSchoolAdmin = $derived(role === 'school_admin');
+	const meta          = $derived((user?.user_metadata ?? {}) as Record<string, string>);
 
 	// ── Step state ──────────────────────────────────────────────────────────────
 	let step = $state(1);
 
-	const TOTAL_STEPS  = isSchoolAdmin ? 3 : 4;
+	const TOTAL_STEPS  = $derived(isSchoolAdmin ? 3 : 4);
 	const stepNumbers  = $derived(Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1));
 	const progressPct  = $derived(((step - 1) / (TOTAL_STEPS - 1)) * 100);
 
@@ -24,8 +24,13 @@
 	);
 
 	// ── Field state ─────────────────────────────────────────────────────────────
-	let schoolName       = $state(meta.school_name ?? '');
-	let country          = $state(meta.country ?? '');
+	let schoolName       = $state('');
+	let country          = $state('');
+	// Prefill from user metadata once — only overwrites if the field is still empty
+	$effect(() => {
+		if (!schoolName) schoolName = meta.school_name ?? '';
+		if (!country)    country    = meta.country ?? '';
+	});
 	let curriculum       = $state('');
 	let studentCount     = $state('');
 	let level            = $state('');

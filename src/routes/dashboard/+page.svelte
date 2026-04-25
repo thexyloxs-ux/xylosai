@@ -5,7 +5,7 @@
 	const { data } = $props<{ data: App.PageData & { org: any; students: any[] } }>();
 	const org = $derived(data.org);
 
-	let students = $state<any[]>(data.students);
+	let students = $state<any[]>([]);
 	$effect(() => { students = data.students; });
 
 	let totalStudents = $derived(students.length);
