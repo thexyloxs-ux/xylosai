@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { error, json } from '@sveltejs/kit';
 import { z } from 'zod';
+import { logger } from '$lib/server/logger';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import type { RequestHandler } from './$types';
 
@@ -54,7 +55,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.single();
 
 	if (orgErr) {
-		console.error('Org creation error:', orgErr);
+		logger.error({ err: orgErr, userId: user.id }, 'Org creation failed');
 		throw error(500, 'Could not create organization');
 	}
 
@@ -69,7 +70,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.eq('id', user.id);
 
 	if (profileErr) {
-		console.error('Profile link error:', profileErr);
+		logger.error({ err: profileErr, userId: user.id, orgId: org.id }, 'Profile link failed');
 		throw error(500, 'Could not link admin profile');
 	}
 

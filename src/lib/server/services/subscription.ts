@@ -41,23 +41,22 @@ export async function activatePlan(
 
 /**
  * Mark a subscription as expired when Paystack fires a cancellation event.
- * Looks up the profile by email since the webhook payload provides the customer email.
+ * Resolves the user via auth.users (authoritative) rather than profiles.email,
+ * so it stays correct even if the user has changed their email since subscribing.
  */
 export async function cancelSubscription(admin: AdminClient, email: string): Promise<void> {
-	const { data: profiles, error: fetchErr } = await admin
-		.from('profiles')
-		.select('id')
-		.eq('email', email)
-		.limit(1);
+	// Use an RPC that queries auth.users directly — profiles.email can drift
+	const { data: userId, error: rpcErr } = await admin.rpc('get_user_id_by_email', {
+		p_email: email,
+	});
 
-	if (fetchErr) throw new Error(`Failed to look up profile for cancellation: ${fetchErr.message}`);
-
-	if (!profiles?.length) return; // no account found — nothing to cancel
+	if (rpcErr) throw new Error(`Failed to resolve user by email: ${rpcErr.message}`);
+	if (!userId) return; // no account found — nothing to cancel
 
 	const { error: updateErr } = await admin
 		.from('profiles')
 		.update({ plan_status: 'expired' })
-		.eq('id', profiles[0].id);
+		.eq('id', userId);
 
 	if (updateErr) throw new Error(`Failed to expire subscription: ${updateErr.message}`);
 }

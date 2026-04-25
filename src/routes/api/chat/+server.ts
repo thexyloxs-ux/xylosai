@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { z } from 'zod';
+import { logger } from '$lib/server/logger';
+import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { enforceRateLimit, streamChatResponse, RateLimitError } from '$lib/server/services/chat';
 import type { RequestHandler } from './$types';
 
@@ -68,7 +69,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : 'AI processing failed';
-		console.error('Chat error:', err);
+		logger.error({ err, userId: user.id }, 'Chat stream failed');
 		throw error(500, msg);
 	}
 };

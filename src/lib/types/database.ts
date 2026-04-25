@@ -136,6 +136,10 @@ export interface Database {
 				Args: { p_user_id: string; p_org_id: string; p_date: string };
 				Returns: void;
 			};
+			get_user_id_by_email: {
+				Args: { p_email: string };
+				Returns: string | null;
+			};
 		};
 		Enums: Record<string, never>;
 		CompositeTypes: Record<string, never>;

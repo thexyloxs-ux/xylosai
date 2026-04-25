@@ -1,4 +1,5 @@
 import { error, json } from '@sveltejs/kit';
+import { logger } from '$lib/server/logger';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
@@ -17,7 +18,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		.order('created_at', { ascending: true });
 
 	if (msgErr) {
-		console.error('Fetch messages error:', msgErr);
+		logger.error({ err: msgErr, conversationId: id, userId: user.id }, 'Failed to fetch messages');
 		throw error(500, 'Could not fetch history');
 	}
 
