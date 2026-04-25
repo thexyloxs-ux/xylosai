@@ -1,9 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '$lib/types/database';
 import type { Cookies } from '@sveltejs/kit';
+import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
+import type { Database } from '$lib/types/database';
 
 // Server client — uses cookies, respects RLS
 export function createSupabaseServerClient(cookies: Cookies) {
@@ -22,11 +22,17 @@ export function createSupabaseServerClient(cookies: Cookies) {
 }
 
 // Admin client — bypasses RLS (server-side only, never expose)
+// Singleton: safe because there is no per-request state on this client.
+let _adminClient: ReturnType<typeof createClient<Database>> | null = null;
+
 export function createSupabaseAdminClient() {
-	return createClient<Database>(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false
-		}
-	});
+	if (!_adminClient) {
+		_adminClient = createClient<Database>(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			}
+		});
+	}
+	return _adminClient;
 }

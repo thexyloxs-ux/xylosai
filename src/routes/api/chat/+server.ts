@@ -1,14 +1,30 @@
 import { error } from '@sveltejs/kit';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { z } from 'zod';
 import { enforceRateLimit, streamChatResponse, RateLimitError } from '$lib/server/services/chat';
 import type { RequestHandler } from './$types';
+
+const chatSchema = z.object({
+	messages: z
+		.array(
+			z.object({
+				role: z.enum(['user', 'assistant']),
+				content: z.string().min(1).max(20000)
+			})
+		)
+		.min(1)
+		.max(100),
+	conversationId: z.string().uuid().optional()
+});
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
 	if (!session || !user) throw error(401, 'Unauthorized');
 
-	const body = await request.json();
-	if (!body.messages || !Array.isArray(body.messages)) throw error(400, 'Invalid messages');
+	const raw = await request.json().catch(() => null);
+	const parsed = chatSchema.safeParse(raw);
+	if (!parsed.success) throw error(400, 'Invalid request body');
+	const body = parsed.data;
 
 	const admin = createSupabaseAdminClient();
 

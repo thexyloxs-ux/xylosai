@@ -8,7 +8,17 @@ export async function getOrCreateConversation(
 	userId: string,
 	opts: { conversationId?: string }
 ): Promise<string> {
-	if (opts.conversationId) return opts.conversationId;
+	if (opts.conversationId) {
+		const { data } = await admin
+			.from('conversations')
+			.select('id')
+			.eq('id', opts.conversationId)
+			.eq('user_id', userId)
+			.single();
+
+		if (!data) throw new Error('Conversation not found or access denied');
+		return opts.conversationId;
+	}
 
 	const { data, error } = await admin
 		.from('conversations')

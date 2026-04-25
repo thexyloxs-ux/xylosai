@@ -1,7 +1,15 @@
-import { json, error } from '@sveltejs/kit';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
+import { error, json } from '@sveltejs/kit';
+import { z } from 'zod';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import type { RequestHandler } from './$types';
+
+const setupOrgSchema = z.object({
+	schoolName: z.string().min(1).max(200),
+	country: z.string().min(1).max(100).optional(),
+	curriculum: z.string().max(100).optional(),
+	seatLimit: z.number().int().min(1).max(10000).optional()
+});
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -10,11 +18,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(401, 'Unauthorized');
 	}
 
-	const { schoolName, country, curriculum, seatLimit } = await request.json();
-
-	if (!schoolName) {
-		throw error(400, 'School name is required');
-	}
+	const raw = await request.json().catch(() => null);
+	const parsed = setupOrgSchema.safeParse(raw);
+	if (!parsed.success) throw error(400, 'Invalid request body');
+	const { schoolName, country, curriculum, seatLimit } = parsed.data;
 
 	const admin = createSupabaseAdminClient();
 
