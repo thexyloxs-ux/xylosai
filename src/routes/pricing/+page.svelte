@@ -9,6 +9,13 @@
 			'Understand, Quiz & Exam Prep modes',
 			'Conversation history (7 days)',
 		],
+		plus: [
+			'Unlimited AI messages',
+			'All core study modes',
+			'Full conversation history',
+			'Personalized academic focus',
+			'Everything in Free',
+		],
 		pro: [
 			'Unlimited AI messages',
 			'All study modes + Study Plan builder',
@@ -31,7 +38,7 @@
 	const faqs = [
 		{
 			q: 'Can I upgrade or cancel anytime?',
-			a: 'Yes. Cancel or change your plan at any time. If you cancel Pro, you keep access until the end of your billing period, then revert to Free automatically.',
+			a: 'Yes. Cancel or change your plan at any time. If you cancel a paid plan, you keep access until the end of your billing period, then revert to Free automatically.',
 		},
 		{
 			q: 'What payment methods are accepted?',
@@ -98,16 +105,42 @@
 			</div>
 		</div>
 
-		<!-- Pro -->
+		<!-- Plus -->
 		<div class="plan-card featured">
-			<div class="plan-badge">Most popular</div>
+			<div class="plan-badge">Best value</div>
 			<div class="plan-top">
-				<p class="plan-name">Pro</p>
+				<p class="plan-name">Plus</p>
 				<div class="plan-price-row">
-					<span class="plan-price">₦2,500</span>
+					<span class="plan-price">₦3,000</span>
 					<span class="plan-cadence">/ month</span>
 				</div>
 				<p class="plan-tagline">Unlimited access. No more daily caps.</p>
+			</div>
+			<ul class="plan-features">
+				{#each studentFeatures.plus as feat}
+					<li>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+						{feat}
+					</li>
+				{/each}
+			</ul>
+			<div class="plan-cta">
+				<a href="/api/paystack/initialize?plan=plus" class="plan-btn primary">
+					Upgrade to Plus
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+				</a>
+			</div>
+		</div>
+
+		<!-- Pro -->
+		<div class="plan-card">
+			<div class="plan-top">
+				<p class="plan-name">Pro</p>
+				<div class="plan-price-row">
+					<span class="plan-price">₦5,000</span>
+					<span class="plan-cadence">/ month</span>
+				</div>
+				<p class="plan-tagline">Advanced tools for serious exam prep.</p>
 			</div>
 			<ul class="plan-features">
 				{#each studentFeatures.pro as feat}
@@ -118,7 +151,7 @@
 				{/each}
 			</ul>
 			<div class="plan-cta">
-				<a href="/api/paystack/initialize?plan=pro" class="plan-btn primary">
+				<a href="/api/paystack/initialize?plan=pro" class="plan-btn secondary">
 					Upgrade to Pro
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -179,23 +212,24 @@
 				<tr>
 					<th class="feature-col">Feature</th>
 					<th>Free</th>
-					<th class="col-pro">Pro</th>
+					<th class="col-pro">Plus</th>
+					<th>Pro</th>
 					<th>School</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each [
-					['Daily messages',          '20 / day',  'Unlimited', 'Unlimited'],
-					['Understand mode',          true,        true,        true],
-					['Quiz mode',                true,        true,        true],
-					['Exam Prep mode',           true,        true,        true],
-					['Study Plan builder',       false,       true,        true],
-					['Conversation history',     '7 days',    'Full',      'Full'],
-					['Priority response speed',  false,       true,        true],
-					['Exam countdown reminders', false,       true,        true],
-					['Admin dashboard',          false,       false,       true],
-					['Engagement analytics',     false,       false,       true],
-					['Student privacy controls', false,       false,       true],
+					['Daily messages',          '20 / day',  'Unlimited', 'Unlimited', 'Unlimited'],
+					['Understand mode',          true,        true,        true,        true],
+					['Quiz mode',                true,        true,        true,        true],
+					['Exam Prep mode',           true,        true,        true,        true],
+					['Study Plan builder',       false,       false,       true,        true],
+					['Conversation history',     '7 days',    'Full',      'Full',      'Full'],
+					['Priority response speed',  false,       false,       true,        true],
+					['Exam countdown reminders', false,       false,       true,        true],
+					['Admin dashboard',          false,       false,       false,       true],
+					['Engagement analytics',     false,       false,       false,       true],
+					['Student privacy controls', false,       false,       false,       true],
 				] as row}
 					<tr>
 						<td class="feature-col">{row[0]}</td>
@@ -315,9 +349,9 @@
 
 .plans-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(3, 1fr);
 	gap: 1.25rem;
-	max-width: 760px;
+	max-width: 1100px;
 }
 
 .plan-card {
@@ -773,7 +807,7 @@
 	.plans-grid { grid-template-columns: 1fr; max-width: 440px; }
 	.plan-card.featured { order: -1; }
 	.compare-wrap { overflow-x: auto; }
-	.compare-table { min-width: 500px; }
+	.compare-table { min-width: 620px; }
 }
 
 @media (max-width: 600px) {

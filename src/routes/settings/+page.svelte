@@ -25,6 +25,18 @@
 	$effect(() => { selectedSubjects = profile?.subjects ?? []; });
 	let codeCopied = $state(false);
 
+	const planName = $derived(
+		profile?.plan === 'free'
+			? 'XYLO Standard'
+			: profile?.plan === 'plus'
+				? 'XYLO Plus'
+				: profile?.plan === 'pro'
+					? 'XYLO Pro'
+					: profile?.plan === 'school'
+						? 'XYLO School'
+						: 'XYLO Standard'
+	);
+
 	function toggleSubject(s: string) {
 		if (selectedSubjects.includes(s)) {
 			selectedSubjects = selectedSubjects.filter((x) => x !== s);
@@ -229,7 +241,7 @@
 							<div class="plan-row">
 								<div>
 									<span class="plan-badge">{profile?.plan?.toUpperCase() || 'FREE'}</span>
-									<p class="plan-name">{profile?.plan === 'free' ? 'XYLO Standard' : 'XYLO Pro'}</p>
+									<p class="plan-name">{planName}</p>
 									<p class="plan-reset">Resets daily at midnight</p>
 								</div>
 								<div class="meter-wrap">
@@ -247,10 +259,10 @@
 						{#if profile?.plan === 'free'}
 							<div class="upgrade-card">
 								<div class="upgrade-text">
-									<h3>Upgrade to Pro</h3>
-									<p>Unlimited messages, priority AI access, and advanced exam tools.</p>
+									<h3>Upgrade your plan</h3>
+									<p>Unlimited messages, full history, and advanced exam tools.</p>
 								</div>
-								<a href="/pricing" class="btn-primary">Upgrade — $5 / mo</a>
+								<a href="/pricing" class="btn-primary">View paid plans</a>
 							</div>
 						{/if}
 					{/if}

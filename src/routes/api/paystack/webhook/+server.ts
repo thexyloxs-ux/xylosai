@@ -7,12 +7,16 @@ import {
 	type PaystackTransaction,
 } from '$lib/server/paystack';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
-import { PAYSTACK_PRO_PLAN_CODE, PAYSTACK_SCHOOL_PLAN_CODE } from '$env/static/private';
+import {
+	PAYSTACK_PLUS_PLAN_CODE,
+	PAYSTACK_PRO_PLAN_CODE,
+	PAYSTACK_SCHOOL_PLAN_CODE,
+} from '$env/static/private';
 import { activatePlan, cancelSubscription } from '$lib/server/services/subscription';
 import type { RequestHandler } from './$types';
 
 function normalizePlanType(value: unknown): PaystackPlanType | null {
-	return value === 'pro' || value === 'school' ? value : null;
+	return value === 'plus' || value === 'pro' || value === 'school' ? value : null;
 }
 
 function transactionPlanCode(transaction: PaystackTransaction): string | null {
@@ -24,7 +28,9 @@ function transactionPlanCode(transaction: PaystackTransaction): string | null {
 }
 
 function expectedPlanCode(planType: PaystackPlanType): string {
-	return planType === 'school' ? PAYSTACK_SCHOOL_PLAN_CODE : PAYSTACK_PRO_PLAN_CODE;
+	if (planType === 'school') return PAYSTACK_SCHOOL_PLAN_CODE;
+	if (planType === 'pro') return PAYSTACK_PRO_PLAN_CODE;
+	return PAYSTACK_PLUS_PLAN_CODE;
 }
 
 export const POST: RequestHandler = async ({ request }) => {

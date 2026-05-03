@@ -1,6 +1,10 @@
 import { error, redirect } from '@sveltejs/kit';
 import { initializeTransaction } from '$lib/server/paystack';
-import { PAYSTACK_PRO_PLAN_CODE, PAYSTACK_SCHOOL_PLAN_CODE } from '$env/static/private';
+import {
+	PAYSTACK_PLUS_PLAN_CODE,
+	PAYSTACK_PRO_PLAN_CODE,
+	PAYSTACK_SCHOOL_PLAN_CODE,
+} from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
 import type { RequestHandler } from './$types';
 
@@ -12,7 +16,14 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 
 	const plan = url.searchParams.get('plan');
-	const planType = plan === 'school' ? 'school' : plan === 'pro' || !plan ? 'pro' : null;
+	const planType =
+		plan === 'school'
+			? 'school'
+			: plan === 'pro'
+				? 'pro'
+				: plan === 'plus' || !plan
+					? 'plus'
+					: null;
 
 	if (!planType) {
 		throw error(400, 'Invalid plan');
@@ -22,7 +33,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		throw error(400, 'User email is required');
 	}
 
-	const planCode = planType === 'school' ? PAYSTACK_SCHOOL_PLAN_CODE : PAYSTACK_PRO_PLAN_CODE;
+	const planCode =
+		planType === 'school'
+			? PAYSTACK_SCHOOL_PLAN_CODE
+			: planType === 'pro'
+				? PAYSTACK_PRO_PLAN_CODE
+				: PAYSTACK_PLUS_PLAN_CODE;
 
 	if (!planCode) {
 		throw error(400, 'Plan not configured');

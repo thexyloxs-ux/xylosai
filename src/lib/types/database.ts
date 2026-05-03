@@ -157,7 +157,7 @@ export type Message = Database['public']['Tables']['messages']['Row'];
 export type StudentActivity = Database['public']['Tables']['student_activity']['Row'];
 
 export type UserRole = 'individual' | 'school_admin' | 'student';
-export type Plan = 'free' | 'pro' | 'school';
+export type Plan = 'free' | 'plus' | 'pro' | 'school';
 export type PlanStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive';
 export type SessionType = 'understand' | 'quiz' | 'study_plan' | 'exam_prep';
 
