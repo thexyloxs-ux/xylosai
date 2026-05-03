@@ -13,6 +13,7 @@ import {
 	PAYSTACK_SCHOOL_PLAN_CODE,
 } from '$env/static/private';
 import { activatePlan, cancelSubscription } from '$lib/server/services/subscription';
+import { sendPlanActivatedEmail, sendSubscriptionCancelledEmail } from '$lib/server/email';
 import type { RequestHandler } from './$types';
 
 function normalizePlanType(value: unknown): PaystackPlanType | null {
@@ -25,6 +26,19 @@ function transactionPlanCode(transaction: PaystackTransaction): string | null {
 		return transaction.plan.plan_code ?? null;
 	}
 	return null;
+}
+
+function transactionSubscription(transaction: PaystackTransaction) {
+	if (typeof transaction.subscription === 'string') {
+		return { subscriptionCode: transaction.subscription, emailToken: null };
+	}
+	if (transaction.subscription && typeof transaction.subscription === 'object') {
+		return {
+			subscriptionCode: transaction.subscription.subscription_code ?? null,
+			emailToken: transaction.subscription.email_token ?? null
+		};
+	}
+	return { subscriptionCode: null, emailToken: null };
 }
 
 function expectedPlanCode(planType: PaystackPlanType): string {
@@ -72,15 +86,33 @@ export const POST: RequestHandler = async ({ request }) => {
 					throw error(400, 'Plan mismatch');
 				}
 
-				await activatePlan(admin, userId, planType);
+				const subscription = transactionSubscription(transaction);
+				const contact = await activatePlan(admin, userId, planType, {
+					planCode,
+					customerCode: transaction.customer?.customer_code ?? null,
+					customerEmail: transaction.customer?.email ?? null,
+					subscriptionCode: subscription.subscriptionCode,
+					emailToken: subscription.emailToken,
+					reference
+				});
 				logger.info({ userId, planType, reference }, 'Plan activated');
+				if (contact.email) {
+					sendPlanActivatedEmail(contact.email, contact.fullName, contact.planType).catch((err) => {
+						logger.error({ err, userId, planType }, 'Failed to send plan activation email');
+					});
+				}
 				break;
 			}
 			case 'subscription.disable': {
 				const email = event.data?.customer?.email;
 				if (typeof email === 'string' && email.length > 0) {
-					await cancelSubscription(admin, email);
+					const contact = await cancelSubscription(admin, email);
 					logger.info({ email }, 'Subscription cancelled');
+					if (contact?.email) {
+						sendSubscriptionCancelledEmail(contact.email, contact.fullName, contact.planType).catch((err) => {
+							logger.error({ err, email }, 'Failed to send subscription cancellation email');
+						});
+					}
 				}
 				break;
 			}

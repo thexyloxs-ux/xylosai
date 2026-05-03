@@ -976,7 +976,6 @@
 }
 .lp-split-flip { direction: rtl; }
 .lp-split-flip > * { direction: ltr; }
-.lp-split-text {}
 
 .lp-modes-list { display: flex; flex-direction: column; gap: 0; }
 .lp-mode-row {

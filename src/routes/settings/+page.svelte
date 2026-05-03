@@ -299,7 +299,10 @@
 									{#if profile?.plan === 'plus'}
 										<a href="/api/paystack/initialize?plan=pro" class="btn-primary">Upgrade to Pro</a>
 									{/if}
-									<a href="mailto:billing@xyloxs.com?subject=Manage%20my%20XYLO%20membership" class="btn-secondary">Contact billing</a>
+									<a href="/api/paystack/manage" class="btn-secondary">Manage on Paystack</a>
+									<form method="POST" action="/api/paystack/cancel">
+										<button type="submit" class="btn-secondary danger">Cancel subscription</button>
+									</form>
 								</div>
 							</div>
 						{/if}
@@ -314,7 +317,10 @@
 									{#if organizationStatusLabel !== 'active'}
 										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate school billing</a>
 									{/if}
-									<a href="mailto:schools@xyloxs.com?subject=Manage%20XYLO%20school%20billing" class="btn-secondary">School billing help</a>
+									<a href="/api/paystack/manage" class="btn-secondary">Manage on Paystack</a>
+									<form method="POST" action="/api/paystack/cancel">
+										<button type="submit" class="btn-secondary danger">Cancel school billing</button>
+									</form>
 								</div>
 							</div>
 						{/if}
@@ -742,6 +748,7 @@
 		gap: 0.75rem;
 		flex-wrap: wrap;
 	}
+	.billing-actions form { margin: 0; }
 	.school-billing { margin-top: 1rem; }
 
 	/* ── Buttons ── */
@@ -781,6 +788,15 @@
 		transition: border-color 0.12s, color 0.12s, background 0.12s;
 	}
 	.btn-secondary:hover { border-color: var(--ink-3); color: var(--ink); background: var(--cream-warm); }
+	.btn-secondary.danger {
+		color: oklch(48% 0.18 24);
+		border-color: oklch(78% 0.08 24);
+	}
+	.btn-secondary.danger:hover {
+		color: oklch(38% 0.18 24);
+		background: oklch(96% 0.025 24);
+		border-color: oklch(62% 0.14 24);
+	}
 
 	.btn-ghost {
 		display: inline-flex;

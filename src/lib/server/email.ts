@@ -244,3 +244,110 @@ Activate your account: ${inviteUrl}
 		text,
 	});
 }
+
+function planLabel(planType: string) {
+	if (planType === 'school') return 'XYLO School';
+	if (planType === 'pro') return 'XYLO Pro';
+	if (planType === 'plus') return 'XYLO Plus';
+	return 'XYLO';
+}
+
+export async function sendPlanActivatedEmail(
+	to: string,
+	name: string | null,
+	planType: string
+): Promise<void> {
+	const firstName = name?.split(' ')[0] || '';
+	const label = planLabel(planType);
+	const settingsUrl = `${PUBLIC_APP_URL}/settings`;
+	const greeting = firstName ? `${firstName}, your ${label} access is active.` : `Your ${label} access is active.`;
+
+	const html = shell(`${label} is active on your account.`, `
+  ${logoRow()}
+  <tr>
+    <td style="padding-bottom:12px;">
+      <h1 style="margin:0;font-size:28px;font-weight:800;color:#f1f5f9;line-height:1.2;letter-spacing:-0.02em;">
+        ${greeting}
+      </h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:28px;">
+      <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
+        Your payment has been confirmed and your plan is now active. You can manage your membership from Settings.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:32px;">
+      ${ctaButton(settingsUrl, 'Open Settings')}
+    </td>
+  </tr>
+  `);
+
+	const text = `${greeting}
+
+Your payment has been confirmed and your plan is now active.
+
+Manage your membership: ${settingsUrl}
+
+© 2026 Xyloxs Ltd`;
+
+	await resend.emails.send({
+		from: FROM,
+		to,
+		subject: `${label} is active`,
+		html,
+		text
+	});
+}
+
+export async function sendSubscriptionCancelledEmail(
+	to: string,
+	name: string | null,
+	planType: string
+): Promise<void> {
+	const firstName = name?.split(' ')[0] || '';
+	const label = planLabel(planType);
+	const settingsUrl = `${PUBLIC_APP_URL}/settings`;
+	const greeting = firstName ? `${firstName}, your ${label} cancellation is recorded.` : `Your ${label} cancellation is recorded.`;
+
+	const html = shell(`${label} cancellation is recorded.`, `
+  ${logoRow()}
+  <tr>
+    <td style="padding-bottom:12px;">
+      <h1 style="margin:0;font-size:28px;font-weight:800;color:#f1f5f9;line-height:1.2;letter-spacing:-0.02em;">
+        ${greeting}
+      </h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:28px;">
+      <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
+        Paystack has confirmed the cancellation request. Your account status has been updated in XYLO.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:32px;">
+      ${ctaButton(settingsUrl, 'Review membership')}
+    </td>
+  </tr>
+  `);
+
+	const text = `${greeting}
+
+Paystack has confirmed the cancellation request. Your account status has been updated in XYLO.
+
+Review membership: ${settingsUrl}
+
+© 2026 Xyloxs Ltd`;
+
+	await resend.emails.send({
+		from: FROM,
+		to,
+		subject: `${label} cancellation recorded`,
+		html,
+		text
+	});
+}

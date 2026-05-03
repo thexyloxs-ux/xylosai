@@ -29,6 +29,8 @@ Run this checklist after database migrations, billing env updates, or deploys. U
 - Student can join with a valid invite code.
 - School admin Settings shows school billing status.
 - School admin can start Paystack school billing from Settings.
+- School admin can open Paystack subscription management from Settings after first successful billing.
+- School admin can request cancellation from Settings.
 
 ## Billing And Webhooks
 
@@ -40,6 +42,10 @@ Run this checklist after database migrations, billing env updates, or deploys. U
 - Webhook rejects mismatched or unverified transactions.
 - Successful webhook activates the user profile plan.
 - Successful school webhook also activates the organization plan.
+- Successful checkout stores Paystack subscription management tokens in `billing_subscriptions`.
+- Manage membership redirects to Paystack's hosted management link.
+- Cancel membership disables the Paystack subscription and marks the profile billing status as canceled.
+- Activation and cancellation emails are sent without blocking webhook success.
 
 ## Email
 
@@ -54,6 +60,7 @@ Run:
 ```sh
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 Then verify the deployed app:

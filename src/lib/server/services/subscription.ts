@@ -4,15 +4,36 @@ import type { PaystackPlanType } from '$lib/server/paystack';
 
 type AdminClient = SupabaseClient<Database>;
 
-/**
- * Activate a plan after a successful payment.
- * For school plans, also activates the linked organization.
- */
+export interface BillingDetails {
+	planCode?: string | null;
+	customerCode?: string | null;
+	customerEmail?: string | null;
+	subscriptionCode?: string | null;
+	emailToken?: string | null;
+	reference?: string | null;
+}
+
+export interface SubscriptionContact {
+	userId: string;
+	email: string | null;
+	fullName: string | null;
+	planType: PaystackPlanType;
+}
+
 export async function activatePlan(
 	admin: AdminClient,
 	userId: string,
-	planType: PaystackPlanType
-): Promise<void> {
+	planType: PaystackPlanType,
+	billing: BillingDetails = {}
+): Promise<SubscriptionContact> {
+	const { data: profile, error: fetchErr } = await admin
+		.from('profiles')
+		.select('email, full_name, org_id')
+		.eq('id', userId)
+		.single();
+
+	if (fetchErr) throw new Error(`Failed to fetch profile for activation: ${fetchErr.message}`);
+
 	const { error: profileErr } = await admin
 		.from('profiles')
 		.update({ plan: planType, plan_status: 'active' })
@@ -20,44 +41,97 @@ export async function activatePlan(
 
 	if (profileErr) throw new Error(`Failed to activate plan on profile: ${profileErr.message}`);
 
-	if (planType === 'school') {
-		const { data: profile, error: fetchErr } = await admin
-			.from('profiles')
-			.select('org_id')
-			.eq('id', userId)
-			.single();
+	if (planType === 'school' && profile?.org_id) {
+		const { error: orgErr } = await admin
+			.from('organizations')
+			.update({ plan: 'school', plan_status: 'active' })
+			.eq('id', profile.org_id);
 
-		if (fetchErr) throw new Error(`Failed to fetch profile for org activation: ${fetchErr.message}`);
-
-		if (profile?.org_id) {
-			const { error: orgErr } = await admin
-				.from('organizations')
-				.update({ plan: 'school', plan_status: 'active' })
-				.eq('id', profile.org_id);
-
-			if (orgErr) throw new Error(`Failed to activate org plan: ${orgErr.message}`);
-		}
+		if (orgErr) throw new Error(`Failed to activate org plan: ${orgErr.message}`);
 	}
+
+	const { error: billingErr } = await admin
+		.from('billing_subscriptions')
+		.upsert({
+			user_id: userId,
+			org_id: profile?.org_id ?? null,
+			plan_type: planType,
+			plan_code: billing.planCode ?? null,
+			customer_code: billing.customerCode ?? null,
+			customer_email: billing.customerEmail ?? profile?.email ?? null,
+			subscription_code: billing.subscriptionCode ?? null,
+			email_token: billing.emailToken ?? null,
+			last_reference: billing.reference ?? null,
+			status: 'active',
+			updated_at: new Date().toISOString()
+		}, { onConflict: 'user_id' });
+
+	if (billingErr) throw new Error(`Failed to record billing subscription: ${billingErr.message}`);
+
+	return {
+		userId,
+		email: profile?.email ?? billing.customerEmail ?? null,
+		fullName: profile?.full_name ?? null,
+		planType
+	};
 }
 
-/**
- * Mark a subscription as expired when Paystack fires a cancellation event.
- * Resolves the user via auth.users (authoritative) rather than profiles.email,
- * so it stays correct even if the user has changed their email since subscribing.
- */
-export async function cancelSubscription(admin: AdminClient, email: string): Promise<void> {
-	// Use an RPC that queries auth.users directly — profiles.email can drift
+export async function markSubscriptionCancelled(
+	admin: AdminClient,
+	userId: string,
+	status = 'canceled'
+): Promise<SubscriptionContact | null> {
+	const { data: profile, error: fetchErr } = await admin
+		.from('profiles')
+		.select('email, full_name, plan, org_id')
+		.eq('id', userId)
+		.single();
+
+	if (fetchErr) throw new Error(`Failed to fetch profile for cancellation: ${fetchErr.message}`);
+
+	const planType = profile?.plan === 'plus' || profile?.plan === 'pro' || profile?.plan === 'school'
+		? profile.plan
+		: null;
+
+	const { error: profileErr } = await admin
+		.from('profiles')
+		.update({ plan_status: status })
+		.eq('id', userId);
+
+	if (profileErr) throw new Error(`Failed to update subscription status: ${profileErr.message}`);
+
+	const { error: billingErr } = await admin
+		.from('billing_subscriptions')
+		.update({ status, updated_at: new Date().toISOString() })
+		.eq('user_id', userId);
+
+	if (billingErr) throw new Error(`Failed to update billing subscription: ${billingErr.message}`);
+
+	if (profile?.org_id && profile.plan === 'school') {
+		const { error: orgErr } = await admin
+			.from('organizations')
+			.update({ plan_status: status })
+			.eq('id', profile.org_id);
+
+		if (orgErr) throw new Error(`Failed to update organization subscription: ${orgErr.message}`);
+	}
+
+	if (!planType) return null;
+	return {
+		userId,
+		email: profile?.email ?? null,
+		fullName: profile?.full_name ?? null,
+		planType
+	};
+}
+
+export async function cancelSubscription(admin: AdminClient, email: string): Promise<SubscriptionContact | null> {
 	const { data: userId, error: rpcErr } = await admin.rpc('get_user_id_by_email', {
-		p_email: email,
+		p_email: email
 	});
 
 	if (rpcErr) throw new Error(`Failed to resolve user by email: ${rpcErr.message}`);
-	if (!userId) return; // no account found — nothing to cancel
+	if (!userId) return null;
 
-	const { error: updateErr } = await admin
-		.from('profiles')
-		.update({ plan_status: 'expired' })
-		.eq('id', userId);
-
-	if (updateErr) throw new Error(`Failed to expire subscription: ${updateErr.message}`);
+	return markSubscriptionCancelled(admin, userId, 'expired');
 }

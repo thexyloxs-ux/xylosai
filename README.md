@@ -77,6 +77,8 @@ https://xyloss.tech/api/paystack/webhook
 
 The app verifies webhook signatures, verifies transactions with Paystack, normalizes allowed plan types, and rejects mismatched plan codes.
 
+Subscription management uses Paystack subscription codes and email tokens stored in `billing_subscriptions`, a service-role-only table. Users can open Paystack's hosted management link from Settings or request cancellation from the app.
+
 ## Deployment
 
 The Vercel project is linked locally through `.vercel/project.json`, which is ignored by Git. Production environment variables must match `.env.example` and use:
@@ -94,6 +96,7 @@ Run static checks and a production build before pushing:
 ```sh
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 For live release checks, use [docs/SMOKE_TEST.md](docs/SMOKE_TEST.md).

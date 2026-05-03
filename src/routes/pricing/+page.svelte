@@ -38,7 +38,7 @@
 	const faqs = [
 		{
 			q: 'Can I upgrade or cancel anytime?',
-			a: 'Yes. You can upgrade from Settings. For cancellations or billing changes, contact billing and your paid access stays active until the end of the billing period.',
+			a: 'Yes. You can upgrade, open Paystack subscription management, or request cancellation from Settings.',
 		},
 		{
 			q: 'What payment methods are accepted?',
@@ -179,8 +179,8 @@
 				a dashboard that shows engagement without ever reading their conversations.
 			</p>
 			<div class="school-price-block">
-				<span class="school-price">School billing from the dashboard</span>
-				<span class="school-price-note">14-day onboarding trial · activate billing when ready</span>
+				<span class="school-price">Custom school subscription</span>
+				<span class="school-price-note">14-day onboarding trial · activate billing from Settings</span>
 			</div>
 			<div class="school-actions">
 				<a href="/auth/signup?type=school" class="plan-btn primary">

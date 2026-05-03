@@ -9,7 +9,11 @@ export interface PaystackTransaction {
 	reference: string;
 	status: string;
 	plan?: string | { plan_code?: string } | null;
-	customer?: { email?: string | null } | null;
+	customer?: { email?: string | null; customer_code?: string | null } | null;
+	subscription?: string | {
+		subscription_code?: string | null;
+		email_token?: string | null;
+	} | null;
 	metadata?: {
 		userId?: string;
 		planType?: string;
@@ -54,6 +58,20 @@ export async function verifyTransaction(reference: string): Promise<PaystackTran
 		throw new Error(data.message || 'Paystack transaction verification failed');
 	}
 	return data.data;
+}
+
+export async function disableSubscription(code: string, token: string): Promise<void> {
+	const body = JSON.stringify({ code, token });
+	const data = await paystackFetch('/subscription/disable', { method: 'POST', body });
+	if (!data.status) throw new Error(data.message || 'Paystack subscription cancellation failed');
+}
+
+export async function createSubscriptionManageLink(code: string): Promise<string> {
+	const data = await paystackFetch(`/subscription/${encodeURIComponent(code)}/manage/link`);
+	if (!data.status || !data.data?.link) {
+		throw new Error(data.message || 'Paystack manage link creation failed');
+	}
+	return data.data.link;
 }
 
 export function verifyWebhookSignature(body: string, signature: string): boolean {

@@ -129,6 +129,40 @@ export interface Database {
 				Update: Partial<Database['public']['Tables']['student_activity']['Insert']>;
 				Relationships: [];
 			};
+			billing_subscriptions: {
+				Row: {
+					id: string;
+					user_id: string;
+					org_id: string | null;
+					plan_type: 'plus' | 'pro' | 'school';
+					plan_code: string | null;
+					customer_code: string | null;
+					customer_email: string | null;
+					subscription_code: string | null;
+					email_token: string | null;
+					last_reference: string | null;
+					status: string;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					org_id?: string | null;
+					plan_type: 'plus' | 'pro' | 'school';
+					plan_code?: string | null;
+					customer_code?: string | null;
+					customer_email?: string | null;
+					subscription_code?: string | null;
+					email_token?: string | null;
+					last_reference?: string | null;
+					status?: string;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: Partial<Database['public']['Tables']['billing_subscriptions']['Insert']>;
+				Relationships: [];
+			};
 		};
 		Views: Record<string, never>;
 		Functions: {
