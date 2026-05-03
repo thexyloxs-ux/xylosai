@@ -17,5 +17,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 		else throw redirect(302, '/chat');
 	}
 
-	return {};
+	const requestedRole = user.user_metadata?.role;
+	const onboardingRole =
+		profile?.role === 'school_admin' || (profile?.role === 'individual' && requestedRole === 'school_admin')
+			? 'school_admin'
+			: profile?.role ?? 'individual';
+
+	return { onboardingRole };
 };

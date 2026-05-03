@@ -8,7 +8,7 @@
 	const user     = $derived(data.user as User);
 	const profile  = $derived(data.profile);
 
-	const role          = $derived(profile?.role ?? (user?.user_metadata?.role as string | undefined) ?? 'individual');
+	const role          = $derived(data.onboardingRole ?? profile?.role ?? 'individual');
 	const isSchoolAdmin = $derived(role === 'school_admin');
 	const meta          = $derived((user?.user_metadata ?? {}) as Record<string, string>);
 
