@@ -27,5 +27,6 @@ vite.config.ts.timestamp-*
 .claude/
 .kiro/
 .windsurf/
+supabase/.temp/
 .impeccable.md
 skills-lock.json
