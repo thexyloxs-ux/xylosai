@@ -140,13 +140,16 @@ export interface Database {
 				Args: { p_email: string };
 				Returns: string | null;
 			};
+			reserve_free_message_quota: {
+				Args: { p_user_id: string; p_limit: number };
+				Returns: boolean;
+			};
 		};
 		Enums: Record<string, never>;
 		CompositeTypes: Record<string, never>;
 	};
 }
 
-// ─── App types ────────────────────────────────────────────────────
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type Conversation = Database['public']['Tables']['conversations']['Row'];
@@ -154,7 +157,7 @@ export type Message = Database['public']['Tables']['messages']['Row'];
 export type StudentActivity = Database['public']['Tables']['student_activity']['Row'];
 
 export type UserRole = 'individual' | 'school_admin' | 'student';
-export type Plan = 'free' | 'individual' | 'school';
+export type Plan = 'free' | 'pro' | 'school';
 export type PlanStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive';
 export type SessionType = 'understand' | 'quiz' | 'study_plan' | 'exam_prep';
 

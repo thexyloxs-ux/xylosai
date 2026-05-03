@@ -12,7 +12,17 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 
 	const plan = url.searchParams.get('plan');
-	const planCode = plan === 'school' ? PAYSTACK_SCHOOL_PLAN_CODE : PAYSTACK_PRO_PLAN_CODE;
+	const planType = plan === 'school' ? 'school' : plan === 'pro' || !plan ? 'pro' : null;
+
+	if (!planType) {
+		throw error(400, 'Invalid plan');
+	}
+
+	if (!user.email) {
+		throw error(400, 'User email is required');
+	}
+
+	const planCode = planType === 'school' ? PAYSTACK_SCHOOL_PLAN_CODE : PAYSTACK_PRO_PLAN_CODE;
 
 	if (!planCode) {
 		throw error(400, 'Plan not configured');
@@ -20,11 +30,11 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	try {
 		const { authorization_url } = await initializeTransaction({
-			email: user.email!,
+			email: user.email,
 			planCode,
 			metadata: {
 				userId: user.id,
-				planType: plan || 'pro'
+				planType
 			},
 			callbackUrl: `${PUBLIC_APP_URL}/settings?success=true`
 		});

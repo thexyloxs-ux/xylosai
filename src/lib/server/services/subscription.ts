@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '$lib/types/database';
+import type { PaystackPlanType } from '$lib/server/paystack';
 
 type AdminClient = SupabaseClient<Database>;
 
@@ -10,7 +11,7 @@ type AdminClient = SupabaseClient<Database>;
 export async function activatePlan(
 	admin: AdminClient,
 	userId: string,
-	planType: string
+	planType: PaystackPlanType
 ): Promise<void> {
 	const { error: profileErr } = await admin
 		.from('profiles')

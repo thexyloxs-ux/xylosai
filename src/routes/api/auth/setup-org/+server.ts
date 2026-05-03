@@ -9,7 +9,8 @@ const setupOrgSchema = z.object({
 	schoolName: z.string().min(1).max(200),
 	country: z.string().min(1).max(100).optional(),
 	curriculum: z.string().max(100).optional(),
-	seatLimit: z.number().int().min(1).max(10000).optional()
+	seatLimit: z.number().int().min(1).max(10000).optional(),
+	completeOnboarding: z.boolean().optional(),
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -22,22 +23,55 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const raw = await request.json().catch(() => null);
 	const parsed = setupOrgSchema.safeParse(raw);
 	if (!parsed.success) throw error(400, 'Invalid request body');
-	const { schoolName, country, curriculum, seatLimit } = parsed.data;
+	const { schoolName, country, curriculum, seatLimit, completeOnboarding = true } = parsed.data;
 
 	const admin = createSupabaseAdminClient();
 
-	// Idempotency guard — reject if this user already has an org
 	const { data: existing } = await admin
 		.from('profiles')
-		.select('org_id')
+		.select('org_id, role')
 		.eq('id', user.id)
 		.single();
 
-	if (existing?.org_id) {
-		throw error(409, 'Organization already set up for this account');
+	if (existing?.role === 'student') {
+		throw error(403, 'Student accounts cannot create organizations');
 	}
 
-	// 1. Create the Organization
+	if (existing?.org_id) {
+		if (existing.role !== 'school_admin') {
+			throw error(409, 'Organization already set up for this account');
+		}
+
+		const { error: orgUpdateErr } = await admin
+			.from('organizations')
+			.update({
+				name: schoolName,
+				country,
+				curriculum,
+				seat_limit: seatLimit ?? 30,
+			})
+			.eq('id', existing.org_id);
+
+		if (orgUpdateErr) {
+			logger.error({ err: orgUpdateErr, userId: user.id, orgId: existing.org_id }, 'Org update failed');
+			throw error(500, 'Could not update organization');
+		}
+
+		if (completeOnboarding) {
+			const { error: profileUpdateErr } = await admin
+				.from('profiles')
+				.update({ onboarded: true })
+				.eq('id', user.id);
+
+			if (profileUpdateErr) {
+				logger.error({ err: profileUpdateErr, userId: user.id }, 'Profile onboarding update failed');
+				throw error(500, 'Could not finish onboarding');
+			}
+		}
+
+		return json({ success: true, orgId: existing.org_id });
+	}
+
 	const inviteCode = randomBytes(4).toString('hex').toUpperCase();
 
 	const { data: org, error: orgErr } = await admin
@@ -59,18 +93,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(500, 'Could not create organization');
 	}
 
-	// 2. Link the Admin Profile (service role bypasses RLS — safe to set org_id and role)
 	const { error: profileErr } = await admin
 		.from('profiles')
 		.update({
 			org_id: org.id,
 			role: 'school_admin',
-			onboarded: true
+			onboarded: completeOnboarding,
 		})
 		.eq('id', user.id);
 
 	if (profileErr) {
-		// Compensating delete — roll back the org so the user can retry
 		await admin.from('organizations').delete().eq('id', org.id);
 		logger.error({ err: profileErr, userId: user.id, orgId: org.id }, 'Profile link failed; org rolled back');
 		throw error(500, 'Could not link admin profile');

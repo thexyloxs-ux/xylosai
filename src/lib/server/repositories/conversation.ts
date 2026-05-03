@@ -9,22 +9,22 @@ export async function getOrCreateConversation(
 	opts: { conversationId?: string }
 ): Promise<string> {
 	if (opts.conversationId) {
-		const { data } = await admin
+		const { data, error } = await admin
 			.from('conversations')
 			.select('id')
 			.eq('id', opts.conversationId)
 			.eq('user_id', userId)
 			.single();
 
-		if (!data) throw new Error('Conversation not found or access denied');
-		return opts.conversationId;
+		if (error || !data) throw new Error('Conversation not found or access denied');
+		return data.id;
 	}
 
 	const { data, error } = await admin
 		.from('conversations')
 		.insert({
 			user_id: userId,
-			title: `Chat — ${new Date().toLocaleDateString()}`,
+			title: `Chat - ${new Date().toLocaleDateString()}`,
 		})
 		.select('id')
 		.single();
@@ -36,6 +36,7 @@ export async function getOrCreateConversation(
 export async function saveMessage(
 	admin: AdminClient,
 	conversationId: string,
+	userId: string,
 	role: 'user' | 'assistant',
 	content: string
 ): Promise<void> {
@@ -44,6 +45,7 @@ export async function saveMessage(
 		admin
 			.from('conversations')
 			.update({ last_message_at: new Date().toISOString() })
-			.eq('id', conversationId),
+			.eq('id', conversationId)
+			.eq('user_id', userId),
 	]);
 }

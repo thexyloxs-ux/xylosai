@@ -3,6 +3,20 @@ import { createHmac } from 'crypto';
 
 const BASE = 'https://api.paystack.co';
 
+export type PaystackPlanType = 'pro' | 'school';
+
+export interface PaystackTransaction {
+	reference: string;
+	status: string;
+	plan?: string | { plan_code?: string } | null;
+	customer?: { email?: string | null } | null;
+	metadata?: {
+		userId?: string;
+		planType?: string;
+		[key: string]: unknown;
+	} | null;
+}
+
 async function paystackFetch(path: string, options: RequestInit = {}) {
 	const res = await fetch(`${BASE}${path}`, {
 		...options,
@@ -18,7 +32,7 @@ async function paystackFetch(path: string, options: RequestInit = {}) {
 export async function initializeTransaction(params: {
 	email: string;
 	planCode: string;
-	metadata: Record<string, string>;
+	metadata: { userId: string; planType: PaystackPlanType };
 	callbackUrl: string;
 }): Promise<{ authorization_url: string; reference: string }> {
 	const body = JSON.stringify({
@@ -31,6 +45,14 @@ export async function initializeTransaction(params: {
 
 	const data = await paystackFetch('/transaction/initialize', { method: 'POST', body });
 	if (!data.status) throw new Error(data.message || 'Paystack initialization failed');
+	return data.data;
+}
+
+export async function verifyTransaction(reference: string): Promise<PaystackTransaction> {
+	const data = await paystackFetch(`/transaction/verify/${encodeURIComponent(reference)}`);
+	if (!data.status || !data.data) {
+		throw new Error(data.message || 'Paystack transaction verification failed');
+	}
 	return data.data;
 }
 

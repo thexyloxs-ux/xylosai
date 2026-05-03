@@ -6,16 +6,12 @@ import { incrementStudentActivity } from '$lib/server/repositories/activity';
 
 type AdminClient = SupabaseClient<Database>;
 
-// ── Domain error ─────────────────────────────────────────────────────────────
-
 export class RateLimitError extends Error {
 	constructor(message: string) {
 		super(message);
 		this.name = 'RateLimitError';
 	}
 }
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface ChatRequest {
 	messages: { role: 'user' | 'assistant'; content: string }[];
@@ -29,11 +25,9 @@ export interface ChatContext {
 	admin: AdminClient;
 }
 
-// ── Business rules ────────────────────────────────────────────────────────────
-
 /**
- * Throws RateLimitError if the user has exhausted their free daily quota.
- * School-linked students and paid users are always allowed through.
+ * Legacy preflight guard kept for callers that only need to fail fast before
+ * the atomic quota reservation runs.
  */
 export function enforceRateLimit(profile: Profile): void {
 	if (profile.plan !== 'free' || profile.org_id) return;
@@ -47,34 +41,38 @@ export function enforceRateLimit(profile: Profile): void {
 	}
 }
 
-// ── Side effects (fire-and-forget) ───────────────────────────────────────────
+export async function reserveMessageQuota(ctx: ChatContext): Promise<void> {
+	if (ctx.profile.plan !== 'free' || ctx.profile.org_id) return;
 
-function incrementMessageCounter(ctx: ChatContext): void {
-	const todayStr = new Date().toDateString();
-	const resetStr = new Date(ctx.profile.messages_today_reset_at).toDateString();
-	const update =
-		resetStr !== todayStr
-			? { messages_today: 1, messages_today_reset_at: new Date().toISOString() }
-			: { messages_today: (ctx.profile.messages_today ?? 0) + 1 };
+	const { data, error } = await ctx.admin.rpc('reserve_free_message_quota', {
+		p_user_id: ctx.userId,
+		p_limit: 20,
+	});
 
-	// Intentionally not awaited — runs after the stream closes
-	ctx.admin.from('profiles').update(update).eq('id', ctx.userId);
+	if (error) {
+		throw new Error(`Failed to reserve message quota: ${error.message}`);
+	}
+
+	if (!data) {
+		throw new RateLimitError(
+			'Daily free limit reached (20 messages). Join a school or upgrade to Pro for unlimited access.'
+		);
+	}
 }
-
-// ── Use case ──────────────────────────────────────────────────────────────────
 
 export async function streamChatResponse(
 	ctx: ChatContext,
 	req: ChatRequest
 ): Promise<{ stream: ReadableStream; conversationId: string }> {
+	await reserveMessageQuota(ctx);
+
 	const conversationId = await getOrCreateConversation(ctx.admin, ctx.userId, {
 		conversationId: req.conversationId,
 	});
 
-	// Persist the user's message before streaming starts
 	const lastUserMsg = [...req.messages].reverse().find((m) => m.role === 'user');
 	if (lastUserMsg) {
-		await saveMessage(ctx.admin, conversationId, 'user', lastUserMsg.content);
+		await saveMessage(ctx.admin, conversationId, ctx.userId, 'user', lastUserMsg.content);
 	}
 
 	const systemPrompt = buildSystemPrompt(ctx.profile, ctx.org);
@@ -110,11 +108,9 @@ export async function streamChatResponse(
 				controller.close();
 			}
 
-			// After stream closes: persist reply and update counters (fire-and-forget)
 			if (assistantText) {
-				saveMessage(ctx.admin, conversationId, 'assistant', assistantText);
+				saveMessage(ctx.admin, conversationId, ctx.userId, 'assistant', assistantText);
 			}
-			incrementMessageCounter(ctx);
 			if (ctx.profile.org_id) {
 				incrementStudentActivity(ctx.admin, ctx.userId, ctx.profile.org_id);
 			}

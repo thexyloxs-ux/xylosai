@@ -128,12 +128,15 @@
 						country,
 						curriculum,
 						seatLimit: SEAT_LIMIT[studentCount] ?? 30,
-					})
+						completeOnboarding: true,
+					}),
 				});
+
 				if (!res.ok) {
 					const body = await res.json().catch(() => ({}));
 					throw new Error(body.message || 'Could not set up your school');
 				}
+
 				goto('/dashboard');
 			} else {
 				const { error: profErr } = await supabase.from('profiles').update({
