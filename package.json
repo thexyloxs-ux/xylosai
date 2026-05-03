@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"@openuidev/svelte-lang": "^0.1.1",
+		"@react-email/render": "^2.0.8",
 		"@supabase/ssr": "^0.10.2",
 		"@supabase/supabase-js": "^2.103.0",
 		"@types/marked": "^5.0.2",

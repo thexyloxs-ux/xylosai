@@ -36,6 +36,9 @@
 						? 'XYLO School'
 						: 'XYLO Standard'
 	);
+	const isFreePlan = $derived(!profile?.plan || profile.plan === 'free');
+	const planStatusLabel = $derived(profile?.plan_status || (isFreePlan ? 'limited' : 'active'));
+	const organizationStatusLabel = $derived(organization?.plan_status || 'trialing');
 
 	function toggleSubject(s: string) {
 		if (selectedSubjects.includes(s)) {
@@ -234,7 +237,7 @@
 						<div class="section-head">
 							<p class="eyebrow">Plan</p>
 							<h1 class="section-title">Membership</h1>
-							<p class="section-desc">Your current plan and daily usage.</p>
+							<p class="section-desc">Your current plan, billing status, and usage access.</p>
 						</div>
 
 						<div class="card billing-card">
@@ -242,17 +245,30 @@
 								<div>
 									<span class="plan-badge">{profile?.plan?.toUpperCase() || 'FREE'}</span>
 									<p class="plan-name">{planName}</p>
-									<p class="plan-reset">Resets daily at midnight</p>
+									<p class="plan-reset">
+										{#if isFreePlan}
+											Free usage resets daily at midnight
+										{:else}
+											Status: {planStatusLabel}
+										{/if}
+									</p>
 								</div>
-								<div class="meter-wrap">
-									<div class="meter-labels">
-										<span>Daily messages</span>
-										<span>{profile?.messages_today || 0} / 20</span>
+								{#if isFreePlan}
+									<div class="meter-wrap">
+										<div class="meter-labels">
+											<span>Daily messages</span>
+											<span>{profile?.messages_today || 0} / 20</span>
+										</div>
+										<div class="meter-rail">
+											<div class="meter-fill" style="width: {Math.min(((profile?.messages_today || 0) / 20) * 100, 100)}%"></div>
+										</div>
 									</div>
-									<div class="meter-rail">
-										<div class="meter-fill" style="width: {Math.min(((profile?.messages_today || 0) / 20) * 100, 100)}%"></div>
+								{:else}
+									<div class="unlimited-card">
+										<span>Unlimited messages</span>
+										<strong>No daily cap</strong>
 									</div>
-								</div>
+								{/if}
 							</div>
 						</div>
 
@@ -262,7 +278,44 @@
 									<h3>Upgrade your plan</h3>
 									<p>Unlimited messages, full history, and advanced exam tools.</p>
 								</div>
-								<a href="/pricing" class="btn-primary">View paid plans</a>
+								<div class="billing-actions">
+									<a href="/api/paystack/initialize?plan=plus" class="btn-primary">Upgrade to Plus</a>
+									<a href="/api/paystack/initialize?plan=pro" class="btn-secondary">Upgrade to Pro</a>
+								</div>
+							</div>
+						{:else}
+							<div class="upgrade-card">
+								<div class="upgrade-text">
+									<h3>Manage membership</h3>
+									<p>
+										{#if profile?.plan === 'plus'}
+											Move to Pro for study plan and exam drill tools, or contact billing to change or cancel.
+										{:else}
+											Contact billing to change your plan, update payment details, or cancel at period end.
+										{/if}
+									</p>
+								</div>
+								<div class="billing-actions">
+									{#if profile?.plan === 'plus'}
+										<a href="/api/paystack/initialize?plan=pro" class="btn-primary">Upgrade to Pro</a>
+									{/if}
+									<a href="mailto:billing@xyloxs.com?subject=Manage%20my%20XYLO%20membership" class="btn-secondary">Contact billing</a>
+								</div>
+							</div>
+						{/if}
+
+						{#if profile?.role === 'school_admin'}
+							<div class="upgrade-card school-billing">
+								<div class="upgrade-text">
+									<h3>School billing</h3>
+									<p>School status: {organizationStatusLabel}. Student access stays private while billing is managed by the school admin.</p>
+								</div>
+								<div class="billing-actions">
+									{#if organizationStatusLabel !== 'active'}
+										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate school billing</a>
+									{/if}
+									<a href="mailto:schools@xyloxs.com?subject=Manage%20XYLO%20school%20billing" class="btn-secondary">School billing help</a>
+								</div>
 							</div>
 						{/if}
 					{/if}
@@ -637,6 +690,28 @@
 		transition: width 0.4s;
 	}
 
+	.unlimited-card {
+		min-width: 220px;
+		padding: 0.875rem 1rem;
+		background: oklch(96% 0.04 80);
+		border: 1px solid oklch(85% 0.06 78);
+		border-radius: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		color: var(--amber-deep);
+	}
+	.unlimited-card span {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+	.unlimited-card strong {
+		font-size: 1rem;
+		color: var(--ink);
+	}
+
 	.upgrade-card {
 		background: oklch(100% 0 0 / 0.62);
 		backdrop-filter: blur(20px) saturate(140%);
@@ -661,6 +736,13 @@
 		margin-bottom: 0.25rem;
 	}
 	.upgrade-text p { font-size: 0.875rem; color: var(--ink-3); }
+	.billing-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+	.school-billing { margin-top: 1rem; }
 
 	/* ── Buttons ── */
 	.btn-primary {
@@ -681,6 +763,24 @@
 	}
 	.btn-primary:hover { background: var(--amber-deep); }
 	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.625rem 1.375rem;
+		background: transparent;
+		color: var(--ink-2);
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		cursor: pointer;
+		text-decoration: none;
+		transition: border-color 0.12s, color 0.12s, background 0.12s;
+	}
+	.btn-secondary:hover { border-color: var(--ink-3); color: var(--ink); background: var(--cream-warm); }
 
 	.btn-ghost {
 		display: inline-flex;
@@ -743,5 +843,8 @@
 		.field-row { grid-template-columns: 1fr; }
 		.plan-row { flex-direction: column; align-items: flex-start; }
 		.meter-wrap { width: 100%; }
+		.unlimited-card { width: 100%; }
+		.billing-actions { width: 100%; }
+		.billing-actions .btn-primary, .billing-actions .btn-secondary { width: 100%; }
 	}
 </style>

@@ -21,6 +21,9 @@
 	let sidebarOpen = $state(false);
 
 	let conversationId = $state<string | null>(null);
+	const hasProTools = $derived(
+		profile?.plan === 'pro' || profile?.plan === 'school' || profile?.role === 'school_admin'
+	);
 
 	async function loadConversation(id: string) {
 		if (fetchingHistory || id === conversationId) return;
@@ -106,11 +109,24 @@
 		if (chatWindow) chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
 	}
 
+	function runSuggestion(text: string, requiresPro = false) {
+		if (requiresPro && !hasProTools) {
+			goto('/pricing');
+			return;
+		}
+		input = text;
+		sendMessage();
+	}
+
 	const suggestions = [
 		"Explain photosynthesis like I'm 10",
-		"Give me a WAEC Biology study plan",
 		"Quiz me on English grammar for BECE",
 		"How does the kidney work?"
+	];
+	const proSuggestions = [
+		"Build me a 14-day WAEC Biology study plan with daily targets",
+		"Run a timed WAEC Chemistry exam drill and mark my answers",
+		"Create an exam countdown plan for Mathematics and English"
 	];
 </script>
 
@@ -203,11 +219,26 @@
 					<p class="empty-sub">Ask me anything — or pick a suggestion below.</p>
 					<div class="suggestions">
 						{#each suggestions as s, i}
-							<button class="suggestion" onclick={() => { input = s; sendMessage(); }}>
+							<button class="suggestion" onclick={() => runSuggestion(s)}>
 								<span class="sug-num">{String(i + 1).padStart(2, '0')}</span>
 								<span>{s}</span>
 							</button>
 						{/each}
+					</div>
+					<div class="pro-tools">
+						<div class="tool-section-head">
+							<span>Pro tools</span>
+							{#if !hasProTools}<a href="/pricing">Upgrade</a>{/if}
+						</div>
+						<div class="suggestions">
+							{#each proSuggestions as s, i}
+								<button class="suggestion pro-suggestion" class:locked={!hasProTools} onclick={() => runSuggestion(s, true)}>
+									<span class="sug-num">{String(i + 1).padStart(2, '0')}</span>
+									<span>{s}</span>
+									{#if !hasProTools}<small>Pro</small>{/if}
+								</button>
+							{/each}
+						</div>
 					</div>
 				</div>
 			{/if}
@@ -569,6 +600,43 @@
 		width: 100%;
 	}
 	.suggestion:hover { color: var(--ink); padding-left: 0.375rem; }
+	.pro-tools {
+		margin-top: 1.75rem;
+	}
+	.tool-section-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.375rem;
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+	}
+	.tool-section-head a {
+		color: var(--amber-deep);
+		text-decoration: none;
+	}
+	.pro-suggestion {
+		align-items: center;
+	}
+	.pro-suggestion small {
+		margin-left: auto;
+		padding: 0.1875rem 0.5rem;
+		border: 1px solid oklch(85% 0.06 78);
+		border-radius: 999px;
+		background: oklch(96% 0.04 80);
+		color: var(--amber-deep);
+		font-size: 0.625rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+	.pro-suggestion.locked {
+		color: var(--ink-3);
+	}
 	.sug-num {
 		font-family: 'Fraunces', Georgia, serif;
 		font-optical-sizing: auto;

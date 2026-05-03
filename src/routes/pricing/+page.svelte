@@ -11,7 +11,7 @@
 		],
 		plus: [
 			'Unlimited AI messages',
-			'All core study modes',
+			'Understand, Quiz & Exam Prep modes',
 			'Full conversation history',
 			'Personalized academic focus',
 			'Everything in Free',
@@ -32,13 +32,13 @@
 		'Student engagement analytics',
 		'Invite-code onboarding',
 		'Student conversations stay private',
-		'Billed per active student seat',
+		'Billing activation from the school admin dashboard',
 	];
 
 	const faqs = [
 		{
 			q: 'Can I upgrade or cancel anytime?',
-			a: 'Yes. Cancel or change your plan at any time. If you cancel a paid plan, you keep access until the end of your billing period, then revert to Free automatically.',
+			a: 'Yes. You can upgrade from Settings. For cancellations or billing changes, contact billing and your paid access stays active until the end of the billing period.',
 		},
 		{
 			q: 'What payment methods are accepted?',
@@ -46,7 +46,7 @@
 		},
 		{
 			q: 'How does the school seat limit work?',
-			a: "A seat is a student who sends at least one message in a billing cycle. If a student is inactive that month, they don't count against your limit.",
+			a: 'School admins start with invite-code onboarding and activate school billing from their dashboard when the school is ready to go live.',
 		},
 		{
 			q: 'Is there a free trial for the school plan?',
@@ -179,8 +179,8 @@
 				a dashboard that shows engagement without ever reading their conversations.
 			</p>
 			<div class="school-price-block">
-				<span class="school-price">Per active student seat</span>
-				<span class="school-price-note">14-day free trial · no credit card</span>
+				<span class="school-price">School billing from the dashboard</span>
+				<span class="school-price-note">14-day onboarding trial · activate billing when ready</span>
 			</div>
 			<div class="school-actions">
 				<a href="/auth/signup?type=school" class="plan-btn primary">
