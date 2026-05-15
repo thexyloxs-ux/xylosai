@@ -3,7 +3,7 @@ import { RESEND_API_KEY } from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
 
 const resend = new Resend(RESEND_API_KEY);
-const FROM = 'XYLO <hello@xyloxs.com>';
+const FROM = 'XYLO <hello@xyloss.tech>';
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ function shell(preview: string, body: string) {
           <tr>
             <td style="padding-top:32px;border-top:1px solid #1e2336;">
               <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.6;">
-                © 2026 Xyloxs Ltd · Smarter Learning. Stronger Students. Better Outcomes.
+                © 2026 XYLO · Smarter Learning. Stronger Students. Better Outcomes.
               </p>
             </td>
           </tr>
@@ -162,7 +162,7 @@ What you can do:
 You have 20 free messages every day. Upgrade to Pro: ${PUBLIC_APP_URL}/pricing
 
 Unsubscribe: ${unsubUrl}
-© 2026 Xyloxs Ltd`;
+© 2026 XYLO`;
 
 	await resend.emails.send({
 		from: FROM,
@@ -234,7 +234,7 @@ ${schoolName} pays for your subscription, so you get unlimited access at no cost
 
 Activate your account: ${inviteUrl}
 
-© 2026 Xyloxs Ltd`;
+© 2026 XYLO`;
 
 	await resend.emails.send({
 		from: FROM,
@@ -291,7 +291,7 @@ Your payment has been confirmed and your plan is now active.
 
 Manage your membership: ${settingsUrl}
 
-© 2026 Xyloxs Ltd`;
+© 2026 XYLO`;
 
 	await resend.emails.send({
 		from: FROM,
@@ -341,7 +341,7 @@ Paystack has confirmed the cancellation request. Your account status has been up
 
 Review membership: ${settingsUrl}
 
-© 2026 Xyloxs Ltd`;
+© 2026 XYLO`;
 
 	await resend.emails.send({
 		from: FROM,
