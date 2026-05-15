@@ -17,6 +17,7 @@
 	let input = $state('');
 	let loading = $state(false);
 	let fetchingHistory = $state(false);
+	let historyError = $state(false);
 	let chatWindow: HTMLElement;
 	let sidebarOpen = $state(false);
 
@@ -28,6 +29,7 @@
 	async function loadConversation(id: string) {
 		if (fetchingHistory || id === conversationId) return;
 		fetchingHistory = true;
+		historyError = false;
 		conversationId = id;
 		messages = [];
 		sidebarOpen = false;
@@ -39,6 +41,7 @@
 			scrollToBottom();
 		} catch (err) {
 			console.error('History error:', err);
+			historyError = true;
 		} finally {
 			fetchingHistory = false;
 		}
@@ -162,9 +165,14 @@
 						class="history-item"
 						class:active={conversationId === conv.id}
 						onclick={() => loadConversation(conv.id)}
+						disabled={fetchingHistory}
 					>
 						<span class="conv-title">{conv.title}</span>
-						<span class="conv-date">{new Date(conv.last_message_at).toLocaleDateString()}</span>
+						{#if fetchingHistory && conversationId === conv.id}
+							<span class="hist-spinner" aria-label="Loading"></span>
+						{:else}
+							<span class="conv-date">{new Date(conv.last_message_at).toLocaleDateString()}</span>
+						{/if}
 					</button>
 				{:else}
 					{#if conversationId}
@@ -221,7 +229,27 @@
 
 		<!-- Chat window -->
 		<div class="chat-window" bind:this={chatWindow}>
-			{#if messages.length === 0}
+			{#if fetchingHistory}
+				<div class="history-loading" aria-busy="true" aria-label="Loading conversation">
+					{#each [1, 2, 3] as _}
+						<div class="msg-row assistant">
+							<div class="msg-avatar-ai skeleton"></div>
+							<div class="bubble assistant skeleton-bubble"></div>
+						</div>
+						<div class="msg-row user">
+							<div class="bubble user skeleton-bubble short"></div>
+						</div>
+					{/each}
+				</div>
+			{:else if historyError}
+				<div class="history-err-state">
+					<p class="history-err-heading">Couldn't load conversation</p>
+					<p class="history-err-sub">Check your connection, then try again.</p>
+					<button class="history-err-retry" onclick={() => { historyError = false; if (conversationId) loadConversation(conversationId); }}>
+						Retry
+					</button>
+				</div>
+			{:else if messages.length === 0}
 				<div class="empty-state">
 					<h1 class="empty-heading">What are we studying today?</h1>
 					<p class="empty-sub">Ask me anything — or pick a suggestion below.</p>
@@ -895,4 +923,76 @@
 		white-space: nowrap;
 		border: 0;
 	}
+
+	/* ── History loading spinner (sidebar item) ── */
+	.hist-spinner {
+		display: inline-block;
+		width: 12px; height: 12px;
+		border: 1.5px solid oklch(72% 0.185 72 / 0.3);
+		border-top-color: oklch(72% 0.185 72);
+		border-radius: 50%;
+		animation: spin 0.7s linear infinite;
+		flex-shrink: 0;
+	}
+	@keyframes spin { to { transform: rotate(360deg); } }
+
+	/* ── Skeleton loading (history fetch) ── */
+	.history-loading {
+		padding: 2rem 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+	@keyframes shimmer {
+		0%   { opacity: 0.5; }
+		50%  { opacity: 1; }
+		100% { opacity: 0.5; }
+	}
+	.skeleton {
+		background: oklch(87% 0.028 78);
+		animation: shimmer 1.4s ease-in-out infinite;
+	}
+	.skeleton-bubble {
+		height: 2.75rem;
+		width: 65%;
+		border-radius: 1rem;
+		background: oklch(87% 0.028 78);
+		animation: shimmer 1.4s ease-in-out infinite;
+	}
+	.skeleton-bubble.short { width: 40%; height: 2rem; }
+
+	/* ── History error state ── */
+	.history-err-state {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 4rem 2rem;
+		text-align: center;
+	}
+	.history-err-heading {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--ink);
+		margin: 0;
+	}
+	.history-err-sub {
+		font-size: 0.8125rem;
+		color: var(--ink-3);
+		margin: 0;
+	}
+	.history-err-retry {
+		margin-top: 0.5rem;
+		padding: 0.4rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--ink-2);
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+	.history-err-retry:hover { background: oklch(87% 0.028 78 / 0.5); }
 </style>
