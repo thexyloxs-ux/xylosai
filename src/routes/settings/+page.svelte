@@ -54,6 +54,9 @@
 		codeCopied = true;
 		setTimeout(() => { codeCopied = false; }, 2000);
 	}
+
+	let deleteConfirm = $state('');
+	let deleting = $state(false);
 </script>
 
 <svelte:head>
@@ -326,6 +329,50 @@
 							</div>
 						{/if}
 					{/if}
+
+					<!-- ── Danger zone ── -->
+					<div class="danger-zone">
+						<div class="danger-zone-head">
+							<h2 class="danger-zone-title">Danger zone</h2>
+							<p class="danger-zone-sub">
+								This permanently deletes your account, all conversations, and associated data.
+								{#if !isFreePlan}
+									You have an active paid plan — <strong>cancel it on Paystack first</strong> to stop future charges before deleting.
+								{/if}
+							</p>
+						</div>
+						<form
+							method="POST"
+							action="?/deleteAccount"
+							use:enhance={() => {
+								deleting = true;
+								return ({ result }) => {
+									if (result.type !== 'redirect') deleting = false;
+								};
+							}}
+						>
+							<div class="delete-confirm-row">
+								<label class="delete-confirm-label" for="deleteConfirm">
+									Type <strong>DELETE</strong> to confirm
+								</label>
+								<input
+									id="deleteConfirm"
+									class="delete-confirm-input"
+									type="text"
+									autocomplete="off"
+									bind:value={deleteConfirm}
+									placeholder="DELETE"
+								/>
+							</div>
+							<button
+								type="submit"
+								class="btn-delete"
+								disabled={deleteConfirm !== 'DELETE' || deleting}
+							>
+								{#if deleting}Deleting…{:else}Delete my account{/if}
+							</button>
+						</form>
+					</div>
 
 					{#if form?.message}
 						<div class="toast" class:toast-error={!form?.success}>{form.message}</div>
@@ -864,4 +911,64 @@
 		.billing-actions { width: 100%; }
 		.billing-actions .btn-primary, .billing-actions .btn-secondary { width: 100%; }
 	}
+
+	/* ── Danger zone ── */
+	.danger-zone {
+		margin-top: 2.5rem;
+		padding: 1.5rem;
+		border: 1px solid oklch(62% 0.18 25 / 0.35);
+		border-radius: 0.75rem;
+		background: oklch(98% 0.01 25 / 0.5);
+	}
+	.danger-zone-head { margin-bottom: 1.25rem; }
+	.danger-zone-title {
+		font-size: 0.9375rem;
+		font-weight: 700;
+		color: oklch(40% 0.18 25);
+		margin: 0 0 0.35rem;
+	}
+	.danger-zone-sub {
+		font-size: 0.8125rem;
+		color: var(--ink-2);
+		margin: 0;
+		line-height: 1.55;
+	}
+	.delete-confirm-row {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		margin-bottom: 1rem;
+	}
+	.delete-confirm-label {
+		font-size: 0.8125rem;
+		color: var(--ink-2);
+	}
+	.delete-confirm-input {
+		width: 200px;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid oklch(62% 0.18 25 / 0.4);
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		background: white;
+		color: var(--ink);
+		outline: none;
+	}
+	.delete-confirm-input:focus { border-color: oklch(50% 0.18 25); }
+	.btn-delete {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.6rem 1.25rem;
+		background: oklch(50% 0.18 25);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.12s, opacity 0.12s;
+	}
+	.btn-delete:hover:not(:disabled) { background: oklch(42% 0.18 25); }
+	.btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

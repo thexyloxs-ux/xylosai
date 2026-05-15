@@ -1,4 +1,6 @@
 import { redirect, fail } from '@sveltejs/kit';
+import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { logger } from '$lib/server/logger';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -83,5 +85,20 @@ export const actions: Actions = {
 		if (error) return fail(500, { message: error.message });
 
 		return { success: true, message: 'Organization updated successfully' };
+	},
+
+	deleteAccount: async ({ locals }) => {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) return fail(401);
+
+		const admin = createSupabaseAdminClient();
+		const { error } = await admin.auth.admin.deleteUser(user.id);
+
+		if (error) {
+			logger.error({ err: error, userId: user.id }, 'Account deletion failed');
+			return fail(500, { message: 'Could not delete account. Please try again or contact support.' });
+		}
+
+		throw redirect(303, '/?deleted=1');
 	}
 };
