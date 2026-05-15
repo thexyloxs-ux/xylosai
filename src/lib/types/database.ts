@@ -45,6 +45,7 @@ export interface Database {
 					messages_today: number;
 					messages_today_reset_at: string;
 					onboarded: boolean;
+					marketing_emails: boolean;
 					created_at: string;
 				};
 				Insert: {
@@ -62,6 +63,7 @@ export interface Database {
 					messages_today?: number;
 					messages_today_reset_at?: string;
 					onboarded?: boolean;
+					marketing_emails?: boolean;
 					created_at?: string;
 				};
 				Update: Partial<Database['public']['Tables']['profiles']['Insert']>;

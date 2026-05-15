@@ -30,6 +30,9 @@ async function paystackFetch(path: string, options: RequestInit = {}) {
 			...options.headers
 		}
 	});
+	if (!res.ok) {
+		throw new Error(`Paystack ${options.method ?? 'GET'} ${path} failed: ${res.status}`);
+	}
 	return res.json();
 }
 
