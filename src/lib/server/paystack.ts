@@ -77,7 +77,11 @@ export async function createSubscriptionManageLink(code: string): Promise<string
 	return data.data.link;
 }
 
-export function verifyWebhookSignature(body: string, signature: string): boolean {
-	const hash = createHmac('sha512', PAYSTACK_SECRET_KEY).update(body).digest('hex');
+export function verifyHmac(body: string, signature: string, secret: string): boolean {
+	const hash = createHmac('sha512', secret).update(body).digest('hex');
 	return hash === signature;
+}
+
+export function verifyWebhookSignature(body: string, signature: string): boolean {
+	return verifyHmac(body, signature, PAYSTACK_SECRET_KEY);
 }

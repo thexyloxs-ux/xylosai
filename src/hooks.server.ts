@@ -3,33 +3,12 @@ import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import type { Database } from '$lib/types/database';
+import { checkRateLimit } from '$lib/server/rate-limit';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 // In-memory sliding-window limiter. Works for single-instance deployments.
 // For multi-instance production scale, replace `checkRateLimit` with
 // @upstash/ratelimit backed by Upstash Redis.
-
-interface RateLimitEntry {
-	count: number;
-	resetAt: number;
-}
-
-const store = new Map<string, RateLimitEntry>();
-
-function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
-	const now = Date.now();
-	const entry = store.get(key);
-
-	if (!entry || now > entry.resetAt) {
-		store.set(key, { count: 1, resetAt: now + windowMs });
-		return true;
-	}
-
-	if (entry.count >= limit) return false;
-
-	entry.count++;
-	return true;
-}
 
 // Rules applied in order — first match wins
 const RATE_RULES: Array<{ test: (path: string) => boolean; limit: number; windowMs: number; key: string }> = [
