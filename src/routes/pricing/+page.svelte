@@ -65,6 +65,15 @@
 <svelte:head>
 	<title>Pricing — XYLO</title>
 	<meta name="description" content="Start free. Upgrade when you're ready. XYLO keeps it simple." />
+	<meta property="og:title" content="Pricing — XYLO" />
+	<meta property="og:description" content="Start free. Upgrade when you're ready. XYLO keeps it simple." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://xyloss.tech/pricing" />
+	<meta property="og:image" content="https://xyloss.tech/og-image.png" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Pricing — XYLO" />
+	<meta name="twitter:description" content="Start free. Upgrade when you're ready. XYLO keeps it simple." />
+	<link rel="canonical" href="https://xyloss.tech/pricing" />
 </svelte:head>
 
 <div class="lp">

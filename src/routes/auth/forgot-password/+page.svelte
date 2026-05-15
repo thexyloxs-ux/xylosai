@@ -26,6 +26,7 @@
 
 <svelte:head>
 	<title>Forgot password — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div class="auth-page">

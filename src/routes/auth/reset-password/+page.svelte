@@ -35,6 +35,7 @@
 
 <svelte:head>
 	<title>Set new password — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div class="auth-page">

@@ -58,6 +58,7 @@
 
 <svelte:head>
 	<title>Settings — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div class="page">

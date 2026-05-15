@@ -57,6 +57,16 @@
 <svelte:head>
 	<title>XYLO — AI Study Companion for African Students</title>
 	<meta name="description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
+	<meta property="og:title" content="XYLO — AI Study Companion for African Students" />
+	<meta property="og:description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://xyloss.tech" />
+	<meta property="og:image" content="https://xyloss.tech/og-image.png" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="XYLO — AI Study Companion for African Students" />
+	<meta name="twitter:description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
+	<meta name="twitter:image" content="https://xyloss.tech/og-image.png" />
+	<link rel="canonical" href="https://xyloss.tech" />
 </svelte:head>
 
 <div class="lp">

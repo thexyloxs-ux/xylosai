@@ -77,6 +77,7 @@
 
 <svelte:head>
 	<title>{isSchool ? 'Register your school' : 'Create account'} — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div class="auth-page">

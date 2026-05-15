@@ -5,7 +5,7 @@
 	import type { Conversation, Organization, Profile } from '$lib/types/database';
 
 	const { data } = $props<{
-		data: App.PageData & { profile: Profile | null; organization: Organization | null; conversations: any[] };
+		data: App.PageData & { profile: Profile | null; organization: Organization | null; conversations: Conversation[] };
 	}>();
 	const profile = $derived(data.profile);
 	let conversations = $state<Conversation[]>([]);
@@ -35,7 +35,7 @@
 			const res = await fetch(`/api/conversations/${id}/messages`);
 			if (!res.ok) throw new Error('Failed to fetch history');
 			const { messages: history } = await res.json();
-			messages = history.map((m: any) => ({ role: m.role, content: m.content }));
+			messages = history.map((m: { role: 'user' | 'assistant'; content: string }) => ({ role: m.role, content: m.content }));
 			scrollToBottom();
 		} catch (err) {
 			console.error('History error:', err);
@@ -89,7 +89,7 @@
 			const reader = response.body.getReader();
 			const decoder = new TextDecoder();
 			messages.push({ role: 'assistant', content: '' });
-			let lastIdx = messages.length - 1;
+			const lastIdx = messages.length - 1;
 
 			while (true) {
 				const { done, value } = await reader.read();
@@ -132,6 +132,7 @@
 
 <svelte:head>
 	<title>Chat — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <!-- Mobile sidebar overlay -->
@@ -209,6 +210,13 @@
 			<button class="new-chat-mobile" onclick={startNewChat} aria-label="New chat">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
 			</button>
+		</div>
+
+		<!-- Screen reader live region: announces the last AI response -->
+		<div aria-live="polite" aria-atomic="true" class="sr-only">
+			{#if !loading && messages.at(-1)?.role === 'assistant'}
+				{messages.at(-1)?.content}
+			{/if}
 		</div>
 
 		<!-- Chat window -->
@@ -876,5 +884,15 @@
 		.suggestions { gap: 0; }
 		.mode-bar { overflow-x: auto; max-width: 100%; }
 		.input-area { padding: 0.75rem 1rem 1.25rem; }
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px; height: 1px;
+		padding: 0; margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

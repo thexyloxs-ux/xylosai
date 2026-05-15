@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import type { Organization, StudentWithActivity } from '$lib/types/database';
 
-	const { data } = $props<{ data: App.PageData & { org: any; students: any[] } }>();
+	const { data } = $props<{ data: App.PageData & { org: Organization | null; students: StudentWithActivity[] } }>();
 	const org = $derived(data.org);
 
-	let students = $state<any[]>([]);
+	let students = $state<StudentWithActivity[]>([]);
 	$effect(() => { students = data.students; });
 
-	let totalStudents = $derived(students.length);
-	let activeToday = $derived(students.filter((s) => s.messages_today > 0).length);
-	let activeThisWeek = $derived(students.filter((s) => s.messages_this_week > 0).length);
-	let totalMessagesToday = $derived(students.reduce((sum: number, s) => sum + (s.messages_today || 0), 0));
-	let weeklyEngagement = $derived(totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0);
+	const totalStudents = $derived(students.length);
+	const activeToday = $derived(students.filter((s) => s.messages_this_week > 0 || s.last_active?.startsWith(new Date().toISOString().slice(0, 10))).length);
+	const activeThisWeek = $derived(students.filter((s) => s.messages_this_week > 0).length);
+	const totalMessagesToday = $derived(students.reduce((sum, s) => sum + (s.messages_this_week || 0), 0));
+	const weeklyEngagement = $derived(totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0);
 
 	let codeCopied = $state(false);
 	function copyInviteCode() {
@@ -46,6 +47,7 @@
 
 <svelte:head>
 	<title>{org?.name || 'School'} Dashboard — XYLO</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div class="dash">
