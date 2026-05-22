@@ -2,6 +2,9 @@
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
+	const { data } = $props<{ data: App.PageData & { billingAvailability?: { plus?: boolean; pro?: boolean; school?: boolean } } }>();
+	const billingAvailability = $derived(data.billingAvailability ?? { plus: false, pro: false, school: false });
+
 	const studentFeatures = {
 		free: [
 			'20 AI messages per day — forever',
@@ -134,10 +137,14 @@
 				{/each}
 			</ul>
 			<div class="plan-cta">
-				<a href="/api/paystack/initialize?plan=plus" class="plan-btn primary">
-					Upgrade to Plus
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-				</a>
+				{#if billingAvailability.plus}
+					<a href="/api/paystack/initialize?plan=plus" class="plan-btn primary">
+						Upgrade to Plus
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+					</a>
+				{:else}
+					<div class="plan-btn primary disabled">Plus checkout coming soon</div>
+				{/if}
 			</div>
 		</div>
 
@@ -160,16 +167,27 @@
 				{/each}
 			</ul>
 			<div class="plan-cta">
-				<a href="/api/paystack/initialize?plan=pro" class="plan-btn secondary">
-					Upgrade to Pro
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-				</a>
+				{#if billingAvailability.pro}
+					<a href="/api/paystack/initialize?plan=pro" class="plan-btn secondary">
+						Upgrade to Pro
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+					</a>
+				{:else}
+					<div class="plan-btn secondary disabled">Pro checkout coming soon</div>
+				{/if}
 			</div>
 		</div>
 
 	</div>
 
-	<p class="plans-note">Prices shown in Nigerian Naira. Payments via Paystack — card, transfer, or mobile money.</p>
+	<p class="plans-note">
+		Prices shown in Nigerian Naira.
+		{#if billingAvailability.plus && billingAvailability.pro}
+			Payments via Paystack — card, transfer, or mobile money.
+		{:else}
+			Checkout is still being configured right now.
+		{/if}
+	</p>
 </section>
 
 <!-- ── Divider ── -->
@@ -512,6 +530,11 @@
 	border: 1px solid var(--border);
 }
 .plan-btn.secondary:hover { border-color: var(--ink-3); color: var(--ink); }
+.plan-btn.disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+	pointer-events: none;
+}
 
 .plans-note {
 	font-size: 0.8125rem;

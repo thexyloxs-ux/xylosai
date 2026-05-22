@@ -3,10 +3,17 @@ import type { Database } from '$lib/types/database';
 
 type AdminClient = SupabaseClient<Database>;
 
+function titleFromMessage(message: string): string {
+	const trimmed = message.trim();
+	if (!trimmed) return 'New conversation';
+
+	return trimmed.length > 40 ? `${trimmed.slice(0, 40)}...` : trimmed;
+}
+
 export async function getOrCreateConversation(
 	admin: AdminClient,
 	userId: string,
-	opts: { conversationId?: string }
+	opts: { conversationId?: string; initialUserMessage?: string }
 ): Promise<string> {
 	if (opts.conversationId) {
 		const { data, error } = await admin
@@ -24,7 +31,7 @@ export async function getOrCreateConversation(
 		.from('conversations')
 		.insert({
 			user_id: userId,
-			title: `Chat - ${new Date().toLocaleDateString()}`,
+			title: titleFromMessage(opts.initialUserMessage ?? ''),
 		})
 		.select('id')
 		.single();
@@ -40,7 +47,7 @@ export async function saveMessage(
 	role: 'user' | 'assistant',
 	content: string
 ): Promise<void> {
-	await Promise.all([
+	const [messageResult, conversationResult] = await Promise.all([
 		admin.from('messages').insert({ conversation_id: conversationId, role, content }),
 		admin
 			.from('conversations')
@@ -48,4 +55,14 @@ export async function saveMessage(
 			.eq('id', conversationId)
 			.eq('user_id', userId),
 	]);
+
+	if (messageResult.error) {
+		throw new Error(`Failed to save ${role} message: ${messageResult.error.message}`);
+	}
+
+	if (conversationResult.error) {
+		throw new Error(`Failed to update conversation timestamp: ${conversationResult.error.message}`);
+	}
 }
+
+export { titleFromMessage };

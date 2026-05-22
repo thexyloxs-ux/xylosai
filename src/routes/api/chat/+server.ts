@@ -37,13 +37,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	if (!profile) throw error(403, 'Profile not found');
 
-	try {
-		enforceRateLimit(profile);
-	} catch (e) {
-		if (e instanceof RateLimitError) throw error(403, e.message);
-		throw e;
-	}
-
 	let org = null;
 	if (profile.org_id) {
 		const { data } = await locals.supabase
@@ -52,6 +45,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.eq('id', profile.org_id)
 			.single();
 		org = data;
+	}
+
+	try {
+		enforceRateLimit(profile, org);
+	} catch (e) {
+		if (e instanceof RateLimitError) throw error(403, e.message);
+		throw e;
 	}
 
 	try {
@@ -70,6 +70,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : 'AI processing failed';
 		logger.error({ err, userId: user.id }, 'Chat stream failed');
+		if (msg.includes('No AI providers configured')) {
+			throw error(503, 'AI is not configured yet. Add a valid GROQ_API_KEY or GEMINI_API_KEY.');
+		}
 		throw error(500, msg);
 	}
 };

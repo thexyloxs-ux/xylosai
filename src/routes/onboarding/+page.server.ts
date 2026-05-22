@@ -1,4 +1,6 @@
 import { redirect } from '@sveltejs/kit';
+import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { ensureProfileForUser } from '$lib/server/profile';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -6,11 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	if (!session || !user) throw redirect(302, '/auth/login');
 
-	const { data: profile } = await locals.supabase
-		.from('profiles')
-		.select('*')
-		.eq('id', user.id)
-		.single();
+	const profile = await ensureProfileForUser(createSupabaseAdminClient(), user);
 
 	if (profile?.onboarded) {
 		if (profile.role === 'school_admin') throw redirect(302, '/dashboard');

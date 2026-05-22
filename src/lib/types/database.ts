@@ -200,10 +200,12 @@ export type SessionType = 'understand' | 'quiz' | 'study_plan' | 'exam_prep';
 export interface StudentWithActivity {
 	id: string;
 	full_name: string | null;
-	email: string;
+	email: string | null;
+	level: string | null;
+	curriculum: string | null;
+	messages_today: number;
 	messages_this_week: number;
 	last_active: string | null;
-	status: 'Active' | 'Inactive' | 'New';
 }
 
 export interface DashboardOverview {

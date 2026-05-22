@@ -1,3 +1,5 @@
+import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { ensureProfileForUser } from '$lib/server/profile';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -6,12 +8,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	// Fetch profile if user is logged in
 	let profile = null;
 	if (user) {
-		const { data } = await locals.supabase
-			.from('profiles')
-			.select('*')
-			.eq('id', user.id)
-			.single();
-		profile = data;
+		profile = await ensureProfileForUser(createSupabaseAdminClient(), user);
 	}
 
 	return { session, user, profile };

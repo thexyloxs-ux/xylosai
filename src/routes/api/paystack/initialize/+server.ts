@@ -5,8 +5,19 @@ import {
 	PAYSTACK_PRO_PLAN_CODE,
 	PAYSTACK_SCHOOL_PLAN_CODE,
 } from '$env/static/private';
-import { PUBLIC_APP_URL } from '$env/static/public';
 import type { RequestHandler } from './$types';
+
+function isConfiguredPlanCode(value: string | undefined): value is string {
+	if (!value) return false;
+
+	const normalized = value.trim().toLowerCase();
+	return (
+		normalized.length > 0 &&
+		!normalized.includes('placeholder') &&
+		!normalized.includes('your_') &&
+		!normalized.includes('_here')
+	);
+}
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const { session, user } = await locals.safeGetSession();
@@ -33,6 +44,20 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		throw error(400, 'User email is required');
 	}
 
+	const { data: profile } = await locals.supabase
+		.from('profiles')
+		.select('role, org_id')
+		.eq('id', user.id)
+		.single();
+
+	if (!profile) {
+		throw error(403, 'Profile not found');
+	}
+
+	if (planType === 'school' && (profile.role !== 'school_admin' || !profile.org_id)) {
+		throw error(403, 'Only school admins can activate school billing.');
+	}
+
 	const planCode =
 		planType === 'school'
 			? PAYSTACK_SCHOOL_PLAN_CODE
@@ -40,8 +65,8 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 				? PAYSTACK_PRO_PLAN_CODE
 				: PAYSTACK_PLUS_PLAN_CODE;
 
-	if (!planCode) {
-		throw error(400, 'Plan not configured');
+	if (!isConfiguredPlanCode(planCode)) {
+		throw error(400, `Paystack ${planType} plan is not configured yet.`);
 	}
 
 	try {
@@ -52,7 +77,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 				userId: user.id,
 				planType
 			},
-			callbackUrl: `${PUBLIC_APP_URL}/settings?success=true`
+			callbackUrl: `${url.origin}/api/paystack/confirm`
 		});
 
 		throw redirect(303, authorization_url);

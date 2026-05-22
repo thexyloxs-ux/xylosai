@@ -5,9 +5,15 @@
 	import type { Conversation, Organization, Profile } from '$lib/types/database';
 
 	const { data } = $props<{
-		data: App.PageData & { profile: Profile | null; organization: Organization | null; conversations: Conversation[] };
+		data: App.PageData & {
+			profile: Profile | null;
+			organization: Organization | null;
+			conversations: Conversation[];
+			previewMode?: boolean;
+		};
 	}>();
 	const profile = $derived(data.profile);
+	const previewMode = $derived(Boolean(data.previewMode));
 	let conversations = $state<Conversation[]>([]);
 	$effect(() => { conversations = data.conversations; });
 
@@ -72,6 +78,46 @@
 		loading = true;
 		scrollToBottom();
 
+		if (previewMode) {
+			const now = new Date().toISOString();
+			const nextTitle = userMsg.trim().length > 40 ? `${userMsg.trim().slice(0, 40)}...` : userMsg.trim();
+			const previewConversationId = conversationId ?? `preview-${Date.now()}`;
+			const existing = conversations.find((conv) => conv.id === previewConversationId);
+
+			conversationId = previewConversationId;
+			if (existing) {
+				conversations = [
+					{ ...existing, last_message_at: now, title: existing.title || nextTitle },
+					...conversations.filter((conv) => conv.id !== previewConversationId)
+				];
+			} else {
+				conversations = [
+					{
+						id: previewConversationId,
+						user_id: profile?.id ?? 'preview-user',
+						title: nextTitle || 'New conversation',
+						subject: null,
+						session_type: null,
+						created_at: now,
+						last_message_at: now
+					},
+					...conversations
+				];
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 450));
+			messages.push({
+				role: 'assistant',
+				content:
+					`This is a local preview of XYLO chat, so no live model call was made.\n\n` +
+					`Your message was: "${userMsg}"\n\n` +
+					`The real backend is already wired to Groq and Gemini. When you sign in with a confirmed account, this same UI will stream the actual tutor response here.`
+			});
+			loading = false;
+			scrollToBottom();
+			return;
+		}
+
 		try {
 			const response = await fetch('/api/chat', {
 				method: 'POST',
@@ -83,7 +129,34 @@
 			});
 
 			const newConvId = response.headers.get('X-Conversation-Id');
-			if (newConvId) conversationId = newConvId;
+			if (newConvId) {
+				const isFreshConversation = !conversationId;
+				conversationId = newConvId;
+
+				const now = new Date().toISOString();
+				const nextTitle = userMsg.trim().length > 40 ? `${userMsg.trim().slice(0, 40)}...` : userMsg.trim();
+				const existing = conversations.find((conv) => conv.id === newConvId);
+
+				if (existing) {
+					conversations = [
+						{ ...existing, last_message_at: now, title: existing.title || nextTitle },
+						...conversations.filter((conv) => conv.id !== newConvId)
+					];
+				} else if (isFreshConversation) {
+					conversations = [
+						{
+							id: newConvId,
+							user_id: profile?.id ?? '',
+							title: nextTitle || 'New conversation',
+							subject: null,
+							session_type: null,
+							created_at: now,
+							last_message_at: now
+						},
+						...conversations
+					];
+				}
+			}
 
 			if (!response.ok) throw new Error('Failed to fetch response');
 			if (!response.body) throw new Error('No response body');
@@ -229,6 +302,12 @@
 
 		<!-- Chat window -->
 		<div class="chat-window" bind:this={chatWindow}>
+			{#if previewMode}
+				<div class="preview-banner">
+					<span>Preview mode</span>
+					<p>This local chat screen is using a simulated assistant response so we can test the UI without auth friction.</p>
+				</div>
+			{/if}
 			{#if fetchingHistory}
 				<div class="history-loading" aria-busy="true" aria-label="Loading conversation">
 					{#each [1, 2, 3] as _}
@@ -585,6 +664,34 @@
 		padding: 2rem 1.5rem 12rem;
 		display: flex;
 		flex-direction: column;
+	}
+
+	.preview-banner {
+		max-width: 760px;
+		width: 100%;
+		margin: 0 auto 1rem;
+		padding: 0.875rem 1rem;
+		border-radius: 0.875rem;
+		background: oklch(95% 0.04 80 / 0.7);
+		border: 1px solid oklch(84% 0.06 78 / 0.75);
+		color: var(--amber-deep);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9);
+	}
+
+	.preview-banner span {
+		display: inline-block;
+		font-size: 0.6875rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		margin-bottom: 0.25rem;
+	}
+
+	.preview-banner p {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.55;
+		color: var(--ink-2);
 	}
 
 	/* ── Empty state ── */

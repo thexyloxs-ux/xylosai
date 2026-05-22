@@ -2,11 +2,19 @@ import { randomBytes } from 'node:crypto';
 import { redirect } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID } from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
+import { getAuthAvailability } from '$lib/server/runtime-config';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-	const state = randomBytes(16).toString('hex');
+	const source = url.searchParams.get('source') === 'signup' ? 'signup' : 'login';
 	const next = url.searchParams.get('next') ?? '';
+
+	if (!getAuthAvailability().google) {
+		const joinParam = next.startsWith('/join/') ? `?join=${encodeURIComponent(next.slice('/join/'.length))}` : '';
+		throw redirect(302, `/auth/${source}${joinParam}${joinParam ? '&' : '?'}error=google_unavailable`);
+	}
+
+	const state = randomBytes(16).toString('hex');
 
 	cookies.set('oauth_state', state, {
 		path: '/',

@@ -1,6 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { logger } from '$lib/server/logger';
+import { getBillingAvailability } from '$lib/server/runtime-config';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -26,7 +27,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		organization = data;
 	}
 
-	return { profile, organization };
+	return { profile, organization, billingAvailability: getBillingAvailability() };
 };
 
 export const actions: Actions = {
@@ -61,7 +62,6 @@ export const actions: Actions = {
 		const { session, user } = await locals.safeGetSession();
 		if (!session || !user) return fail(401);
 
-		// Check if user is an admin
 		const { data: profile } = await locals.supabase
 			.from('profiles')
 			.select('role, org_id')
@@ -92,6 +92,19 @@ export const actions: Actions = {
 		if (!session || !user) return fail(401);
 
 		const admin = createSupabaseAdminClient();
+		const { data: billing } = await admin
+			.from('billing_subscriptions')
+			.select('status')
+			.eq('user_id', user.id)
+			.single();
+
+		if (billing?.status === 'active') {
+			return fail(400, {
+				message:
+					'Cancel your active Paystack subscription from Membership before deleting this account.'
+			});
+		}
+
 		const { error } = await admin.auth.admin.deleteUser(user.id);
 
 		if (error) {

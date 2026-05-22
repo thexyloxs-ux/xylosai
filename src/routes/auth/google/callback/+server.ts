@@ -2,6 +2,8 @@ import { redirect, error } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
 import { logger } from '$lib/server/logger';
+import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { ensureProfileForUser } from '$lib/server/profile';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url, locals, cookies }) => {
@@ -58,11 +60,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 	const { data: { user } } = await locals.supabase.auth.getUser();
 
 	if (user) {
-		const { data: profile } = await locals.supabase
-			.from('profiles')
-			.select('onboarded, role')
-			.eq('id', user.id)
-			.single();
+		const profile = await ensureProfileForUser(createSupabaseAdminClient(), user);
 
 		if (profile?.onboarded) {
 			throw redirect(302, profile.role === 'school_admin' ? '/dashboard' : '/chat');

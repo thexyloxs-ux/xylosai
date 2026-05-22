@@ -1,10 +1,16 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
 	import { fade } from 'svelte/transition';
 
 	const { data, form } = $props<{ data: any; form: any }>();
 	const profile = $derived(data.profile);
 	const organization = $derived(data.organization);
+	const billingAvailability = $derived(
+		data.billingAvailability ?? { plus: false, pro: false, school: false }
+	);
+	const billingState = $derived($page.url.searchParams.get('billing'));
+	const cancellationState = $derived($page.url.searchParams.get('canceled'));
 
 	let activeTab = $state('profile');
 	let saving = $state(false);
@@ -57,6 +63,34 @@
 
 	let deleteConfirm = $state('');
 	let deleting = $state(false);
+
+	const billingMessage = $derived.by(() => {
+		if (billingState === 'success') {
+			return {
+				tone: 'success',
+				text: 'Payment confirmed. Your XYLO membership is now active.'
+			};
+		}
+		if (billingState === 'verification_failed') {
+			return {
+				tone: 'error',
+				text: 'We could not verify that payment yet. If you were charged, please wait a moment and refresh Settings.'
+			};
+		}
+		if (billingState === 'missing_reference') {
+			return {
+				tone: 'error',
+				text: 'The payment callback arrived without a transaction reference. Please try again or contact support.'
+			};
+		}
+		if (cancellationState === 'true') {
+			return {
+				tone: 'success',
+				text: 'Your Paystack subscription has been canceled.'
+			};
+		}
+		return null;
+	});
 </script>
 
 <svelte:head>
@@ -106,6 +140,11 @@
 
 		<!-- ── Main content ── -->
 		<main class="settings-main">
+			{#if billingMessage}
+				<div class="billing-banner" class:error={billingMessage.tone === 'error'}>
+					{billingMessage.text}
+				</div>
+			{/if}
 			{#key activeTab}
 				<div in:fade={{ duration: 180 }}>
 
@@ -283,8 +322,16 @@
 									<p>Unlimited messages, full history, and advanced exam tools.</p>
 								</div>
 								<div class="billing-actions">
-									<a href="/api/paystack/initialize?plan=plus" class="btn-primary">Upgrade to Plus</a>
-									<a href="/api/paystack/initialize?plan=pro" class="btn-secondary">Upgrade to Pro</a>
+									{#if billingAvailability.plus}
+										<a href="/api/paystack/initialize?plan=plus" class="btn-primary">Upgrade to Plus</a>
+									{:else}
+										<div class="btn-primary btn-disabled">Plus checkout coming soon</div>
+									{/if}
+									{#if billingAvailability.pro}
+										<a href="/api/paystack/initialize?plan=pro" class="btn-secondary">Upgrade to Pro</a>
+									{:else}
+										<div class="btn-secondary btn-disabled">Pro checkout coming soon</div>
+									{/if}
 								</div>
 							</div>
 						{:else}
@@ -300,8 +347,10 @@
 									</p>
 								</div>
 								<div class="billing-actions">
-									{#if profile?.plan === 'plus'}
+									{#if profile?.plan === 'plus' && billingAvailability.pro}
 										<a href="/api/paystack/initialize?plan=pro" class="btn-primary">Upgrade to Pro</a>
+									{:else if profile?.plan === 'plus'}
+										<div class="btn-primary btn-disabled">Pro checkout coming soon</div>
 									{/if}
 									<a href="/api/paystack/manage" class="btn-secondary">Manage on Paystack</a>
 									<form method="POST" action="/api/paystack/cancel">
@@ -318,8 +367,10 @@
 									<p>School status: {organizationStatusLabel}. Student access stays private while billing is managed by the school admin.</p>
 								</div>
 								<div class="billing-actions">
-									{#if organizationStatusLabel !== 'active'}
+									{#if organizationStatusLabel !== 'active' && billingAvailability.school}
 										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate school billing</a>
+									{:else if organizationStatusLabel !== 'active'}
+										<div class="btn-primary btn-disabled">School checkout coming soon</div>
 									{/if}
 									<a href="/api/paystack/manage" class="btn-secondary">Manage on Paystack</a>
 									<form method="POST" action="/api/paystack/cancel">
@@ -546,6 +597,22 @@
 			0 8px 24px oklch(18% 0.014 50 / 0.04);
 		border-radius: 1rem;
 		padding: 2rem;
+	}
+
+	.billing-banner {
+		margin-bottom: 1.25rem;
+		padding: 0.875rem 1rem;
+		border-radius: 0.75rem;
+		background: oklch(95% 0.04 145 / 0.55);
+		border: 1px solid oklch(80% 0.08 145 / 0.45);
+		color: oklch(38% 0.08 145);
+		font-size: 0.875rem;
+		font-weight: 700;
+	}
+	.billing-banner.error {
+		background: oklch(94% 0.05 25 / 0.55);
+		border-color: oklch(78% 0.1 25 / 0.45);
+		color: oklch(40% 0.14 25);
 	}
 
 	/* ── Form fields ── */
@@ -818,6 +885,11 @@
 	}
 	.btn-primary:hover { background: var(--amber-deep); }
 	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+	.btn-disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
 
 	.btn-secondary {
 		display: inline-flex;

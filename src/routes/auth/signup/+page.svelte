@@ -3,10 +3,12 @@
 	import { page } from '$app/stores';
 	import { createSupabaseBrowserClient } from '$lib/supabase';
 
+	const { data } = $props<{ data: App.PageData & { authAvailability?: { google?: boolean } } }>();
 	const supabase = createSupabaseBrowserClient();
 
 	const isSchool = $derived($page.url.searchParams.get('type') === 'school');
 	const joinCode = $derived($page.url.searchParams.get('join'));
+	const googleAvailable = $derived(data.authAvailability?.google ?? false);
 
 	let fullName = $state('');
 	let email = $state('');
@@ -16,14 +18,38 @@
 	let showPassword = $state(false);
 	let loading = $state(false);
 	let error = $state('');
+	let confirmationEmail = $state('');
+	let awaitingConfirmation = $state(false);
+	let resendLoading = $state(false);
+	let resendMessage = $state('');
 
 	const googleHref = $derived(
-		`/api/auth/google${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
+		`/api/auth/google?source=signup${joinCode ? `&next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
 	);
+
+	function friendlyAuthError(message: string) {
+		const normalized = message.toLowerCase();
+		if (normalized.includes('email rate limit exceeded') || normalized.includes('rate limit exceeded')) {
+			return 'Too many signup attempts happened just now. Please wait a little, then try again.';
+		}
+		return message;
+	}
+
+	$effect(() => {
+		const incoming = $page.url.searchParams.get('error');
+		if (incoming === 'invite_full') {
+			error = 'This school has reached its student limit. Ask the school admin to add more seats.';
+		} else if (incoming === 'invalid_invite') {
+			error = 'This invite link is invalid or has expired.';
+		} else if (incoming === 'google_unavailable') {
+			error = 'Google sign-in is not configured yet. Use email for now.';
+		}
+	});
 
 	async function handleSignup(e: Event) {
 		e.preventDefault();
 		error = '';
+		resendMessage = '';
 		loading = true;
 
 		const metadata: Record<string, string> = {
@@ -42,16 +68,19 @@
 		const { data, error: err } = await supabase.auth.signUp({
 			email,
 			password,
-			options: { data: metadata }
+			options: {
+				data: metadata,
+				emailRedirectTo: `${$page.url.origin}/auth/callback${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
+			}
 		});
 
 		if (err) {
-			error = err.message;
+			error = friendlyAuthError(err.message);
 			loading = false;
 			return;
 		}
 
-		if (data.user) {
+		if (data.session) {
 			await fetch('/api/auth/welcome', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -60,7 +89,40 @@
 
 			if (joinCode) goto(`/join/${joinCode}`);
 			else goto('/onboarding');
+			return;
 		}
+
+		if (data.user) {
+			confirmationEmail = email;
+			awaitingConfirmation = true;
+		}
+
+		loading = false;
+	}
+
+	async function resendConfirmation() {
+		if (!confirmationEmail || resendLoading) return;
+
+		resendLoading = true;
+		error = '';
+		resendMessage = '';
+
+		const { error: resendError } = await supabase.auth.resend({
+			type: 'signup',
+			email: confirmationEmail,
+			options: {
+				emailRedirectTo: `${$page.url.origin}/auth/callback${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
+			}
+		});
+
+		if (resendError) {
+			error = friendlyAuthError(resendError.message);
+			resendLoading = false;
+			return;
+		}
+
+		resendMessage = `We sent a fresh confirmation link to ${confirmationEmail}.`;
+		resendLoading = false;
 	}
 </script>
 
@@ -74,11 +136,49 @@
 
 	<nav class="auth-nav">
 		<a href="/" class="auth-wordmark">XYLO</a>
-		<a href="/auth/login" class="auth-nav-link">Already have an account? Sign in →</a>
+		<a href="/auth/login{joinCode ? `?join=${joinCode}` : ''}" class="auth-nav-link">Already have an account? Sign in →</a>
 	</nav>
 
 	<main class="auth-main">
 		<div class="auth-card" class:is-school={isSchool}>
+			{#if awaitingConfirmation}
+				<div class="auth-badge">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+					Email confirmation required
+				</div>
+
+				<h1 class="auth-heading">Check your email.</h1>
+				<p class="auth-sub">
+					We sent a confirmation link to <strong>{confirmationEmail}</strong>. Open it, then come back and sign in to continue to XYLO.
+				</p>
+
+				<div class="confirm-card">
+					<p class="confirm-copy">If you don't see it, check spam or promotions first.</p>
+
+					{#if error}
+						<div class="auth-error" role="alert">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							{error}
+						</div>
+					{/if}
+
+					{#if resendMessage}
+						<p class="auth-success">{resendMessage}</p>
+					{/if}
+
+					<div class="confirm-actions">
+						<button type="button" class="submit-btn secondary" onclick={resendConfirmation} disabled={resendLoading}>
+							{#if resendLoading}
+								<span class="spinner-ink"></span>
+								Resending…
+							{:else}
+								Resend confirmation email
+							{/if}
+						</button>
+						<a class="submit-btn" href="/auth/login{joinCode ? `?join=${joinCode}` : ''}">Go to sign in</a>
+					</div>
+				</div>
+			{:else}
 			{#if joinCode}
 				<div class="auth-badge">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -109,6 +209,7 @@
 			{/if}
 
 			{#if !isSchool}
+				{#if googleAvailable}
 				<a href={googleHref} class="google-btn">
 					<svg width="19" height="19" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 						<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -118,6 +219,17 @@
 					</svg>
 					Continue with Google
 				</a>
+				{:else}
+				<div class="google-btn disabled" aria-disabled="true">
+					<svg width="19" height="19" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+						<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+						<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+						<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+					</svg>
+					Google sign-in coming soon
+				</div>
+				{/if}
 				<div class="divider"><span>or sign up with email</span></div>
 			{/if}
 
@@ -220,8 +332,9 @@
 			</form>
 
 			<p class="auth-switch">
-				Already have an account? <a href="/auth/login">Sign in here</a>
+				Already have an account? <a href="/auth/login{joinCode ? `?join=${joinCode}` : ''}">Sign in here</a>
 			</p>
+			{/if}
 		</div>
 
 		{#if !isSchool}
@@ -457,6 +570,11 @@
 	}
 	.google-btn:active { transform: translateY(0); }
 	.google-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+	.google-btn.disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
 
 	/* ── Divider ── */
 	.divider {
@@ -622,6 +740,41 @@
 	.auth-terms a { color: var(--ink-2); font-weight: 600; transition: color 0.15s; }
 	.auth-terms a:hover { color: var(--amber-deep); }
 
+	.confirm-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 1.25rem;
+		border-radius: 1rem;
+		background: oklch(100% 0 0 / 0.55);
+		border: 1px solid oklch(100% 0 0 / 0.8);
+		box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.9);
+	}
+
+	.confirm-copy {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--ink-3);
+	}
+
+	.confirm-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.auth-success {
+		margin: 0;
+		padding: 0.75rem 1rem;
+		border-radius: 0.625rem;
+		background: oklch(95% 0.04 145 / 0.55);
+		border: 1px solid oklch(80% 0.08 145 / 0.45);
+		color: oklch(38% 0.08 145);
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
 	/* ── Submit button ── */
 	.submit-btn {
 		display: flex;
@@ -641,10 +794,17 @@
 		cursor: pointer;
 		transition: background 0.15s, transform 0.1s;
 		margin-top: 0.25rem;
+		text-decoration: none;
 	}
 	.submit-btn:hover { background: oklch(25% 0.016 50); }
 	.submit-btn:active { transform: scale(0.99); }
 	.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+	.submit-btn.secondary {
+		background: transparent;
+		color: var(--ink);
+		border: 1px solid var(--border);
+	}
+	.submit-btn.secondary:hover { background: var(--cream-warm); }
 
 	/* ── Footer links ── */
 	.auth-switch {

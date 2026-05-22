@@ -1,34 +1,46 @@
 import { redirect } from '@sveltejs/kit';
 import { logger } from '$lib/server/logger';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
+import { ensureProfileForUser } from '$lib/server/profile';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { code } = params;
 	const { session, user } = await locals.safeGetSession();
+	const admin = createSupabaseAdminClient();
 
 	// 1. Resolve the invite code to an organization
-	const { data: org, error: orgErr } = await locals.supabase
+	const { data: org, error: orgErr } = await admin
 		.from('organizations')
-		.select('id, name')
+		.select('id, name, plan_status, seat_limit')
 		.eq('invite_code', code)
 		.single();
 
-	if (orgErr || !org) {
+	if (orgErr || !org || (org.plan_status !== 'active' && org.plan_status !== 'trialing')) {
 		// Invalid code: back to login with error
 		throw redirect(302, '/auth/login?error=invalid_invite');
 	}
 
 	// 2. Handle based on auth status
 	if (user) {
-		// Use admin client so RLS doesn't block updating role/org_id
-		const admin = createSupabaseAdminClient();
+		const profile = await ensureProfileForUser(admin, user);
+		const alreadyLinked = profile.org_id === org.id && profile.role === 'student';
+
+		const { count: studentCount } = await admin
+			.from('profiles')
+			.select('id', { count: 'exact', head: true })
+			.eq('org_id', org.id)
+			.eq('role', 'student');
+
+		if (!alreadyLinked && (studentCount ?? 0) >= org.seat_limit) {
+			throw redirect(302, '/chat?error=invite_full');
+		}
+
 		const { error: updateErr } = await admin
 			.from('profiles')
 			.update({
 				org_id: org.id,
 				role: 'student',
-				onboarded: true
 			})
 			.eq('id', user.id);
 
@@ -37,9 +49,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			throw redirect(302, `/chat?error=join_failed`);
 		}
 
-		// Success: go to chat
-		throw redirect(302, '/chat?joined=' + encodeURIComponent(org.name));
+		if (profile.onboarded) {
+			throw redirect(302, '/chat?joined=' + encodeURIComponent(org.name));
+		}
+
+		throw redirect(302, '/onboarding?joined=' + encodeURIComponent(org.name));
 	} else {
+		const { count: studentCount } = await admin
+			.from('profiles')
+			.select('id', { count: 'exact', head: true })
+			.eq('org_id', org.id)
+			.eq('role', 'student');
+
+		if ((studentCount ?? 0) >= org.seat_limit) {
+			throw redirect(302, '/auth/signup?error=invite_full');
+		}
+
 		// User is NOT logged in: redirect to signup with the code passed through
 		throw redirect(302, `/auth/signup?join=${code}`);
 	}

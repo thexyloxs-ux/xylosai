@@ -20,6 +20,22 @@ export interface SubscriptionContact {
 	planType: PaystackPlanType;
 }
 
+async function setOrganizationAccess(
+	admin: AdminClient,
+	orgId: string,
+	state: { plan: 'school'; plan_status: 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive' }
+		| { plan: 'free'; plan_status: 'active' }
+): Promise<void> {
+	const { error } = await admin
+		.from('profiles')
+		.update(state)
+		.eq('org_id', orgId);
+
+	if (error) {
+		throw new Error(`Failed to sync organization member access: ${error.message}`);
+	}
+}
+
 export async function activatePlan(
 	admin: AdminClient,
 	userId: string,
@@ -48,6 +64,8 @@ export async function activatePlan(
 			.eq('id', profile.org_id);
 
 		if (orgErr) throw new Error(`Failed to activate org plan: ${orgErr.message}`);
+
+		await setOrganizationAccess(admin, profile.org_id, { plan: 'school', plan_status: 'active' });
 	}
 
 	const { error: billingErr } = await admin
@@ -93,9 +111,14 @@ export async function markSubscriptionCancelled(
 		? profile.plan
 		: null;
 
+	const nextProfileState =
+		profile?.plan === 'school'
+			? { plan: 'free', plan_status: 'active' as const }
+			: { plan: 'free', plan_status: 'active' as const };
+
 	const { error: profileErr } = await admin
 		.from('profiles')
-		.update({ plan_status: status })
+		.update(nextProfileState)
 		.eq('id', userId);
 
 	if (profileErr) throw new Error(`Failed to update subscription status: ${profileErr.message}`);
@@ -114,6 +137,8 @@ export async function markSubscriptionCancelled(
 			.eq('id', profile.org_id);
 
 		if (orgErr) throw new Error(`Failed to update organization subscription: ${orgErr.message}`);
+
+		await setOrganizationAccess(admin, profile.org_id, { plan: 'free', plan_status: 'active' });
 	}
 
 	if (!planType) return null;

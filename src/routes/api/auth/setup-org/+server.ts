@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { error, json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { logger } from '$lib/server/logger';
+import { ensureProfileForUser } from '$lib/server/profile';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import type { RequestHandler } from './$types';
 
@@ -26,6 +27,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const { schoolName, country, curriculum, seatLimit, completeOnboarding = true } = parsed.data;
 
 	const admin = createSupabaseAdminClient();
+	await ensureProfileForUser(admin, user);
 
 	const { data: existing } = await admin
 		.from('profiles')

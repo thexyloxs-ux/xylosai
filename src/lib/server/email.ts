@@ -3,7 +3,7 @@ import { RESEND_API_KEY } from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
 
 const resend = new Resend(RESEND_API_KEY);
-const FROM = 'XYLO <hello@xyloss.tech>';
+const FROM = 'XYLO <hello@contact.xyloss.tech>';
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 

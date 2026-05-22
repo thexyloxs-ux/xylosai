@@ -1,8 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Profile, Organization } from '$lib/types/database';
-import { groq, buildSystemPrompt, GROQ_MODEL } from '$lib/server/groq';
+import { buildSystemPrompt } from '$lib/server/groq';
 import { getOrCreateConversation, saveMessage } from '$lib/server/repositories/conversation';
 import { incrementStudentActivity } from '$lib/server/repositories/activity';
+import { logger } from '$lib/server/logger';
+import { orchestrateChatStream } from '$lib/server/ai/orchestrator';
+import { classifyTurn } from '$lib/server/ai/router';
 
 type AdminClient = SupabaseClient<Database>;
 
@@ -25,12 +28,25 @@ export interface ChatContext {
 	admin: AdminClient;
 }
 
+function hasSchoolAccess(profile: Profile, org: Organization | null): boolean {
+	if (!profile.org_id || !org) return false;
+	return org.plan_status === 'active' || org.plan_status === 'trialing';
+}
+
+function hasPaidIndividualAccess(profile: Profile): boolean {
+	return (profile.plan === 'plus' || profile.plan === 'pro') && profile.plan_status === 'active';
+}
+
+function hasUnlimitedAccess(profile: Profile, org: Organization | null): boolean {
+	return hasPaidIndividualAccess(profile) || hasSchoolAccess(profile, org);
+}
+
 /**
  * Legacy preflight guard kept for callers that only need to fail fast before
  * the atomic quota reservation runs.
  */
-export function enforceRateLimit(profile: Profile): void {
-	if (profile.plan !== 'free' || profile.org_id) return;
+export function enforceRateLimit(profile: Profile, org: Organization | null): void {
+	if (hasUnlimitedAccess(profile, org)) return;
 
 	const todayStr = new Date().toDateString();
 	const resetStr = new Date(profile.messages_today_reset_at).toDateString();
@@ -42,7 +58,7 @@ export function enforceRateLimit(profile: Profile): void {
 }
 
 export async function reserveMessageQuota(ctx: ChatContext): Promise<void> {
-	if (ctx.profile.plan !== 'free' || ctx.profile.org_id) return;
+	if (hasUnlimitedAccess(ctx.profile, ctx.org)) return;
 
 	const { data, error } = await ctx.admin.rpc('reserve_free_message_quota', {
 		p_user_id: ctx.userId,
@@ -66,8 +82,10 @@ export async function streamChatResponse(
 ): Promise<{ stream: ReadableStream; conversationId: string }> {
 	await reserveMessageQuota(ctx);
 
+	const firstUserMessage = req.messages.find((message) => message.role === 'user')?.content;
 	const conversationId = await getOrCreateConversation(ctx.admin, ctx.userId, {
 		conversationId: req.conversationId,
+		initialUserMessage: firstUserMessage,
 	});
 
 	const lastUserMsg = [...req.messages].reverse().find((m) => m.role === 'user');
@@ -75,21 +93,9 @@ export async function streamChatResponse(
 		await saveMessage(ctx.admin, conversationId, ctx.userId, 'user', lastUserMsg.content);
 	}
 
-	const systemPrompt = buildSystemPrompt(ctx.profile, ctx.org);
-
-	const groqStream = await groq.chat.completions.create({
-		model: GROQ_MODEL,
-		messages: [
-			{ role: 'system', content: systemPrompt },
-			...req.messages.map((m) => ({
-				role: m.role as 'user' | 'assistant' | 'system',
-				content: m.content,
-			})),
-		],
-		stream: true,
-		temperature: 0.7,
-		max_tokens: 2048,
-	});
+	const selection = classifyTurn(req.messages);
+	const systemPrompt = buildSystemPrompt(ctx.profile, ctx.org, selection.intent);
+	const orchestration = await orchestrateChatStream(req.messages, systemPrompt);
 
 	const stream = new ReadableStream({
 		async start(controller) {
@@ -97,22 +103,36 @@ export async function streamChatResponse(
 			let assistantText = '';
 
 			try {
-				for await (const chunk of groqStream) {
-					const token = chunk.choices[0]?.delta?.content ?? '';
-					if (token) {
-						assistantText += token;
-						controller.enqueue(encoder.encode(token));
-					}
-				}
-			} finally {
-				controller.close();
-			}
+				logger.info(
+					{
+						userId: ctx.userId,
+						intent: orchestration.selection.intent,
+						provider: orchestration.provider,
+						usedFallback: orchestration.usedFallback,
+						reason: orchestration.selection.reason
+					},
+					'Streaming chat response'
+				);
 
-			if (assistantText) {
-				saveMessage(ctx.admin, conversationId, ctx.userId, 'assistant', assistantText);
-			}
-			if (ctx.profile.org_id) {
-				incrementStudentActivity(ctx.admin, ctx.userId, ctx.profile.org_id);
+				for await (const token of orchestration.stream) {
+					assistantText += token;
+					controller.enqueue(encoder.encode(token));
+				}
+
+				if (assistantText) {
+					await saveMessage(ctx.admin, conversationId, ctx.userId, 'assistant', assistantText);
+				}
+				if (ctx.profile.org_id) {
+					await incrementStudentActivity(ctx.admin, ctx.userId, ctx.profile.org_id);
+				}
+
+				controller.close();
+			} catch (err) {
+				logger.error(
+					{ err, userId: ctx.userId, conversationId },
+					'Failed during chat stream delivery'
+				);
+				controller.error(err instanceof Error ? err : new Error('Chat stream failed'));
 			}
 		},
 	});

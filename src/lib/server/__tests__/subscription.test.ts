@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { activatePlan } from '../services/subscription';
+import { activatePlan, markSubscriptionCancelled } from '../services/subscription';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-function makeAdmin(overrides: Record<string, unknown> = {}) {
+function makeAdmin(overrides: Record<string, Record<string, unknown>> = {}) {
 	const selectChain = { eq: vi.fn().mockReturnThis(), single: vi.fn() };
 	const updateChain = { eq: vi.fn().mockReturnThis() };
 	const upsertChain = {};
@@ -12,7 +12,7 @@ function makeAdmin(overrides: Record<string, unknown> = {}) {
 			select: vi.fn(() => selectChain),
 			update: vi.fn(() => updateChain),
 			upsert: vi.fn(() => upsertChain),
-			...overrides[table]
+			...(overrides[table] ?? {})
 		}))
 	} as unknown as SupabaseClient;
 }
@@ -68,6 +68,9 @@ describe('activatePlan', () => {
 			update: () => ({ eq: orgUpdate })
 		}));
 		from.mockImplementationOnce(() => ({
+			update: () => ({ eq: vi.fn().mockResolvedValue({ error: null }) })
+		}));
+		from.mockImplementationOnce(() => ({
 			upsert: vi.fn().mockResolvedValue({ error: null })
 		}));
 
@@ -75,6 +78,36 @@ describe('activatePlan', () => {
 
 		expect(orgUpdate).toHaveBeenCalled();
 		expect(result.planType).toBe('school');
+	});
+
+	it('downgrades school members to free when a school subscription is canceled', async () => {
+		const admin = makeAdmin();
+		const from = admin.from as ReturnType<typeof vi.fn>;
+		const schoolProfile = {
+			email: 'admin@school.edu',
+			full_name: 'School Admin',
+			org_id: 'org-456',
+			plan: 'school'
+		};
+
+		from.mockImplementationOnce(() => ({
+			select: () => ({ eq: () => ({ single: vi.fn().mockResolvedValue({ data: schoolProfile, error: null }) }) })
+		}));
+		const profileUpdate = vi.fn().mockResolvedValue({ error: null });
+		from.mockImplementationOnce(() => ({
+			update: () => ({ eq: profileUpdate })
+		}));
+		from.mockImplementationOnce(() => ({
+			update: () => ({ eq: vi.fn().mockResolvedValue({ error: null }) })
+		}));
+		from.mockImplementationOnce(() => ({
+			update: () => ({ eq: vi.fn().mockResolvedValue({ error: null }) })
+		}));
+
+		const result = await markSubscriptionCancelled(admin, 'user-123', 'canceled');
+
+		expect(profileUpdate).toHaveBeenCalled();
+		expect(result?.planType).toBe('school');
 	});
 
 	it('throws if the profile fetch fails', async () => {

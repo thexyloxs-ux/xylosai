@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { User } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	const { data } = $props<{ data: App.PageData }>();
 
@@ -11,6 +12,7 @@
 	const role          = $derived(data.onboardingRole ?? profile?.role ?? 'individual');
 	const isSchoolAdmin = $derived(role === 'school_admin');
 	const meta          = $derived((user?.user_metadata ?? {}) as Record<string, string>);
+	const joinedSchool  = $derived($page.url.searchParams.get('joined'));
 
 	// ── Step state ──────────────────────────────────────────────────────────────
 	let step = $state(1);
@@ -175,6 +177,12 @@
 				{/each}
 			</div>
 		</div>
+
+		{#if joinedSchool}
+			<div class="join-banner">
+				You're in. Finish onboarding to start learning with {joinedSchool}.
+			</div>
+		{/if}
 
 		{#key step}
 			<div class="step-pane">
@@ -393,6 +401,18 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 2.5rem;
+	}
+
+	.join-banner {
+		margin-bottom: 1.5rem;
+		padding: 0.875rem 1rem;
+		border-radius: 0.875rem;
+		background: oklch(95% 0.04 145 / 0.55);
+		border: 1px solid oklch(80% 0.08 145 / 0.45);
+		color: oklch(38% 0.08 145);
+		font-size: 0.875rem;
+		font-weight: 700;
+		line-height: 1.5;
 	}
 
 	.ob-logo {

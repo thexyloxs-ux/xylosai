@@ -2,8 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { disableSubscription } from '$lib/server/paystack';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { markSubscriptionCancelled } from '$lib/server/services/subscription';
-import { sendSubscriptionCancelledEmail } from '$lib/server/email';
-import { logger } from '$lib/server/logger';
+
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ locals }) => {
@@ -26,13 +25,8 @@ export const POST: RequestHandler = async ({ locals }) => {
 	}
 
 	await disableSubscription(billing.subscription_code, billing.email_token);
-	const contact = await markSubscriptionCancelled(admin, user.id, 'canceled');
-
-	if (contact?.email) {
-		sendSubscriptionCancelledEmail(contact.email, contact.fullName, contact.planType).catch((err) => {
-			logger.error({ err, userId: user.id }, 'Failed to send cancellation email');
-		});
-	}
+	await markSubscriptionCancelled(admin, user.id, 'canceled');
+	// Cancellation email is sent by the Paystack subscription.disable webhook to avoid a double send
 
 	throw redirect(303, '/settings?canceled=true');
 };
