@@ -20,7 +20,10 @@ const chatSchema = z.object({
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const { session, user } = await locals.safeGetSession();
-	if (!session || !user) throw error(401, 'Unauthorized');
+	if (!session || !user) {
+		logger.warn('Chat API: Unauthorized — no valid session');
+		throw error(401, 'Unauthorized');
+	}
 
 	const raw = await request.json().catch(() => null);
 	const parsed = chatSchema.safeParse(raw);
@@ -29,13 +32,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const admin = createSupabaseAdminClient();
 
-	const { data: profile } = await locals.supabase
+	const { data: profile, error: profileError } = await locals.supabase
 		.from('profiles')
 		.select('*')
 		.eq('id', user.id)
 		.single();
 
-	if (!profile) throw error(403, 'Profile not found');
+	if (!profile) {
+		logger.warn({ userId: user.id, profileError }, 'Chat API: Profile not found');
+		throw error(403, 'Profile not found');
+	}
 
 	let org = null;
 	if (profile.org_id) {
@@ -50,7 +56,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		enforceRateLimit(profile, org);
 	} catch (e) {
-		if (e instanceof RateLimitError) throw error(403, e.message);
+		if (e instanceof RateLimitError) {
+			logger.info({ userId: user.id }, `Chat API: Rate limited — ${e.message}`);
+			throw error(403, e.message);
+		}
 		throw e;
 	}
 

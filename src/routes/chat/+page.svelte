@@ -151,6 +151,30 @@
 				})
 			});
 
+			if (!response.ok) {
+				let errorMsg = 'Something went wrong. Please try again.';
+				try {
+					const errBody = await response.json();
+					errorMsg = errBody?.message || errorMsg;
+				} catch { /* response wasn't JSON */ }
+
+				if (response.status === 401) {
+					errorMsg = 'Your session has expired. Redirecting to sign in…';
+					messages.push({ role: 'assistant', content: errorMsg });
+					loading = false;
+					scrollToBottom();
+					setTimeout(() => { window.location.href = '/auth/login'; }, 2000);
+					return;
+				}
+				if (response.status === 429) {
+					errorMsg = 'Too many messages — please wait a moment and try again.';
+				}
+
+				throw new Error(errorMsg);
+			}
+
+			if (!response.body) throw new Error('No response body received.');
+
 			const newConvId = response.headers.get('X-Conversation-Id');
 			if (newConvId) {
 				const isFreshConversation = !conversationId;
@@ -181,9 +205,6 @@
 				}
 			}
 
-			if (!response.ok) throw new Error('Failed to fetch response');
-			if (!response.body) throw new Error('No response body');
-
 			loading = false;
 			const reader = response.body.getReader();
 			const decoder = new TextDecoder();
@@ -198,7 +219,8 @@
 			}
 		} catch (err) {
 			console.error('Chat error:', err);
-			messages.push({ role: 'assistant', content: 'Sorry, I hit a snag. Please try again or check your connection.' });
+			const fallback = err instanceof Error ? err.message : 'Sorry, I hit a snag. Please try again or check your connection.';
+			messages.push({ role: 'assistant', content: fallback });
 			loading = false;
 		}
 	}
