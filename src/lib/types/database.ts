@@ -109,7 +109,7 @@ export interface Database {
 				Update: Partial<Database['public']['Tables']['messages']['Insert']>;
 				Relationships: [];
 			};
-			student_activity: {
+			member_activity: {
 				Row: {
 					id: string;
 					user_id: string;
@@ -128,7 +128,7 @@ export interface Database {
 					session_count?: number;
 					subjects_studied?: string[] | null;
 				};
-				Update: Partial<Database['public']['Tables']['student_activity']['Insert']>;
+				Update: Partial<Database['public']['Tables']['member_activity']['Insert']>;
 				Relationships: [];
 			};
 			billing_subscriptions: {
@@ -136,7 +136,7 @@ export interface Database {
 					id: string;
 					user_id: string;
 					org_id: string | null;
-					plan_type: 'plus' | 'pro' | 'school';
+					plan_type: 'plus' | 'pro' | 'org';
 					plan_code: string | null;
 					customer_code: string | null;
 					customer_email: string | null;
@@ -151,7 +151,7 @@ export interface Database {
 					id?: string;
 					user_id: string;
 					org_id?: string | null;
-					plan_type: 'plus' | 'pro' | 'school';
+					plan_type: 'plus' | 'pro' | 'org';
 					plan_code?: string | null;
 					customer_code?: string | null;
 					customer_email?: string | null;
@@ -168,7 +168,7 @@ export interface Database {
 		};
 		Views: Record<string, never>;
 		Functions: {
-			increment_student_activity: {
+			increment_member_activity: {
 				Args: { p_user_id: string; p_org_id: string; p_date: string };
 				Returns: void;
 			};
@@ -190,14 +190,14 @@ export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type Conversation = Database['public']['Tables']['conversations']['Row'];
 export type Message = Database['public']['Tables']['messages']['Row'];
-export type StudentActivity = Database['public']['Tables']['student_activity']['Row'];
+export type MemberActivity = Database['public']['Tables']['member_activity']['Row'];
 
-export type UserRole = 'individual' | 'school_admin' | 'student';
-export type Plan = 'free' | 'plus' | 'pro' | 'school';
+export type UserRole = 'individual' | 'org_admin' | 'member';
+export type Plan = 'free' | 'plus' | 'pro' | 'org';
 export type PlanStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive';
 export type SessionType = 'understand' | 'quiz' | 'study_plan' | 'exam_prep';
 
-export interface StudentWithActivity {
+export interface MemberWithActivity {
 	id: string;
 	full_name: string | null;
 	email: string | null;
@@ -209,7 +209,7 @@ export interface StudentWithActivity {
 }
 
 export interface DashboardOverview {
-	total_students: number;
+	total_members: number;
 	active_today: number;
 	active_this_week: number;
 	needs_attention: number;

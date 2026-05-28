@@ -5,7 +5,7 @@ type AdminClient = SupabaseClient<Database>;
 
 function roleFromMetadata(user: User): Profile['role'] {
 	const metadataRole = user.user_metadata?.role;
-	if (metadataRole === 'school_admin' || metadataRole === 'student') {
+	if (metadataRole === 'org_admin' || metadataRole === 'member') {
 		return metadataRole;
 	}
 	return 'individual';

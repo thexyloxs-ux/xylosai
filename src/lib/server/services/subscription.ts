@@ -23,7 +23,7 @@ export interface SubscriptionContact {
 async function setOrganizationAccess(
 	admin: AdminClient,
 	orgId: string,
-	state: { plan: 'school'; plan_status: 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive' }
+	state: { plan: 'org'; plan_status: 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive' }
 		| { plan: 'free'; plan_status: 'active' }
 ): Promise<void> {
 	const { error } = await admin
@@ -57,15 +57,15 @@ export async function activatePlan(
 
 	if (profileErr) throw new Error(`Failed to activate plan on profile: ${profileErr.message}`);
 
-	if (planType === 'school' && profile?.org_id) {
+	if (planType === 'org' && profile?.org_id) {
 		const { error: orgErr } = await admin
 			.from('organizations')
-			.update({ plan: 'school', plan_status: 'active' })
+			.update({ plan: 'org', plan_status: 'active' })
 			.eq('id', profile.org_id);
 
 		if (orgErr) throw new Error(`Failed to activate org plan: ${orgErr.message}`);
 
-		await setOrganizationAccess(admin, profile.org_id, { plan: 'school', plan_status: 'active' });
+		await setOrganizationAccess(admin, profile.org_id, { plan: 'org', plan_status: 'active' });
 	}
 
 	const { error: billingErr } = await admin
@@ -107,12 +107,12 @@ export async function markSubscriptionCancelled(
 
 	if (fetchErr) throw new Error(`Failed to fetch profile for cancellation: ${fetchErr.message}`);
 
-	const planType = profile?.plan === 'plus' || profile?.plan === 'pro' || profile?.plan === 'school'
+	const planType = profile?.plan === 'plus' || profile?.plan === 'pro' || profile?.plan === 'org'
 		? profile.plan
 		: null;
 
 	const nextProfileState =
-		profile?.plan === 'school'
+		profile?.plan === 'org'
 			? { plan: 'free', plan_status: 'active' as const }
 			: { plan: 'free', plan_status: 'active' as const };
 
@@ -130,7 +130,7 @@ export async function markSubscriptionCancelled(
 
 	if (billingErr) throw new Error(`Failed to update billing subscription: ${billingErr.message}`);
 
-	if (profile?.org_id && profile.plan === 'school') {
+	if (profile?.org_id && profile.plan === 'org') {
 		const { error: orgErr } = await admin
 			.from('organizations')
 			.update({ plan_status: status })

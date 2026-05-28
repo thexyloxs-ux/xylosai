@@ -7,7 +7,7 @@
 	const profile = $derived(data.profile);
 	const organization = $derived(data.organization);
 	const billingAvailability = $derived(
-		data.billingAvailability ?? { plus: false, pro: false, school: false }
+		data.billingAvailability ?? { plus: false, pro: false, org: false }
 	);
 	const billingState = $derived($page.url.searchParams.get('billing'));
 	const cancellationState = $derived($page.url.searchParams.get('canceled'));
@@ -23,7 +23,7 @@
 		{ value: 'Other', label: 'Custom Path' }
 	];
 	const LEVELS = [
-		{ value: 'primary', label: 'Primary School' },
+		{ value: 'primary', label: 'Primary Org' },
 		{ value: 'jss', label: 'Junior Secondary' },
 		{ value: 'sss', label: 'Senior Secondary' },
 		{ value: 'university', label: 'University' }
@@ -44,7 +44,7 @@
 				? 'XYLO Plus'
 				: profile?.plan === 'pro'
 					? 'XYLO Pro'
-					: profile?.plan === 'school'
+					: profile?.plan === 'org'
 						? 'XYLO Organization'
 						: 'XYLO Standard'
 	);
@@ -131,7 +131,7 @@
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
 					Focus Profile
 				</button>
-				{#if profile?.role === 'school_admin'}
+				{#if profile?.role === 'org_admin'}
 					<button class="nav-item" class:active={activeTab === 'organization'} onclick={() => activeTab = 'organization'}>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 21v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/></svg>
 						My Organization
@@ -366,15 +366,15 @@
 							</div>
 						{/if}
 
-						{#if profile?.role === 'school_admin'}
-							<div class="upgrade-card school-billing">
+						{#if profile?.role === 'org_admin'}
+							<div class="upgrade-card org-billing">
 								<div class="upgrade-text">
 									<h3>Organization billing</h3>
 									<p>Organization status: {organizationStatusLabel}. Member access stays private while billing is managed by the organization admin.</p>
 								</div>
 								<div class="billing-actions">
-									{#if organizationStatusLabel !== 'active' && billingAvailability.school}
-										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate organization billing</a>
+									{#if organizationStatusLabel !== 'active' && billingAvailability.org}
+										<a href="/api/paystack/initialize?plan=org" class="btn-primary">Activate organization billing</a>
 									{:else if organizationStatusLabel !== 'active'}
 										<div class="btn-primary btn-disabled">Organization checkout coming soon</div>
 									{/if}
@@ -870,7 +870,7 @@
 		flex-wrap: wrap;
 	}
 	.billing-actions form { margin: 0; }
-	.school-billing { margin-top: 1rem; }
+	.org-billing { margin-top: 1rem; }
 
 	/* ── Buttons ── */
 	.btn-primary {

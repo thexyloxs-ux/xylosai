@@ -2,10 +2,10 @@
 	import SiteHeader from '$lib/components/SiteHeader.svelte';
 	import SiteFooter from '$lib/components/SiteFooter.svelte';
 
-	const { data } = $props<{ data: App.PageData & { billingAvailability?: { plus?: boolean; pro?: boolean; school?: boolean } } }>();
-	const billingAvailability = $derived(data.billingAvailability ?? { plus: false, pro: false, school: false });
+	const { data } = $props<{ data: App.PageData & { billingAvailability?: { plus?: boolean; pro?: boolean; org?: boolean } } }>();
+	const billingAvailability = $derived(data.billingAvailability ?? { plus: false, pro: false, org: false });
 
-	const studentFeatures = {
+	const memberFeatures = {
 		free: [
 			'5 AI messages per day — forever',
 			'Personalized guidance across your focus areas',
@@ -29,7 +29,7 @@
 		],
 	};
 
-	const schoolFeatures = [
+	const orgFeatures = [
 		'Everything in Pro — for every member',
 		'Organization admin dashboard',
 		'Member engagement analytics',
@@ -105,7 +105,7 @@
 				<p class="plan-tagline">Everything you need to get started.</p>
 			</div>
 			<ul class="plan-features">
-				{#each studentFeatures.free as feat}
+				{#each memberFeatures.free as feat}
 					<li>
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
 						{feat}
@@ -129,7 +129,7 @@
 				<p class="plan-tagline">Unlimited access. No more daily caps.</p>
 			</div>
 			<ul class="plan-features">
-				{#each studentFeatures.plus as feat}
+				{#each memberFeatures.plus as feat}
 					<li>
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
 						{feat}
@@ -159,7 +159,7 @@
 				<p class="plan-tagline">Advanced tools for deeper, more structured work.</p>
 			</div>
 			<ul class="plan-features">
-				{#each studentFeatures.pro as feat}
+				{#each memberFeatures.pro as feat}
 					<li>
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
 						{feat}
@@ -196,21 +196,21 @@
 </div>
 
 <!-- ── Organization plan ── -->
-<section class="school-section">
-	<div class="school-inner">
-		<div class="school-left">
+<section class="org-section">
+	<div class="org-inner">
+		<div class="org-left">
 			<p class="section-eyebrow">Organization Plan</p>
-			<h2 class="school-heading">One subscription.<br>Every member covered.</h2>
-			<p class="school-body">
+			<h2 class="org-heading">One subscription.<br>Every member covered.</h2>
+			<p class="org-body">
 				XYLO gives every member in your organization unlimited Pro access — and gives you
 				a dashboard that shows engagement without ever reading their conversations.
 			</p>
-			<div class="school-price-block">
-				<span class="school-price">Custom organization subscription</span>
-				<span class="school-price-note">14-day onboarding trial · activate billing from Settings</span>
+			<div class="org-price-block">
+				<span class="org-price">Custom organization subscription</span>
+				<span class="org-price-note">14-day onboarding trial · activate billing from Settings</span>
 			</div>
-			<div class="school-actions">
-				<a href="/auth/signup?type=school" class="plan-btn primary">
+			<div class="org-actions">
+				<a href="/auth/signup?type=org" class="plan-btn primary">
 					Register your organization
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -218,8 +218,8 @@
 			</div>
 		</div>
 
-		<ul class="school-features">
-			{#each schoolFeatures as feat}
+		<ul class="org-features">
+			{#each orgFeatures as feat}
 				<li>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
 					{feat}
@@ -305,7 +305,7 @@
 	<p class="cta-sub">Start free in 30 seconds. No credit card.</p>
 	<div class="cta-actions">
 		<a href="/auth/signup" class="cta-btn-primary">Create free account</a>
-		<a href="/auth/signup?type=school" class="cta-btn-ghost">Register your organization →</a>
+		<a href="/auth/signup?type=org" class="cta-btn-ghost">Register your organization →</a>
 	</div>
 </section>
 
@@ -566,14 +566,14 @@
 	white-space: nowrap;
 }
 
-/* ── School plan ── */
-.school-section {
+/* ── Org plan ── */
+.org-section {
 	max-width: 1100px;
 	margin: 0 auto;
 	padding: 3rem 2rem 0;
 }
 
-.school-inner {
+.org-inner {
 	display: grid;
 	grid-template-columns: 1.1fr 0.9fr;
 	gap: 4rem;
@@ -592,9 +592,9 @@
 		0 16px 48px oklch(18% 0.014 50 / 0.10);
 }
 
-.school-left { display: flex; flex-direction: column; gap: 1.25rem; }
+.org-left { display: flex; flex-direction: column; gap: 1.25rem; }
 
-.school-heading {
+.org-heading {
 	font-family: 'Fraunces', Georgia, serif;
 	font-optical-sizing: auto;
 	font-size: clamp(1.75rem, 3vw, 2.25rem);
@@ -604,13 +604,13 @@
 	color: var(--ink);
 }
 
-.school-body {
+.org-body {
 	font-size: 0.9375rem;
 	color: var(--ink-3);
 	line-height: 1.7;
 }
 
-.school-price-block {
+.org-price-block {
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
@@ -620,23 +620,23 @@
 	border-radius: 0.75rem;
 }
 
-.school-price {
+.org-price {
 	font-family: 'Fraunces', Georgia, serif;
 	font-size: 1.125rem;
 	font-weight: 600;
 	color: var(--ink);
 }
 
-.school-price-note {
+.org-price-note {
 	font-size: 0.8125rem;
 	color: var(--ink-3);
 	font-weight: 600;
 }
 
-.school-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-.school-actions .plan-btn { width: auto; flex: 1; min-width: 140px; }
+.org-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.org-actions .plan-btn { width: auto; flex: 1; min-width: 140px; }
 
-.school-features {
+.org-features {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -646,7 +646,7 @@
 	align-self: stretch;
 }
 
-.school-features li {
+.org-features li {
 	display: flex;
 	align-items: flex-start;
 	gap: 0.75rem;
@@ -657,7 +657,7 @@
 	color: var(--ink-2);
 	line-height: 1.45;
 }
-.school-features svg { color: var(--amber); flex-shrink: 0; margin-top: 0.2rem; }
+.org-features svg { color: var(--amber); flex-shrink: 0; margin-top: 0.2rem; }
 
 /* ── Compare table ── */
 .compare-section {
@@ -831,8 +831,8 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-	.school-inner { grid-template-columns: 1fr; gap: 2.5rem; }
-	.school-features { border-top: 1px solid var(--border); }
+	.org-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+	.org-features { border-top: 1px solid var(--border); }
 }
 
 @media (max-width: 720px) {
@@ -844,8 +844,8 @@
 
 @media (max-width: 600px) {
 	.pricing-hero { padding: 3.5rem 1.25rem 2.5rem; }
-	.plans-section, .school-section, .compare-section, .faq-section { padding: 0 1.25rem; }
-	.school-inner { padding: 2rem 1.5rem; }
+	.plans-section, .org-section, .compare-section, .faq-section { padding: 0 1.25rem; }
+	.org-inner { padding: 2rem 1.5rem; }
 	.cta-section { padding: 4rem 1.25rem; }
 }
 </style>

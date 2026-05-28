@@ -227,8 +227,8 @@
 			<p class="auth-switch">
 				New to XYLO? <a href="/auth/signup{joinCode ? `?join=${joinCode}` : ''}">Create a free account</a>
 			</p>
-			<p class="auth-switch-school">
-				Organization leader? <a href="/auth/signup?type=school">Register your organization →</a>
+			<p class="auth-switch-org">
+				Organization leader? <a href="/auth/signup?type=org">Register your organization →</a>
 			</p>
 		</div>
 
@@ -549,18 +549,18 @@
 	}
 	.auth-switch a:hover { color: var(--amber-deep); }
 
-	.auth-switch-school {
+	.auth-switch-org {
 		margin-top: 0.625rem;
 		font-size: 0.8125rem;
 		color: var(--ink-3);
 	}
-	.auth-switch-school a {
+	.auth-switch-org a {
 		color: var(--ink-3);
 		font-weight: 600;
 		margin-left: 0.25rem;
 		transition: color 0.15s;
 	}
-	.auth-switch-school a:hover { color: var(--ink); }
+	.auth-switch-org a:hover { color: var(--ink); }
 
 	.auth-success {
 		margin: 0;

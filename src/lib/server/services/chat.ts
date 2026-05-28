@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Profile, Organization } from '$lib/types/database';
 import { buildSystemPrompt } from '$lib/server/groq';
 import { getOrCreateConversation, saveMessage } from '$lib/server/repositories/conversation';
-import { incrementStudentActivity } from '$lib/server/repositories/activity';
+import { incrementMemberActivity } from '$lib/server/repositories/activity';
 import { logger } from '$lib/server/logger';
 import { orchestrateChatStream } from '$lib/server/ai/orchestrator';
 import { classifyTurn } from '$lib/server/ai/router';
@@ -29,7 +29,7 @@ export interface ChatContext {
 	admin: AdminClient;
 }
 
-function hasSchoolAccess(profile: Profile, org: Organization | null): boolean {
+function hasOrgAccess(profile: Profile, org: Organization | null): boolean {
 	if (!profile.org_id || !org) return false;
 	return org.plan_status === 'active' || org.plan_status === 'trialing';
 }
@@ -39,7 +39,7 @@ function hasPaidIndividualAccess(profile: Profile): boolean {
 }
 
 function hasUnlimitedAccess(profile: Profile, org: Organization | null): boolean {
-	return hasPaidIndividualAccess(profile) || hasSchoolAccess(profile, org);
+	return hasPaidIndividualAccess(profile) || hasOrgAccess(profile, org);
 }
 
 /**
@@ -124,7 +124,7 @@ export async function streamChatResponse(
 					await saveMessage(ctx.admin, conversationId, ctx.userId, 'assistant', assistantText);
 				}
 				if (ctx.profile.org_id) {
-					await incrementStudentActivity(ctx.admin, ctx.userId, ctx.profile.org_id);
+					await incrementMemberActivity(ctx.admin, ctx.userId, ctx.profile.org_id);
 				}
 
 				controller.close();

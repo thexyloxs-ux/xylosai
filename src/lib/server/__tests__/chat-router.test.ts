@@ -35,7 +35,7 @@ describe('classifyTurn', () => {
 			{
 				role: 'user',
 				content:
-					'Explain electrolysis step by step for a senior secondary school student and include one simple worked example.'
+					'Explain electrolysis step by step for a senior secondary org member and include one simple worked example.'
 			}
 		]);
 

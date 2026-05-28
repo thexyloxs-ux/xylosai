@@ -20,7 +20,7 @@
 
 		<nav class="site-nav" aria-label="Main navigation">
 			<a href="/#features"    class:active={activePage === 'features'}>Features</a>
-			<a href="/#schools"     class:active={activePage === 'schools'}>Organizations</a>
+			<a href="/#orgs"     class:active={activePage === 'orgs'}>Organizations</a>
 			<a href="/pricing"      class:active={activePage === 'pricing'}>Pricing</a>
 			<a href="/#faq"         class:active={activePage === 'faq'}>FAQ</a>
 		</nav>
@@ -49,7 +49,7 @@
 	{#if mobileOpen}
 		<div class="site-mobile-menu">
 			<a href="/#features" onclick={close}>Features</a>
-			<a href="/#schools"  onclick={close}>Organizations</a>
+			<a href="/#orgs"  onclick={close}>Organizations</a>
 			<a href="/pricing"   onclick={close} class:active={activePage === 'pricing'}>Pricing</a>
 			<a href="/#faq"      onclick={close}>FAQ</a>
 			<div class="site-mobile-ctas">

@@ -176,22 +176,22 @@ Unsubscribe: ${unsubUrl}
 	});
 }
 
-// ── School invite email ───────────────────────────────────────────────────────
+// ── Organization invite email ───────────────────────────────────────────────────────
 
 export async function sendInviteEmail(
 	to: string,
-	schoolName: string,
+	orgName: string,
 	inviteCode: string
 ): Promise<void> {
 	const inviteUrl = `${APP_URL}/join/${inviteCode}`;
-	const previewStr = `Full AI companion access — no cost to you, paid for by ${schoolName}.`;
+	const previewStr = `Full AI companion access — no cost to you, paid for by ${orgName}.`;
 
 	const html = shell(previewStr, `
   ${logoRow()}
   <tr>
     <td style="padding-bottom:12px;">
       <h1 style="margin:0;font-size:28px;font-weight:800;color:#f1f5f9;line-height:1.2;letter-spacing:-0.02em;">
-        ${schoolName} gave you free access to XYLO.
+        ${orgName} gave you free access to XYLO.
       </h1>
     </td>
   </tr>
@@ -207,14 +207,14 @@ export async function sendInviteEmail(
   <tr>
     <td style="padding-bottom:32px;">
       <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
-        ${schoolName} has an organization subscription, so you get <strong style="color:#f1f5f9;">unlimited access at zero cost.</strong>
+        ${orgName} has an organization subscription, so you get <strong style="color:#f1f5f9;">unlimited access at zero cost.</strong>
         Click below to activate your account.
       </p>
     </td>
   </tr>
   <tr>
     <td style="padding-bottom:24px;">
-      ${ctaButton(inviteUrl, `Join ${schoolName} on XYLO →`)}
+      ${ctaButton(inviteUrl, `Join ${orgName} on XYLO →`)}
     </td>
   </tr>
   <tr>
@@ -227,11 +227,11 @@ export async function sendInviteEmail(
   </tr>
   `);
 
-	const text = `${schoolName} gave you free access to XYLO.
+	const text = `${orgName} gave you free access to XYLO.
 
 XYLO is an AI-powered companion for individuals across Africa — understand hard topics, practice deliberately, build action plans, and stay consistent.
 
-${schoolName} pays for your subscription, so you get unlimited access at no cost.
+${orgName} pays for your subscription, so you get unlimited access at no cost.
 
 Activate your account: ${inviteUrl}
 
@@ -240,14 +240,14 @@ Activate your account: ${inviteUrl}
 	await resend.emails.send({
 		from: FROM,
 		to,
-		subject: `${schoolName} gave you free access to XYLO`,
+		subject: `${orgName} gave you free access to XYLO`,
 		html,
 		text,
 	});
 }
 
 function planLabel(planType: string) {
-	if (planType === 'school') return 'XYLO Organization';
+	if (planType === 'org') return 'XYLO Organization';
 	if (planType === 'pro') return 'XYLO Pro';
 	if (planType === 'plus') return 'XYLO Plus';
 	return 'XYLO';

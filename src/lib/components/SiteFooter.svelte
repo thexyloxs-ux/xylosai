@@ -20,7 +20,7 @@
 			<p class="sf-col-title">Product</p>
 			<a href="/pricing">Pricing</a>
 			<a href="/#features">Features</a>
-			<a href="/#schools">For Organizations</a>
+			<a href="/#orgs">For Organizations</a>
 			<a href="/#faq">FAQ</a>
 		</div>
 
@@ -29,7 +29,7 @@
 			<p class="sf-col-title">Account</p>
 			<a href="/auth/login">Sign in</a>
 			<a href="/auth/signup">Get started free</a>
-			<a href="/auth/signup?type=school">Organization signup</a>
+			<a href="/auth/signup?type=org">Organization signup</a>
 		</div>
 
 		<!-- Uses -->

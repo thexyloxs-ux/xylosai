@@ -11,7 +11,7 @@ const signupSchema = z.object({
 	email: z.string().trim().email(),
 	password: z.string().min(8).max(200),
 	isOrganization: z.boolean().default(false),
-	schoolName: z.string().trim().max(200).optional().default(''),
+	orgName: z.string().trim().max(200).optional().default(''),
 	country: z.string().trim().max(120).optional().default(''),
 	joinCode: z.string().trim().max(64).optional().nullable()
 });
@@ -31,20 +31,20 @@ export const POST: RequestHandler = async ({ request }) => {
 	const parsed = signupSchema.safeParse(payload);
 	if (!parsed.success) throw error(400, 'Invalid request body');
 
-	const { fullName, email, password, isOrganization, schoolName, country, joinCode } = parsed.data;
+	const { fullName, email, password, isOrganization, orgName, country, joinCode } = parsed.data;
 	const admin = createSupabaseAdminClient();
 	const metadata: Record<string, string> = {
 		full_name: fullName,
-		role: isOrganization ? 'school_admin' : 'individual'
+		role: isOrganization ? 'org_admin' : 'individual'
 	};
 
 	if (isOrganization) {
-		metadata.school_name = schoolName;
+		metadata.org_name = orgName;
 		metadata.country = country;
 	}
 
 	if (joinCode) {
-		metadata.role = 'student';
+		metadata.role = 'member';
 		metadata.join_code = joinCode;
 	}
 

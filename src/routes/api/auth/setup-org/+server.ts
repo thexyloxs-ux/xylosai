@@ -7,7 +7,7 @@ import { createSupabaseAdminClient } from '$lib/server/supabase';
 import type { RequestHandler } from './$types';
 
 const setupOrgSchema = z.object({
-	schoolName: z.string().min(1).max(200),
+	orgName: z.string().min(1).max(200),
 	country: z.string().min(1).max(100).optional(),
 	curriculum: z.string().max(100).optional(),
 	seatLimit: z.number().int().min(1).max(10000).optional(),
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const raw = await request.json().catch(() => null);
 	const parsed = setupOrgSchema.safeParse(raw);
 	if (!parsed.success) throw error(400, 'Invalid request body');
-	const { schoolName, country, curriculum, seatLimit, completeOnboarding = true } = parsed.data;
+	const { orgName, country, curriculum, seatLimit, completeOnboarding = true } = parsed.data;
 
 	const admin = createSupabaseAdminClient();
 	await ensureProfileForUser(admin, user);
@@ -35,19 +35,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.eq('id', user.id)
 		.single();
 
-	if (existing?.role === 'student') {
+	if (existing?.role === 'member') {
 		throw error(403, 'Member accounts cannot create organizations');
 	}
 
 	if (existing?.org_id) {
-		if (existing.role !== 'school_admin') {
+		if (existing.role !== 'org_admin') {
 			throw error(409, 'Organization already set up for this account');
 		}
 
 		const { error: orgUpdateErr } = await admin
 			.from('organizations')
 			.update({
-				name: schoolName,
+				name: orgName,
 				country,
 				curriculum,
 				seat_limit: seatLimit ?? 30,
@@ -79,12 +79,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const { data: org, error: orgErr } = await admin
 		.from('organizations')
 		.insert({
-			name: schoolName,
+			name: orgName,
 			country,
 			curriculum,
 			invite_code: inviteCode,
 			seat_limit: seatLimit ?? 30,
-			plan: 'school',
+			plan: 'org',
 			plan_status: 'trialing'
 		})
 		.select()
@@ -99,7 +99,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.from('profiles')
 		.update({
 			org_id: org.id,
-			role: 'school_admin',
+			role: 'org_admin',
 			onboarded: completeOnboarding,
 		})
 		.eq('id', user.id);

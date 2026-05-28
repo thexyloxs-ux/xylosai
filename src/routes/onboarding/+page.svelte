@@ -10,31 +10,31 @@
 	const profile  = $derived(data.profile);
 
 	const role          = $derived(data.onboardingRole ?? profile?.role ?? 'individual');
-	const isSchoolAdmin = $derived(role === 'school_admin');
+	const isOrgAdmin = $derived(role === 'org_admin');
 	const meta          = $derived((user?.user_metadata ?? {}) as Record<string, string>);
-	const joinedSchool  = $derived($page.url.searchParams.get('joined'));
+	const joinedOrg  = $derived($page.url.searchParams.get('joined'));
 
 	// ── Step state ──────────────────────────────────────────────────────────────
 	let step = $state(1);
 
-	const TOTAL_STEPS  = $derived(isSchoolAdmin ? 3 : 2);
+	const TOTAL_STEPS  = $derived(isOrgAdmin ? 3 : 2);
 	const stepNumbers  = $derived(Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1));
 	const progressPct  = $derived(((step - 1) / (TOTAL_STEPS - 1)) * 100);
 
 	const isAutoStep = $derived(
-		isSchoolAdmin ? step === 2 || step === 3 : step === 1
+		isOrgAdmin ? step === 2 || step === 3 : step === 1
 	);
 
 	// ── Field state ─────────────────────────────────────────────────────────────
-	let schoolName       = $state('');
+	let orgName       = $state('');
 	let country          = $state('');
 	// Prefill from user metadata once — only overwrites if the field is still empty
 	$effect(() => {
-		if (!schoolName) schoolName = meta.school_name ?? '';
+		if (!orgName) orgName = meta.org_name ?? '';
 		if (!country)    country    = meta.country ?? '';
 	});
 	let curriculum       = $state('');
-	let studentCount     = $state('');
+	let memberCount     = $state('');
 	let level            = $state('');
 	let selectedSubjects = $state<string[]>([]);
 	let challenge        = $state('');
@@ -44,7 +44,7 @@
 
 	// ── Content ─────────────────────────────────────────────────────────────────
 	const LEVELS = [
-		{ value: 'primary',      label: 'Primary School'   },
+		{ value: 'primary',      label: 'Primary Org'   },
 		{ value: 'jss',          label: 'Junior Secondary'  },
 		{ value: 'sss',          label: 'Senior Secondary'  },
 		{ value: 'university',   label: 'University'        },
@@ -80,18 +80,18 @@
 	const COUNTRIES = ['Nigeria', 'Kenya', 'Ghana', 'South Africa', 'Tanzania', 'Uganda', 'Rwanda', 'Senegal', 'Ivory Coast', 'Cameroon', 'Ethiopia', 'Other'] as const;
 	const SEAT_LIMIT: Record<string, number> = { '1–15': 15, '16–30': 30, '31–60': 60, '61–100': 100, '100+': 200 };
 
-	const subjectList = $derived(isSchoolAdmin ? (SUBJECTS[curriculum] ?? SUBJECTS.Other) : INDIVIDUAL_SUBJECTS);
+	const subjectList = $derived(isOrgAdmin ? (SUBJECTS[curriculum] ?? SUBJECTS.Other) : INDIVIDUAL_SUBJECTS);
 	const stepTitle   = $derived(
-		isSchoolAdmin
+		isOrgAdmin
 			? (['Organization Info', 'Curriculum', 'Members'][step - 1])
 			: (['Learning Path',  'Focus Areas'][step - 1])
 	);
 
 	function canProceed(): boolean {
-		if (isSchoolAdmin) {
-			if (step === 1) return schoolName.trim().length > 0 && country.length > 0;
+		if (isOrgAdmin) {
+			if (step === 1) return orgName.trim().length > 0 && country.length > 0;
 			if (step === 2) return curriculum.length > 0;
-			if (step === 3) return studentCount.length > 0;
+			if (step === 3) return memberCount.length > 0;
 		} else {
 			if (step === 1) return curriculum.length > 0;
 			if (step === 2) return selectedSubjects.length > 0;
@@ -121,15 +121,15 @@
 		saving = true;
 		error = '';
 		try {
-			if (isSchoolAdmin) {
+			if (isOrgAdmin) {
 				const res = await fetch('/api/auth/setup-org', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						schoolName: schoolName.trim(),
+						orgName: orgName.trim(),
 						country,
 						curriculum,
-						seatLimit: SEAT_LIMIT[studentCount] ?? 30,
+						seatLimit: SEAT_LIMIT[memberCount] ?? 30,
 						completeOnboarding: true,
 					}),
 				});
@@ -178,9 +178,9 @@
 			</div>
 		</div>
 
-		{#if joinedSchool}
+		{#if joinedOrg}
 			<div class="join-banner">
-				You're in. Finish onboarding to start working with {joinedSchool}.
+				You're in. Finish onboarding to start working with {joinedOrg}.
 			</div>
 		{/if}
 
@@ -191,7 +191,7 @@
 				<header class="step-head">
 					<p class="step-label">Step {step} · {stepTitle}</p>
 
-					{#if isSchoolAdmin}
+					{#if isOrgAdmin}
 						{#if step === 1}
 							<h1 class="step-title">Tell us about your organization.</h1>
 							<p class="step-desc">We'll personalize the XYLO experience for your members.</p>
@@ -216,13 +216,13 @@
 				<!-- Step content -->
 				<div class="step-body">
 
-					{#if isSchoolAdmin}
+					{#if isOrgAdmin}
 
 						{#if step === 1}
 							<div class="fields">
 								<div class="field">
 									<label for="sn">Organization name</label>
-									<input id="sn" class="ob-input" bind:value={schoolName} placeholder="St. Mary's College" />
+									<input id="sn" class="ob-input" bind:value={orgName} placeholder="St. Mary's College" />
 								</div>
 								<div class="field">
 									<label for="ct">Country</label>
@@ -248,7 +248,7 @@
 						{:else if step === 3}
 							<div class="ob-grid compact">
 								{#each STUDENT_COUNTS as n}
-									<button class="tile" class:active={studentCount === n} onclick={() => selectAndAdvance(() => (studentCount = n))}>
+									<button class="tile" class:active={memberCount === n} onclick={() => selectAndAdvance(() => (memberCount = n))}>
 										<span class="tile-label">{n}</span>
 										<span class="tile-sub">members</span>
 									</button>

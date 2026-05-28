@@ -3,7 +3,7 @@ import { createHmac } from 'crypto';
 
 const BASE = 'https://api.paystack.co';
 
-export type PaystackPlanType = 'plus' | 'pro' | 'school';
+export type PaystackPlanType = 'plus' | 'pro' | 'org';
 
 export interface PaystackTransaction {
 	reference: string;

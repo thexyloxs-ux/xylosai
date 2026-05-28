@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 		const profile = await ensureProfileForUser(createSupabaseAdminClient(), user);
 
 		if (profile?.onboarded) {
-			throw redirect(302, profile.role === 'school_admin' ? '/dashboard' : '/chat');
+			throw redirect(302, profile.role === 'org_admin' ? '/dashboard' : '/chat');
 		}
 	}
 

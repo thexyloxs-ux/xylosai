@@ -8,13 +8,13 @@ export const profile = writable<Profile | null>(null);
 export const authLoading = writable(true);
 
 export const isLoggedIn = derived(user, ($user) => !!$user);
-export const isSchoolAdmin = derived(
+export const isOrgAdmin = derived(
 	profile,
-	($profile) => $profile?.role === 'school_admin'
+	($profile) => $profile?.role === 'org_admin'
 );
-export const isStudent = derived(
+export const isMember = derived(
 	profile,
-	($profile) => $profile?.role === 'student'
+	($profile) => $profile?.role === 'member'
 );
 export const isPaid = derived(profile, ($profile) => {
 	if (!$profile) return false;

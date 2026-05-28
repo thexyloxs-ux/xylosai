@@ -3,7 +3,7 @@ import {
 	GOOGLE_CLIENT_SECRET,
 	PAYSTACK_PLUS_PLAN_CODE,
 	PAYSTACK_PRO_PLAN_CODE,
-	PAYSTACK_SCHOOL_PLAN_CODE
+	PAYSTACK_ORG_PLAN_CODE
 } from '$env/static/private';
 
 export function isConfiguredSecret(value: string | undefined): value is string {
@@ -28,6 +28,6 @@ export function getBillingAvailability() {
 	return {
 		plus: isConfiguredSecret(PAYSTACK_PLUS_PLAN_CODE),
 		pro: isConfiguredSecret(PAYSTACK_PRO_PLAN_CODE),
-		school: isConfiguredSecret(PAYSTACK_SCHOOL_PLAN_CODE)
+		org: isConfiguredSecret(PAYSTACK_ORG_PLAN_CODE)
 	};
 }

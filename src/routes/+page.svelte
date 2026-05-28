@@ -9,7 +9,7 @@
 		if ($isLoggedIn && $profile) {
 			const preview = new URLSearchParams(window.location.search).has('preview');
 			if (!preview) {
-				goto($profile.role === 'school_admin' ? '/dashboard' : '/chat');
+				goto($profile.role === 'org_admin' ? '/dashboard' : '/chat');
 			}
 		}
 	});
@@ -109,7 +109,7 @@
 
 			<p class="lp-hero-note">
 				No credit card · 5 free messages/day · 
-				For organizations: <a href="/auth/signup?type=school" style="text-decoration: underline; font-weight: 600;">Register here</a>
+				For organizations: <a href="/auth/signup?type=org" style="text-decoration: underline; font-weight: 600;">Register here</a>
 			</p>
 		</div>
 
@@ -323,16 +323,16 @@
 <!-- ═══════════════════════════════════════════════════
      § 8  FOR SCHOOLS
 ════════════════════════════════════════════════════ -->
-<section class="lp-section" id="schools">
+<section class="lp-section" id="orgs">
 	<div class="lp-container lp-split lp-split-flip">
 
-		<!-- Dark school card -->
-		<div class="lp-school-card lp-reveal">
-			<div class="lp-school-card-head">
-				<p class="lp-school-plan-label">Organization Plan</p>
-				<p class="lp-school-plan-trial">14-day free trial · No credit card</p>
+		<!-- Dark org card -->
+		<div class="lp-org-card lp-reveal">
+			<div class="lp-org-card-head">
+				<p class="lp-org-plan-label">Organization Plan</p>
+				<p class="lp-org-plan-trial">14-day free trial · No credit card</p>
 			</div>
-			<ul class="lp-school-features">
+			<ul class="lp-org-features">
 				{#each [
 					'Full AI access for all members',
 					'Admin engagement dashboard',
@@ -347,7 +347,7 @@
 					</li>
 				{/each}
 			</ul>
-			<a href="/auth/signup?type=school" class="lp-school-cta">Start free trial →</a>
+			<a href="/auth/signup?type=org" class="lp-org-cta">Start free trial →</a>
 		</div>
 
 		<!-- Text -->
@@ -373,7 +373,7 @@
 					</li>
 				{/each}
 			</ul>
-			<a href="/auth/signup?type=school" class="lp-btn-primary lp-btn-lg" style="margin-top: 2rem; display: inline-flex;">
+			<a href="/auth/signup?type=org" class="lp-btn-primary lp-btn-lg" style="margin-top: 2rem; display: inline-flex;">
 				Register your organization
 				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
@@ -438,7 +438,7 @@
 			<a href="/auth/login" class="lp-btn-ghost-dark lp-btn-lg">Sign in</a>
 		</div>
 		<p style="margin-top: 1.25rem; font-size: 0.9375rem; color: oklch(88% 0.01 85 / 0.8);">
-			For organizations: <a href="/auth/signup?type=school" style="color: var(--lp-amber); font-weight: 600; text-decoration: underline;">Register here</a>
+			For organizations: <a href="/auth/signup?type=org" style="color: var(--lp-amber); font-weight: 600; text-decoration: underline;">Register here</a>
 		</p>
 	</div>
 </section>
@@ -1146,8 +1146,8 @@
 }
 
 /* ─── § 8  SCHOOLS ───────────────────────────────── */
-.lp-school-card {
-	/* Dark Liquid Glass — school card */
+.lp-org-card {
+	/* Dark Liquid Glass — org card */
 	background: oklch(14% 0.012 50 / 0.92);
 	backdrop-filter: blur(28px) saturate(160%);
 	-webkit-backdrop-filter: blur(28px) saturate(160%);
@@ -1168,7 +1168,7 @@
 	overflow: hidden;
 }
 /* Ambient amber glow */
-.lp-school-card::before {
+.lp-org-card::before {
 	content: '';
 	position: absolute;
 	top: -40px; right: -40px;
@@ -1178,7 +1178,7 @@
 	z-index: 0;
 }
 /* Top reflection */
-.lp-school-card::after {
+.lp-org-card::after {
 	content: '';
 	position: absolute;
 	top: 0; left: 8%; right: 8%;
@@ -1194,8 +1194,8 @@
 	pointer-events: none;
 	z-index: 1;
 }
-.lp-school-card-head { margin-bottom: 2rem; }
-.lp-school-plan-label {
+.lp-org-card-head { margin-bottom: 2rem; }
+.lp-org-plan-label {
 	font-family: 'Fraunces', Georgia, serif;
 	font-optical-sizing: auto;
 	font-size: 1.375rem;
@@ -1203,11 +1203,11 @@
 	color: oklch(93% 0.01 85);
 	margin-bottom: 0.375rem;
 }
-.lp-school-plan-trial {
+.lp-org-plan-trial {
 	font-size: 0.8125rem;
 	color: oklch(60% 0.01 85);
 }
-.lp-school-features {
+.lp-org-features {
 	list-style: none;
 	padding: 0;
 	margin: 0 0 2rem 0;
@@ -1215,15 +1215,15 @@
 	flex-direction: column;
 	gap: 0.875rem;
 }
-.lp-school-features li {
+.lp-org-features li {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 	font-size: 0.9rem;
 	color: oklch(78% 0.01 85);
 }
-.lp-school-features li svg { color: var(--lp-amber); flex-shrink: 0; }
-.lp-school-cta {
+.lp-org-features li svg { color: var(--lp-amber); flex-shrink: 0; }
+.lp-org-cta {
 	display: block;
 	width: 100%;
 	text-align: center;
@@ -1237,7 +1237,7 @@
 	transition: background 0.2s;
 	margin-top: auto;
 }
-.lp-school-cta:hover { background: var(--lp-amber-dark); }
+.lp-org-cta:hover { background: var(--lp-amber-dark); }
 .lp-checklist {
 	list-style: none;
 	padding: 0;

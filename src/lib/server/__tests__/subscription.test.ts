@@ -17,7 +17,7 @@ function makeAdmin(overrides: Record<string, Record<string, unknown>> = {}) {
 	} as unknown as SupabaseClient;
 }
 
-const PROFILE = { email: 'student@school.edu', full_name: 'Test User', org_id: null };
+const PROFILE = { email: 'member@org.com', full_name: 'Test User', org_id: null };
 
 describe('activatePlan', () => {
 	beforeEach(() => vi.clearAllMocks());
@@ -46,13 +46,13 @@ describe('activatePlan', () => {
 
 		expect(result).toEqual({
 			userId: 'user-123',
-			email: 'student@school.edu',
+			email: 'member@org.com',
 			fullName: 'Test User',
 			planType: 'plus'
 		});
 	});
 
-	it('also updates the org when plan is school', async () => {
+	it('also updates the org when plan is org', async () => {
 		const admin = makeAdmin();
 		const from = admin.from as ReturnType<typeof vi.fn>;
 		const profileWithOrg = { ...PROFILE, org_id: 'org-456' };
@@ -74,24 +74,24 @@ describe('activatePlan', () => {
 			upsert: vi.fn().mockResolvedValue({ error: null })
 		}));
 
-		const result = await activatePlan(admin, 'user-123', 'school');
+		const result = await activatePlan(admin, 'user-123', 'org');
 
 		expect(orgUpdate).toHaveBeenCalled();
-		expect(result.planType).toBe('school');
+		expect(result.planType).toBe('org');
 	});
 
-	it('downgrades school members to free when a school subscription is canceled', async () => {
+	it('downgrades org members to free when a org subscription is canceled', async () => {
 		const admin = makeAdmin();
 		const from = admin.from as ReturnType<typeof vi.fn>;
-		const schoolProfile = {
-			email: 'admin@school.edu',
-			full_name: 'School Admin',
+		const orgProfile = {
+			email: 'admin@org.com',
+			full_name: 'Organization admin',
 			org_id: 'org-456',
-			plan: 'school'
+			plan: 'org'
 		};
 
 		from.mockImplementationOnce(() => ({
-			select: () => ({ eq: () => ({ single: vi.fn().mockResolvedValue({ data: schoolProfile, error: null }) }) })
+			select: () => ({ eq: () => ({ single: vi.fn().mockResolvedValue({ data: orgProfile, error: null }) }) })
 		}));
 		const profileUpdate = vi.fn().mockResolvedValue({ error: null });
 		from.mockImplementationOnce(() => ({
@@ -107,7 +107,7 @@ describe('activatePlan', () => {
 		const result = await markSubscriptionCancelled(admin, 'user-123', 'canceled');
 
 		expect(profileUpdate).toHaveBeenCalled();
-		expect(result?.planType).toBe('school');
+		expect(result?.planType).toBe('org');
 	});
 
 	it('throws if the profile fetch fails', async () => {

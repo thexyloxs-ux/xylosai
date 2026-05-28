@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import type { Organization, StudentWithActivity } from '$lib/types/database';
+	import type { Organization, MemberWithActivity } from '$lib/types/database';
 
-	const { data } = $props<{ data: App.PageData & { org: Organization | null; students: StudentWithActivity[] } }>();
+	const { data } = $props<{ data: App.PageData & { org: Organization | null; members: MemberWithActivity[] } }>();
 	const org = $derived(data.org);
 
-	let students = $state<StudentWithActivity[]>([]);
-	$effect(() => { students = data.students; });
+	let members = $state<MemberWithActivity[]>([]);
+	$effect(() => { members = data.members; });
 
-	const totalStudents = $derived(students.length);
-	const activeToday = $derived(students.filter((s) => s.messages_this_week > 0 || s.last_active?.startsWith(new Date().toISOString().slice(0, 10))).length);
-	const activeThisWeek = $derived(students.filter((s) => s.messages_this_week > 0).length);
-	const totalMessagesToday = $derived(students.reduce((sum, s) => sum + (s.messages_this_week || 0), 0));
-	const weeklyEngagement = $derived(totalStudents > 0 ? Math.round((activeThisWeek / totalStudents) * 100) : 0);
+	const totalMembers = $derived(members.length);
+	const activeToday = $derived(members.filter((s) => s.messages_this_week > 0 || s.last_active?.startsWith(new Date().toISOString().slice(0, 10))).length);
+	const activeThisWeek = $derived(members.filter((s) => s.messages_this_week > 0).length);
+	const totalMessagesToday = $derived(members.reduce((sum, s) => sum + (s.messages_this_week || 0), 0));
+	const weeklyEngagement = $derived(totalMembers > 0 ? Math.round((activeThisWeek / totalMembers) * 100) : 0);
 
 	let codeCopied = $state(false);
 	function copyInviteCode() {
@@ -41,9 +41,9 @@
 		if (!value) return null;
 		return curriculumLabels[value] ?? value;
 	}
-	let filteredStudents = $derived(
+	let filteredMembers = $derived(
 		search.trim()
-			? students.filter((s: any) => {
+			? members.filter((s: any) => {
 					const q = search.toLowerCase();
 					return (
 						s.full_name?.toLowerCase().includes(q) ||
@@ -51,7 +51,7 @@
 						displayPath(s.curriculum)?.toLowerCase().includes(q)
 					);
 				})
-			: students
+			: members
 	);
 
 </script>
@@ -102,14 +102,14 @@
 				<p class="page-meta">
 					Plan: <strong>{org.plan}</strong>
 					&nbsp;·&nbsp;
-					Seats: <strong>{totalStudents} / {org.seat_limit}</strong>
+					Seats: <strong>{totalMembers} / {org.seat_limit}</strong>
 				</p>
 			</div>
 
 			<!-- ── Stats row ── -->
 			<div class="stats-row">
 				<div class="stat-item">
-					<span class="stat-num">{totalStudents}</span>
+					<span class="stat-num">{totalMembers}</span>
 					<span class="stat-label">Enrolled</span>
 				</div>
 				<div class="stat-divider"></div>
@@ -157,7 +157,7 @@
 						</div>
 					{/if}
 				</div>
-				<form method="POST" action="?/inviteStudents"
+				<form method="POST" action="?/inviteMembers"
 					use:enhance={() => {
 						inviteSending = true;
 						inviteResult = null;
@@ -197,8 +197,8 @@
 				<div class="table-head">
 					<div class="table-head-left">
 						<h2 class="table-title">Member Directory</h2>
-						<span class="student-count">
-							{filteredStudents.length}{search ? ` of ${totalStudents}` : ''} member{totalStudents !== 1 ? 's' : ''}
+						<span class="member-count">
+							{filteredMembers.length}{search ? ` of ${totalMembers}` : ''} member{totalMembers !== 1 ? 's' : ''}
 						</span>
 					</div>
 					<div class="search-wrap">
@@ -207,12 +207,12 @@
 					</div>
 				</div>
 
-				{#if students.length === 0}
+				{#if members.length === 0}
 					<div class="table-empty">
 						<p class="empty-heading">No members yet</p>
 						<p class="empty-sub">Share your invite code above to add your first members.</p>
 					</div>
-				{:else if filteredStudents.length === 0}
+				{:else if filteredMembers.length === 0}
 					<div class="table-empty">
 						<p class="empty-heading">No results for "{search}"</p>
 						<p class="empty-sub">Try a different name, level, or path.</p>
@@ -231,51 +231,51 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each filteredStudents as student}
-									<tr class:confirming={confirmId === student.id}>
-										<td class="name-cell">{student.full_name || 'Anonymous'}</td>
-										<td>{student.level || '—'}</td>
+								{#each filteredMembers as member}
+									<tr class:confirming={confirmId === member.id}>
+										<td class="name-cell">{member.full_name || 'Anonymous'}</td>
+										<td>{member.level || '—'}</td>
 										<td>
-											{#if student.curriculum}
-												<span class="curriculum-tag">{displayPath(student.curriculum)}</span>
+											{#if member.curriculum}
+												<span class="curriculum-tag">{displayPath(member.curriculum)}</span>
 											{:else}
 												<span class="not-set">Not set</span>
 											{/if}
 										</td>
 										<td>
-											{#if student.last_active}
-												{#if student.messages_today > 0}
+											{#if member.last_active}
+												{#if member.messages_today > 0}
 													<span class="status active"><span class="status-dot active"></span> Today</span>
 												{:else}
-													<span class="status inactive"><span class="status-dot"></span> {new Date(student.last_active).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+													<span class="status inactive"><span class="status-dot"></span> {new Date(member.last_active).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
 												{/if}
 											{:else}
 												<span class="not-set">Never</span>
 											{/if}
 										</td>
 										<td class="right">
-											<span class="msg-count" class:has-msgs={student.messages_this_week > 0}>
-												{student.messages_this_week}
+											<span class="msg-count" class:has-msgs={member.messages_this_week > 0}>
+												{member.messages_this_week}
 											</span>
 										</td>
 										<td class="action-cell">
-											{#if confirmId === student.id}
+											{#if confirmId === member.id}
 												<span class="confirm-label">Remove?</span>
-												<form method="POST" action="?/removeStudent"
+												<form method="POST" action="?/removeMember"
 													use:enhance={() => {
 														return ({ result }) => {
 															if (result.type === 'success') {
-																students = students.filter((s: any) => s.id !== student.id);
+																members = members.filter((s: any) => s.id !== member.id);
 															}
 															confirmId = null;
 														};
 													}}>
-													<input type="hidden" name="studentId" value={student.id} />
+													<input type="hidden" name="memberId" value={member.id} />
 													<button type="submit" class="btn-confirm">Yes</button>
 												</form>
 												<button class="btn-cancel" onclick={() => confirmId = null}>No</button>
 											{:else}
-												<button class="btn-remove" onclick={() => confirmId = student.id} title="Remove member">
+												<button class="btn-remove" onclick={() => confirmId = member.id} title="Remove member">
 													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
 												</button>
 											{/if}
@@ -553,7 +553,7 @@
 		color: var(--ink);
 	}
 
-	.student-count {
+	.member-count {
 		font-size: 0.75rem;
 		font-weight: 700;
 		color: var(--ink-3);

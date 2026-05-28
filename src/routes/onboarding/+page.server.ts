@@ -11,14 +11,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const profile = await ensureProfileForUser(createSupabaseAdminClient(), user);
 
 	if (profile?.onboarded) {
-		if (profile.role === 'school_admin') throw redirect(302, '/dashboard');
+		if (profile.role === 'org_admin') throw redirect(302, '/dashboard');
 		else throw redirect(302, '/chat');
 	}
 
 	const requestedRole = user.user_metadata?.role;
 	const onboardingRole =
-		profile?.role === 'school_admin' || (profile?.role === 'individual' && requestedRole === 'school_admin')
-			? 'school_admin'
+		profile?.role === 'org_admin' || (profile?.role === 'individual' && requestedRole === 'org_admin')
+			? 'org_admin'
 			: profile?.role ?? 'individual';
 
 	return { onboardingRole };

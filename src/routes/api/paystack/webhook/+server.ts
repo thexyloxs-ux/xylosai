@@ -10,14 +10,14 @@ import { createSupabaseAdminClient } from '$lib/server/supabase';
 import {
 	PAYSTACK_PLUS_PLAN_CODE,
 	PAYSTACK_PRO_PLAN_CODE,
-	PAYSTACK_SCHOOL_PLAN_CODE,
+	PAYSTACK_ORG_PLAN_CODE,
 } from '$env/static/private';
 import { activatePlan, cancelSubscription } from '$lib/server/services/subscription';
 import { sendPlanActivatedEmail, sendSubscriptionCancelledEmail } from '$lib/server/email';
 import type { RequestHandler } from './$types';
 
 function normalizePlanType(value: unknown): PaystackPlanType | null {
-	return value === 'plus' || value === 'pro' || value === 'school' ? value : null;
+	return value === 'plus' || value === 'pro' || value === 'org' ? value : null;
 }
 
 function transactionPlanCode(transaction: PaystackTransaction): string | null {
@@ -42,7 +42,7 @@ function transactionSubscription(transaction: PaystackTransaction) {
 }
 
 function expectedPlanCode(planType: PaystackPlanType): string {
-	if (planType === 'school') return PAYSTACK_SCHOOL_PLAN_CODE;
+	if (planType === 'org') return PAYSTACK_ORG_PLAN_CODE;
 	if (planType === 'pro') return PAYSTACK_PRO_PLAN_CODE;
 	return PAYSTACK_PLUS_PLAN_CODE;
 }

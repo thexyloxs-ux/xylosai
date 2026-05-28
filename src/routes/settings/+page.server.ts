@@ -68,7 +68,7 @@ export const actions: Actions = {
 			.eq('id', user.id)
 			.single();
 
-		if (profile?.role !== 'school_admin' || !profile.org_id) {
+		if (profile?.role !== 'org_admin' || !profile.org_id) {
 			return fail(403, { message: 'Unauthorized' });
 		}
 

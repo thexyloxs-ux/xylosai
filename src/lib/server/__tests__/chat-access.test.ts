@@ -14,7 +14,7 @@ describe('enforceRateLimit', () => {
 		expect(() => enforceRateLimit(freeProfile as never, null)).toThrow(RateLimitError);
 	});
 
-	it('allows school users while the organization is active', () => {
+	it('allows org users while the organization is active', () => {
 		expect(() =>
 			enforceRateLimit(
 				{ ...freeProfile, org_id: 'org-1' } as never,
@@ -23,7 +23,7 @@ describe('enforceRateLimit', () => {
 		).not.toThrow();
 	});
 
-	it('falls back to free limits when the school plan is canceled', () => {
+	it('falls back to free limits when the org plan is canceled', () => {
 		expect(() =>
 			enforceRateLimit(
 				{ ...freeProfile, org_id: 'org-1' } as never,

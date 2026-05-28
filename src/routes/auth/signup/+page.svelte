@@ -3,14 +3,14 @@
 
 	const { data } = $props<{ data: App.PageData & { authAvailability?: { google?: boolean } } }>();
 
-	const isSchool = $derived($page.url.searchParams.get('type') === 'school');
+	const isOrg = $derived($page.url.searchParams.get('type') === 'org');
 	const joinCode = $derived($page.url.searchParams.get('join'));
 	const googleAvailable = $derived(data.authAvailability?.google ?? false);
 
 	let fullName = $state('');
 	let email = $state('');
 	let password = $state('');
-	let schoolName = $state('');
+	let orgName = $state('');
 	let country = $state('');
 	let showPassword = $state(false);
 	let loading = $state(false);
@@ -56,8 +56,8 @@
 				fullName,
 				email,
 				password,
-				isOrganization: isSchool,
-				schoolName,
+				isOrganization: isOrg,
+				orgName,
 				country,
 				joinCode
 			})
@@ -104,7 +104,7 @@
 </script>
 
 <svelte:head>
-	<title>{isSchool ? 'Register your organization' : 'Create account'} — XYLO</title>
+	<title>{isOrg ? 'Register your organization' : 'Create account'} — XYLO</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -117,7 +117,7 @@
 	</nav>
 
 	<main class="auth-main">
-		<div class="auth-card" class:is-school={isSchool}>
+		<div class="auth-card" class:is-org={isOrg}>
 			{#if awaitingConfirmation}
 				<div class="auth-badge">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
@@ -164,10 +164,10 @@
 			{/if}
 
 			<h1 class="auth-heading">
-				{#if isSchool}Register your organization.{:else}Start learning free.{/if}
+				{#if isOrg}Register your organization.{:else}Start learning free.{/if}
 			</h1>
 			<p class="auth-sub">
-				{#if isSchool}
+				{#if isOrg}
 					14-day free trial. No credit card needed. Full access for all your members.
 				{:else}
 					5 messages a day, forever. No credit card. No nonsense.
@@ -176,16 +176,16 @@
 
 			{#if !joinCode}
 				<div class="type-toggle">
-					<a href="/auth/signup" class="toggle-btn" class:active={!isSchool}>
+					<a href="/auth/signup" class="toggle-btn" class:active={!isOrg}>
 						Individual
 					</a>
-					<a href="/auth/signup?type=school" class="toggle-btn" class:active={isSchool}>
+					<a href="/auth/signup?type=org" class="toggle-btn" class:active={isOrg}>
 						Organization
 					</a>
 				</div>
 			{/if}
 
-			{#if !isSchool}
+			{#if !isOrg}
 				{#if googleAvailable}
 				<a href={googleHref} class="google-btn">
 					<svg width="19" height="19" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -212,7 +212,7 @@
 
 			<form class="auth-form" onsubmit={handleSignup}>
 				<div class="field">
-					<label for="fullName">{isSchool ? 'Admin name' : 'Full name'}</label>
+					<label for="fullName">{isOrg ? 'Admin name' : 'Full name'}</label>
 					<input
 						id="fullName"
 						type="text"
@@ -223,13 +223,13 @@
 					/>
 				</div>
 
-				{#if isSchool}
+				{#if isOrg}
 					<div class="field">
-						<label for="schoolName">Organization name</label>
+						<label for="orgName">Organization name</label>
 						<input
-							id="schoolName"
+							id="orgName"
 							type="text"
-							bind:value={schoolName}
+							bind:value={orgName}
 							placeholder="St. Mary's College"
 							required
 						/>
@@ -302,7 +302,7 @@
 						<span class="spinner-white"></span>
 						Creating account…
 					{:else}
-						{isSchool ? 'Register Organization — Start Trial' : 'Create Free Account'}
+						{isOrg ? 'Register Organization — Start Trial' : 'Create Free Account'}
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 					{/if}
 				</button>
@@ -314,7 +314,7 @@
 			{/if}
 		</div>
 
-		{#if !isSchool}
+		{#if !isOrg}
 			<aside class="auth-aside">
 				<div class="aside-headline">
 					<span class="aside-label">Trusted by individuals across Africa</span>

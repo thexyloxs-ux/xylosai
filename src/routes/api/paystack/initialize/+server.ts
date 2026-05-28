@@ -3,7 +3,7 @@ import { initializeTransaction } from '$lib/server/paystack';
 import {
 	PAYSTACK_PLUS_PLAN_CODE,
 	PAYSTACK_PRO_PLAN_CODE,
-	PAYSTACK_SCHOOL_PLAN_CODE,
+	PAYSTACK_ORG_PLAN_CODE,
 } from '$env/static/private';
 import type { RequestHandler } from './$types';
 
@@ -28,8 +28,8 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	const plan = url.searchParams.get('plan');
 	const planType =
-		plan === 'school'
-			? 'school'
+		plan === 'org'
+			? 'org'
 			: plan === 'pro'
 				? 'pro'
 				: plan === 'plus' || !plan
@@ -54,13 +54,13 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		throw error(403, 'Profile not found');
 	}
 
-	if (planType === 'school' && (profile.role !== 'school_admin' || !profile.org_id)) {
+	if (planType === 'org' && (profile.role !== 'org_admin' || !profile.org_id)) {
 		throw error(403, 'Only organization admins can activate organization billing.');
 	}
 
 	const planCode =
-		planType === 'school'
-			? PAYSTACK_SCHOOL_PLAN_CODE
+		planType === 'org'
+			? PAYSTACK_ORG_PLAN_CODE
 			: planType === 'pro'
 				? PAYSTACK_PRO_PLAN_CODE
 				: PAYSTACK_PLUS_PLAN_CODE;

@@ -24,15 +24,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	// 2. Handle based on auth status
 	if (user) {
 		const profile = await ensureProfileForUser(admin, user);
-		const alreadyLinked = profile.org_id === org.id && profile.role === 'student';
+		const alreadyLinked = profile.org_id === org.id && profile.role === 'member';
 
-		const { count: studentCount } = await admin
+		const { count: memberCount } = await admin
 			.from('profiles')
 			.select('id', { count: 'exact', head: true })
 			.eq('org_id', org.id)
-			.eq('role', 'student');
+			.eq('role', 'member');
 
-		if (!alreadyLinked && (studentCount ?? 0) >= org.seat_limit) {
+		if (!alreadyLinked && (memberCount ?? 0) >= org.seat_limit) {
 			throw redirect(302, '/chat?error=invite_full');
 		}
 
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			.from('profiles')
 			.update({
 				org_id: org.id,
-				role: 'student',
+				role: 'member',
 			})
 			.eq('id', user.id);
 
@@ -55,13 +55,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		throw redirect(302, '/onboarding?joined=' + encodeURIComponent(org.name));
 	} else {
-		const { count: studentCount } = await admin
+		const { count: memberCount } = await admin
 			.from('profiles')
 			.select('id', { count: 'exact', head: true })
 			.eq('org_id', org.id)
-			.eq('role', 'student');
+			.eq('role', 'member');
 
-		if ((studentCount ?? 0) >= org.seat_limit) {
+		if ((memberCount ?? 0) >= org.seat_limit) {
 			throw redirect(302, '/auth/signup?error=invite_full');
 		}
 
