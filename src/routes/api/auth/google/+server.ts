@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { redirect } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { GOOGLE_CLIENT_ID } from '$env/static/private';
 import { getAuthAvailability } from '$lib/server/runtime-config';
 import type { RequestHandler } from './$types';
@@ -16,22 +17,18 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	const state = randomBytes(16).toString('hex');
 
-	cookies.set('oauth_state', state, {
+	const cookieOpts = {
 		path: '/',
 		httpOnly: true,
-		secure: true,
-		sameSite: 'lax',
+		secure: !dev,
+		sameSite: 'lax' as const,
 		maxAge: 600
-	});
+	};
+
+	cookies.set('oauth_state', state, cookieOpts);
 
 	if (next) {
-		cookies.set('oauth_next', next, {
-			path: '/',
-			httpOnly: true,
-			secure: true,
-			sameSite: 'lax',
-			maxAge: 600
-		});
+		cookies.set('oauth_next', next, cookieOpts);
 	}
 
 	const params = new URLSearchParams({
@@ -46,3 +43,4 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	throw redirect(302, `https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 };
+
