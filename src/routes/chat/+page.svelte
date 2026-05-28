@@ -469,12 +469,6 @@
 
 <style>
 	/* ── Tokens ── */
-	:global(html), :global(body) {
-		margin: 0;
-		padding: 0;
-		height: 100%;
-		overflow: hidden;
-	}
 
 	.chat-shell {
 		--cream:      oklch(97.5% 0.018 85);
