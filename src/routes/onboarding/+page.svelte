@@ -17,12 +17,12 @@
 	// ── Step state ──────────────────────────────────────────────────────────────
 	let step = $state(1);
 
-	const TOTAL_STEPS  = $derived(isSchoolAdmin ? 3 : 4);
+	const TOTAL_STEPS  = $derived(isSchoolAdmin ? 3 : 2);
 	const stepNumbers  = $derived(Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1));
 	const progressPct  = $derived(((step - 1) / (TOTAL_STEPS - 1)) * 100);
 
 	const isAutoStep = $derived(
-		isSchoolAdmin ? step === 2 || step === 3 : step === 1 || step === 2 || step === 4,
+		isSchoolAdmin ? step === 2 || step === 3 : step === 1
 	);
 
 	// ── Field state ─────────────────────────────────────────────────────────────
@@ -52,11 +52,11 @@
 	] as const;
 
 	const CURRICULA = [
-		{ value: 'WAEC',      label: 'WAEC',      sub: 'West Africa'      },
-		{ value: 'KCSE',      label: 'KCSE',      sub: 'Kenya'            },
-		{ value: 'BECE',      label: 'BECE',      sub: 'Ghana'            },
-		{ value: 'Cambridge', label: 'Cambridge', sub: 'International'    },
-		{ value: 'Other',     label: 'Other',     sub: 'Different system' },
+		{ value: 'WAEC',      label: 'Structured Core', sub: 'Broad fundamentals' },
+		{ value: 'KCSE',      label: 'Analytical Track', sub: 'Strong reasoning focus' },
+		{ value: 'BECE',      label: 'Applied Basics', sub: 'Step-by-step foundation' },
+		{ value: 'Cambridge', label: 'Global Standard', sub: 'Cross-context learning' },
+		{ value: 'Other',     label: 'Custom Path', sub: 'Something different' },
 	] as const;
 
 	const SUBJECTS: Record<string, readonly string[]> = {
@@ -67,10 +67,12 @@
 		Other:     ['English', 'Mathematics', 'Sciences', 'Humanities', 'Social Studies', 'Arts', 'ICT', 'Business', 'Languages'],
 	};
 
+	const INDIVIDUAL_SUBJECTS = ['IT', 'Business', 'Art', 'Writing', 'Design', 'Finance', 'Marketing'] as const;
+
 	const CHALLENGES = [
 		{ value: 'consistency',   label: 'Staying consistent'    },
 		{ value: 'understanding', label: 'Understanding concepts' },
-		{ value: 'exam_pressure', label: 'Exam pressure'          },
+		{ value: 'exam_pressure', label: 'Performance pressure'   },
 		{ value: 'motivation',    label: 'Staying motivated'      },
 	] as const;
 
@@ -78,11 +80,11 @@
 	const COUNTRIES = ['Nigeria', 'Kenya', 'Ghana', 'South Africa', 'Tanzania', 'Uganda', 'Rwanda', 'Senegal', 'Ivory Coast', 'Cameroon', 'Ethiopia', 'Other'] as const;
 	const SEAT_LIMIT: Record<string, number> = { '1–15': 15, '16–30': 30, '31–60': 60, '61–100': 100, '100+': 200 };
 
-	const subjectList = $derived(SUBJECTS[curriculum] ?? SUBJECTS.Other);
+	const subjectList = $derived(isSchoolAdmin ? (SUBJECTS[curriculum] ?? SUBJECTS.Other) : INDIVIDUAL_SUBJECTS);
 	const stepTitle   = $derived(
 		isSchoolAdmin
-			? (['School Info', 'Curriculum', 'Students'][step - 1])
-			: (['Your Level',  'Curriculum',  'Subjects', 'Challenge'][step - 1])
+			? (['Organization Info', 'Curriculum', 'Members'][step - 1])
+			: (['Learning Path',  'Focus Areas'][step - 1])
 	);
 
 	function canProceed(): boolean {
@@ -91,10 +93,8 @@
 			if (step === 2) return curriculum.length > 0;
 			if (step === 3) return studentCount.length > 0;
 		} else {
-			if (step === 1) return level.length > 0;
-			if (step === 2) return curriculum.length > 0;
-			if (step === 3) return selectedSubjects.length > 0;
-			if (step === 4) return challenge.length > 0;
+			if (step === 1) return curriculum.length > 0;
+			if (step === 2) return selectedSubjects.length > 0;
 		}
 		return false;
 	}
@@ -136,13 +136,13 @@
 
 				if (!res.ok) {
 					const body = await res.json().catch(() => ({}));
-					throw new Error(body.message || 'Could not set up your school');
+					throw new Error(body.message || 'Could not set up your organization');
 				}
 
 				goto('/dashboard');
 			} else {
 				const { error: profErr } = await supabase.from('profiles').update({
-					level, curriculum, subjects: selectedSubjects, study_challenge: challenge, onboarded: true,
+					level: null, curriculum, subjects: selectedSubjects, study_challenge: null, onboarded: true,
 				}).eq('id', user.id);
 				if (profErr) throw new Error(profErr.message);
 				goto('/chat');
@@ -180,7 +180,7 @@
 
 		{#if joinedSchool}
 			<div class="join-banner">
-				You're in. Finish onboarding to start learning with {joinedSchool}.
+				You're in. Finish onboarding to start working with {joinedSchool}.
 			</div>
 		{/if}
 
@@ -193,28 +193,22 @@
 
 					{#if isSchoolAdmin}
 						{#if step === 1}
-							<h1 class="step-title">Tell us about your school.</h1>
-							<p class="step-desc">We'll personalize the study experience for your students.</p>
+							<h1 class="step-title">Tell us about your organization.</h1>
+							<p class="step-desc">We'll personalize the XYLO experience for your members.</p>
 						{:else if step === 2}
-							<h1 class="step-title">Which curriculum?</h1>
-							<p class="step-desc">XYLO matches its knowledge base to your students' specific exams.</p>
+							<h1 class="step-title">Which learning path fits best?</h1>
+							<p class="step-desc">Choose the path that feels closest to how your members usually work and learn.</p>
 						{:else if step === 3}
-							<h1 class="step-title">How many students?</h1>
+							<h1 class="step-title">How many members?</h1>
 							<p class="step-desc">Sets your initial seat limit. You can adjust this any time.</p>
 						{/if}
 					{:else}
 						{#if step === 1}
-							<h1 class="step-title">What's your study level?</h1>
-							<p class="step-desc">XYLO adjusts its tone and depth to match your stage.</p>
+							<h1 class="step-title">Which learning path fits you best?</h1>
+							<p class="step-desc">This helps XYLO choose the right pace, structure, and examples for you.</p>
 						{:else if step === 2}
-							<h1 class="step-title">Which curriculum?</h1>
-							<p class="step-desc">Aligns XYLO with the exact syllabus you'll face in exams.</p>
-						{:else if step === 3}
-							<h1 class="step-title">Select your subjects.</h1>
-							<p class="step-desc">Pick up to 6. This tailors every study session.</p>
-						{:else if step === 4}
-							<h1 class="step-title">Your biggest challenge?</h1>
-							<p class="step-desc">Be honest — we'll shape your experience around it.</p>
+							<h1 class="step-title">Select your focus areas.</h1>
+							<p class="step-desc">Pick up to 6. This tailors every session.</p>
 						{/if}
 					{/if}
 				</header>
@@ -227,7 +221,7 @@
 						{#if step === 1}
 							<div class="fields">
 								<div class="field">
-									<label for="sn">School name</label>
+									<label for="sn">Organization name</label>
 									<input id="sn" class="ob-input" bind:value={schoolName} placeholder="St. Mary's College" />
 								</div>
 								<div class="field">
@@ -256,7 +250,7 @@
 								{#each STUDENT_COUNTS as n}
 									<button class="tile" class:active={studentCount === n} onclick={() => selectAndAdvance(() => (studentCount = n))}>
 										<span class="tile-label">{n}</span>
-										<span class="tile-sub">students</span>
+										<span class="tile-sub">members</span>
 									</button>
 								{/each}
 							</div>
@@ -265,18 +259,6 @@
 					{:else}
 
 						{#if step === 1}
-							<div class="ob-list">
-								{#each LEVELS as l}
-									<button class="row-tile" class:active={level === l.value} onclick={() => selectAndAdvance(() => (level = l.value))}>
-										<span class="row-label">{l.label}</span>
-										<span class="row-check">
-											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg>
-										</span>
-									</button>
-								{/each}
-							</div>
-
-						{:else if step === 2}
 							<div class="ob-grid">
 								{#each CURRICULA as c}
 									<button class="tile" class:active={curriculum === c.value} onclick={() => selectAndAdvance(() => (curriculum = c.value))}>
@@ -286,7 +268,7 @@
 								{/each}
 							</div>
 
-						{:else if step === 3}
+						{:else if step === 2}
 							<div class="chip-wrap">
 								{#each subjectList as s}
 									<button
@@ -298,18 +280,6 @@
 								{/each}
 							</div>
 							<p class="chip-count">{selectedSubjects.length}/6 selected</p>
-
-						{:else if step === 4}
-							<div class="ob-list">
-								{#each CHALLENGES as ch}
-									<button class="row-tile" class:active={challenge === ch.value} onclick={() => selectAndAdvance(() => (challenge = ch.value))}>
-										<span class="row-label">{ch.label}</span>
-										<span class="row-check">
-											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M20 6L9 17l-5-5"/></svg>
-										</span>
-									</button>
-								{/each}
-							</div>
 						{/if}
 
 					{/if}

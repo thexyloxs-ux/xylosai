@@ -1,10 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { createSupabaseBrowserClient } from '$lib/supabase';
 
 	const { data } = $props<{ data: App.PageData & { authAvailability?: { google?: boolean } } }>();
-	const supabase = createSupabaseBrowserClient();
 
 	const isSchool = $derived($page.url.searchParams.get('type') === 'school');
 	const joinCode = $derived($page.url.searchParams.get('join'));
@@ -38,7 +35,7 @@
 	$effect(() => {
 		const incoming = $page.url.searchParams.get('error');
 		if (incoming === 'invite_full') {
-			error = 'This school has reached its student limit. Ask the school admin to add more seats.';
+			error = 'This organization has reached its member limit. Ask the organization admin to add more seats.';
 		} else if (incoming === 'invalid_invite') {
 			error = 'This invite link is invalid or has expired.';
 		} else if (incoming === 'google_unavailable') {
@@ -52,52 +49,30 @@
 		resendMessage = '';
 		loading = true;
 
-		const metadata: Record<string, string> = {
-			full_name: fullName,
-			role: isSchool ? 'school_admin' : 'individual'
-		};
-		if (isSchool) {
-			metadata.school_name = schoolName;
-			metadata.country = country;
-		}
-		if (joinCode) {
-			metadata.role = 'student';
-			metadata.join_code = joinCode;
-		}
-
-		const { data, error: err } = await supabase.auth.signUp({
-			email,
-			password,
-			options: {
-				data: metadata,
-				emailRedirectTo: `${$page.url.origin}/auth/callback${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
-			}
+		const response = await fetch('/api/auth/signup', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				fullName,
+				email,
+				password,
+				isOrganization: isSchool,
+				schoolName,
+				country,
+				joinCode
+			})
 		});
 
-		if (err) {
-			error = friendlyAuthError(err.message);
-			loading = false;
-			return;
-		}
-
-		if (data.session) {
-			await fetch('/api/auth/welcome', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: fullName, email })
-			}).catch(() => {});
-
-			if (joinCode) goto(`/join/${joinCode}`);
-			else goto('/onboarding');
-			return;
-		}
-
-		if (data.user) {
-			confirmationEmail = email;
-			awaitingConfirmation = true;
-		}
-
+		const payload = await response.json().catch(() => null);
 		loading = false;
+
+		if (!response.ok) {
+			error = friendlyAuthError(payload?.message || payload?.error || 'Unable to create account right now.');
+			return;
+		}
+
+		confirmationEmail = email;
+		awaitingConfirmation = true;
 	}
 
 	async function resendConfirmation() {
@@ -107,16 +82,18 @@
 		error = '';
 		resendMessage = '';
 
-		const { error: resendError } = await supabase.auth.resend({
-			type: 'signup',
-			email: confirmationEmail,
-			options: {
-				emailRedirectTo: `${$page.url.origin}/auth/callback${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
-			}
+		const response = await fetch('/api/auth/resend-confirmation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				email: confirmationEmail,
+				joinCode
+			})
 		});
 
-		if (resendError) {
-			error = friendlyAuthError(resendError.message);
+		if (!response.ok) {
+			const payload = await response.json().catch(() => null);
+			error = friendlyAuthError(payload?.message || payload?.error || 'Unable to resend confirmation email.');
 			resendLoading = false;
 			return;
 		}
@@ -127,7 +104,7 @@
 </script>
 
 <svelte:head>
-	<title>{isSchool ? 'Register your school' : 'Create account'} — XYLO</title>
+	<title>{isSchool ? 'Register your organization' : 'Create account'} — XYLO</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -182,28 +159,28 @@
 			{#if joinCode}
 				<div class="auth-badge">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-					Joining via school invite
+					Joining via organization invite
 				</div>
 			{/if}
 
 			<h1 class="auth-heading">
-				{#if isSchool}Register your school.{:else}Start learning free.{/if}
+				{#if isSchool}Register your organization.{:else}Start learning free.{/if}
 			</h1>
 			<p class="auth-sub">
 				{#if isSchool}
-					14-day free trial. No credit card needed. Full access for all your students.
+					14-day free trial. No credit card needed. Full access for all your members.
 				{:else}
-					20 messages a day, forever. No credit card. No nonsense.
+					5 messages a day, forever. No credit card. No nonsense.
 				{/if}
 			</p>
 
 			{#if !joinCode}
 				<div class="type-toggle">
 					<a href="/auth/signup" class="toggle-btn" class:active={!isSchool}>
-						Student
+						Individual
 					</a>
 					<a href="/auth/signup?type=school" class="toggle-btn" class:active={isSchool}>
-						School
+						Organization
 					</a>
 				</div>
 			{/if}
@@ -248,7 +225,7 @@
 
 				{#if isSchool}
 					<div class="field">
-						<label for="schoolName">School name</label>
+						<label for="schoolName">Organization name</label>
 						<input
 							id="schoolName"
 							type="text"
@@ -325,7 +302,7 @@
 						<span class="spinner-white"></span>
 						Creating account…
 					{:else}
-						{isSchool ? 'Register School — Start Trial' : 'Create Free Account'}
+						{isSchool ? 'Register Organization — Start Trial' : 'Create Free Account'}
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 					{/if}
 				</button>
@@ -340,16 +317,16 @@
 		{#if !isSchool}
 			<aside class="auth-aside">
 				<div class="aside-headline">
-					<span class="aside-label">Trusted by students across Africa</span>
-					<p class="aside-tagline">The senior student who's available at midnight before your WAEC exam.</p>
+					<span class="aside-label">Trusted by individuals across Africa</span>
+					<p class="aside-tagline">The AI partner that's available when you need clarity, structure, or momentum.</p>
 				</div>
 
 				<div class="aside-features">
 					{#each [
-						{ num: '01', text: 'WAEC, JAMB, KCSE, BECE, Cambridge — all supported.' },
-						{ num: '02', text: 'Personalized study plans built around your exam date.' },
+						{ num: '01', text: 'Personalized guidance across a wide range of goals and focus areas.' },
+						{ num: '02', text: 'Structured plans built around your timeline and priorities.' },
 						{ num: '03', text: 'Streaks that build real daily habits over time.' },
-						{ num: '04', text: '20 free messages every day. No trial. No tricks.' },
+						{ num: '04', text: '5 free messages every day. No trial. No tricks.' },
 					] as feat}
 						<div class="aside-feat">
 							<span class="feat-num">{feat.num}</span>
@@ -361,14 +338,14 @@
 		{:else}
 			<aside class="auth-aside">
 				<div class="aside-headline">
-					<span class="aside-label">For school leaders</span>
-					<p class="aside-tagline">One dashboard. Every student's engagement, at a glance.</p>
+					<span class="aside-label">For organization leaders</span>
+					<p class="aside-tagline">One dashboard. Every member's engagement, at a glance.</p>
 				</div>
 				<div class="aside-features">
 					{#each [
-						{ num: '01', text: 'One subscription covers all your students.' },
+						{ num: '01', text: 'One subscription covers all your members.' },
 						{ num: '02', text: 'See who\'s engaged and who\'s struggling — before it\'s a crisis.' },
-						{ num: '03', text: 'Student conversations remain fully private.' },
+						{ num: '03', text: 'Member conversations remain fully private.' },
 						{ num: '04', text: '14-day free trial. No credit card required.' },
 					] as feat}
 						<div class="aside-feat">

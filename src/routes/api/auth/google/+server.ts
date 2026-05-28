@@ -1,13 +1,13 @@
 import { randomBytes } from 'node:crypto';
 import { redirect } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID } from '$env/static/private';
-import { PUBLIC_APP_URL } from '$env/static/public';
 import { getAuthAvailability } from '$lib/server/runtime-config';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const source = url.searchParams.get('source') === 'signup' ? 'signup' : 'login';
 	const next = url.searchParams.get('next') ?? '';
+	const redirectUri = `${url.origin}/auth/google/callback`;
 
 	if (!getAuthAvailability().google) {
 		const joinParam = next.startsWith('/join/') ? `?join=${encodeURIComponent(next.slice('/join/'.length))}` : '';
@@ -36,7 +36,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	const params = new URLSearchParams({
 		client_id: GOOGLE_CLIENT_ID,
-		redirect_uri: `${PUBLIC_APP_URL}/auth/google/callback`,
+		redirect_uri: redirectUri,
 		response_type: 'code',
 		scope: 'openid email profile',
 		state,

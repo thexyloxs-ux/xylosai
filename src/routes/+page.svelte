@@ -15,34 +15,34 @@
 	});
 
 	const features = [
-		{ num: '01', title: 'Curriculum-Aligned', desc: 'Knows WAEC, JAMB, KCSE, BECE, and Cambridge by name — not by guess. Every answer is shaped by your actual syllabus.' },
-		{ num: '02', title: 'Personalized Study Plans', desc: 'Give XYLO your exam date. Get a day-by-day plan built around your actual life, not a generic template.' },
+		{ num: '01', title: 'Context-Aware Guidance', desc: 'Understands your level, your focus areas, and how you like to work. Every answer feels shaped for you, not copied from a template.' },
+		{ num: '02', title: 'Personalized Action Plans', desc: 'Tell XYLO what you are working toward and it turns that into a day-by-day plan that fits your real schedule.' },
 		{ num: '03', title: 'Daily Consistency', desc: 'Streaks and gentle check-ins that build lasting habits. Not motivation bursts. Real change over time.' },
-		{ num: '04', title: 'Emotionally Intelligent', desc: 'Academic pressure is real. XYLO acknowledges how you feel before diving into content. Never judgmental.' },
+		{ num: '04', title: 'Emotionally Intelligent', desc: 'Pressure is real. XYLO acknowledges how you feel before diving into the work. Never judgmental.' },
 		{ num: '05', title: 'Progress Tracking', desc: 'See exactly what you\'ve covered, what still needs work, and how your consistency compares week over week.' },
-		{ num: '06', title: 'School Dashboard', desc: 'Admins see who\'s engaged and who\'s struggling — without ever reading a student\'s private messages.' },
+		{ num: '06', title: 'Organization Dashboard', desc: 'Admins see who\'s engaged and who needs support — without ever reading a member\'s private messages.' },
 	];
 
 	const steps = [
-		{ num: '01', title: 'Sign up free', desc: 'No credit card. 20 AI messages per day, forever.' },
-		{ num: '02', title: 'Set your profile', desc: 'Level, curriculum, subjects. One setup, every answer personalized.' },
-		{ num: '03', title: 'Pick a mode', desc: 'Understand, quiz, plan, or exam prep — you choose how to learn.' },
+		{ num: '01', title: 'Sign up free', desc: 'No credit card. 5 AI messages per day, forever.' },
+		{ num: '02', title: 'Set your profile', desc: 'Level, learning path, focus areas. One setup, every answer personalized.' },
+		{ num: '03', title: 'Pick a mode', desc: 'Understand, quiz, plan, or deep practice — you choose how to learn.' },
 		{ num: '04', title: 'Build your streak', desc: 'Come back daily. XYLO remembers where you left off.' },
 	];
 
 	const faqs = [
-		{ q: 'Is XYLO really free?', a: '20 messages a day, forever. No credit card, no trial period that suddenly expires. Upgrade to unlimited when you\'re ready.' },
-		{ q: 'Which curriculums does XYLO support?', a: 'WAEC, NECO, JAMB (Nigeria), KCSE (Kenya), BECE and WASSCE (Ghana), Cambridge, IGCSE, and more are actively supported.' },
-		{ q: 'Can XYLO help with any subject?', a: 'Maths, English, Sciences, Humanities, Commerce — if it\'s in your curriculum, XYLO can teach it and quiz you on it.' },
-		{ q: 'Does XYLO replace my teacher?', a: 'No. XYLO fills the gap when your teacher isn\'t available. Think of it as the senior student who helps after school — available 24/7.' },
-		{ q: 'How does the school plan work?', a: 'One subscription covers all your students. You manage invites, see engagement data, and get billed per active student seat each month.' },
-		{ q: 'Is student chat private?', a: 'Yes. School admins only see engagement metrics — messages sent, active days, subjects studied. The actual conversations are never visible.' },
+		{ q: 'Is XYLO really free?', a: '5 messages a day, forever. No credit card, no trial period that suddenly expires. Upgrade to unlimited when you\'re ready.' },
+		{ q: 'How does XYLO personalize answers?', a: 'It uses your level, your chosen focus areas, and your recent activity to shape explanations, practice, and next steps.' },
+		{ q: 'Can XYLO help with different topics?', a: 'Yes. You can use XYLO for writing, problem-solving, revision, professional growth, planning, and focused practice across a wide range of topics.' },
+		{ q: 'Does XYLO replace a mentor or coach?', a: 'No. XYLO fills the gap when your usual support is unavailable. Think of it as a reliable companion that helps after hours and keeps momentum going.' },
+		{ q: 'How does the organization plan work?', a: 'One subscription covers all your members. You manage invites, see engagement data, and get billed per active member seat each month.' },
+		{ q: 'Are member chats private?', a: 'Yes. Organization admins only see engagement metrics — messages sent, active days, subjects studied. The actual conversations are never visible.' },
 	];
 
 	const testimonials = [
-		{ quote: 'XYLO explained organic chemistry in a way my teacher never did. I actually get it now.', name: 'Amara T.', role: 'SS3 · Lagos, Nigeria' },
-		{ quote: 'I prepped for KCSE maths every evening with XYLO. My grade jumped from C to A–.', name: 'Brian K.', role: 'Form 4 · Nairobi, Kenya' },
-		{ quote: 'The dashboard shows exactly who needs help before it becomes a crisis. Invaluable for our teachers.', name: 'Mrs. Adeola F.', role: 'Deputy Principal · Ibadan' },
+		{ quote: 'XYLO broke a hard topic into steps I could finally follow. I stopped feeling stuck and started moving again.', name: 'Amara T.', role: 'Individual member · Lagos, Nigeria' },
+		{ quote: 'I used XYLO every evening to sharpen my problem solving. My confidence changed before anything else did.', name: 'Brian K.', role: 'Individual member · Nairobi, Kenya' },
+		{ quote: 'The dashboard shows exactly who needs support before it becomes a bigger issue. That visibility matters.', name: 'Adeola F.', role: 'Operations lead · Ibadan' },
 	];
 
 	let openFaq = $state<number | null>(null);
@@ -55,16 +55,16 @@
 </script>
 
 <svelte:head>
-	<title>XYLO — AI Study Companion for African Students</title>
-	<meta name="description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
-	<meta property="og:title" content="XYLO — AI Study Companion for African Students" />
-	<meta property="og:description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
+	<title>XYLO — AI Companion for Individuals and Organizations</title>
+	<meta name="description" content="XYLO is the AI companion for individuals and organizations across Africa. Personalized, emotionally intelligent, and always available." />
+	<meta property="og:title" content="XYLO — AI Companion for Individuals and Organizations" />
+	<meta property="og:description" content="XYLO is the AI companion for individuals and organizations across Africa. Personalized, emotionally intelligent, and always available." />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://xyloss.tech" />
 	<meta property="og:image" content="https://xyloss.tech/og-image.png" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="XYLO — AI Study Companion for African Students" />
-	<meta name="twitter:description" content="XYLO is the AI academic companion built for African students. Curriculum-aligned, emotionally intelligent, always available." />
+	<meta name="twitter:title" content="XYLO — AI Companion for Individuals and Organizations" />
+	<meta name="twitter:description" content="XYLO is the AI companion for individuals and organizations across Africa. Personalized, emotionally intelligent, and always available." />
 	<meta name="twitter:image" content="https://xyloss.tech/og-image.png" />
 	<link rel="canonical" href="https://xyloss.tech" />
 </svelte:head>
@@ -89,14 +89,14 @@
 
 			<h1 class="lp-hero-h1">
 				Smarter Learning.<br>
-				Stronger Students.<br>
+				Stronger People.<br>
 				Better Outcomes.
 			</h1>
 
 			<p class="lp-hero-body">
-				The AI study companion built specifically for African students.
-				Knows your curriculum. Guides your sessions.
-				Keeps you consistent — and never makes you feel stupid.
+				The AI companion built for individuals and organizations across Africa.
+				Learns how you work. Guides your sessions.
+				Keeps you consistent — and never makes you feel small.
 			</p>
 
 			<div class="lp-hero-actions">
@@ -104,10 +104,11 @@
 					Start for free
 					<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
-				<a href="/auth/signup?type=school" class="lp-btn-outline lp-btn-lg">For schools →</a>
+				<a href="/auth/signup?type=school" class="lp-btn-outline lp-btn-lg">For organizations →</a>
+				<a href="/auth/login" class="lp-btn-outline lp-btn-lg">Sign in</a>
 			</div>
 
-			<p class="lp-hero-note">No credit card · 20 free messages/day · Cancel anytime</p>
+			<p class="lp-hero-note">No credit card · 5 free messages/day · Cancel anytime</p>
 		</div>
 
 		<!-- Chat preview -->
@@ -117,17 +118,17 @@
 					<span class="lp-dot lp-dot-r"></span>
 					<span class="lp-dot lp-dot-a"></span>
 					<span class="lp-dot lp-dot-g"></span>
-					<span class="lp-chat-card-label">XYLO · Study Session</span>
+					<span class="lp-chat-card-label">XYLO · Focus Session</span>
 				</div>
 				<div class="lp-chat-body">
 					<div class="lp-msg lp-msg-ai">
-						<strong>XYLO:</strong> Hi there! What would you like to learn today? 🌍
+						<strong>XYLO:</strong> Hi there! What would you like to work through today? 🌍
 					</div>
 					<div class="lp-msg lp-msg-user">
-						Help me understand photosynthesis for WAEC
+						Help me understand this concept in a simple way
 					</div>
 					<div class="lp-msg lp-msg-ai">
-						<strong>XYLO:</strong> Good choice — photosynthesis is in almost every WAEC Biology paper. Let's break it into three parts: what happens, where it happens, and why it matters. Ready?
+						<strong>XYLO:</strong> Good choice. Let's break it into three small parts: what it is, how it works, and why it matters. Ready?
 					</div>
 					<div class="lp-msg lp-msg-user">Yes, let's go!</div>
 					<div class="lp-msg lp-msg-ai lp-typing">
@@ -145,12 +146,12 @@
      § 3  CURRICULUM MARQUEE
 ════════════════════════════════════════════════════ -->
 <div class="lp-marquee-section">
-	<p class="lp-marquee-label">Curriculum coverage</p>
+	<p class="lp-marquee-label">How people use XYLO</p>
 	<div class="lp-marquee-track-wrap">
 		<!-- Row 1: left to right -->
 		<div class="lp-marquee-track">
 			<div class="lp-marquee-inner">
-				{#each ['WAEC', 'NECO', 'JAMB', 'KCSE', 'BECE', 'WASSCE', 'Cambridge', 'IGCSE', 'WAEC', 'NECO', 'JAMB', 'KCSE', 'BECE', 'WASSCE', 'Cambridge', 'IGCSE'] as c}
+				{#each ['Deep explanations', 'Focused practice', 'Daily planning', 'Writing support', 'Problem solving', 'Confidence building', 'Team insight', 'Progress tracking', 'Deep explanations', 'Focused practice', 'Daily planning', 'Writing support', 'Problem solving', 'Confidence building', 'Team insight', 'Progress tracking'] as c}
 					<span class="lp-marquee-chip">{c}</span>
 				{/each}
 			</div>
@@ -171,15 +172,15 @@
 
 		<div class="lp-bento lp-reveal">
 
-			<!-- Card 1: Hero — Curriculum-Aligned (spans 2 cols, row 1) -->
+			<!-- Card 1: Hero — Context-Aware Guidance (spans 2 cols, row 1) -->
 			<div class="lp-bento-card lp-bento-a lp-stagger">
 				<div class="lp-bento-icon">
 					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
 				</div>
-				<h3 class="lp-bento-title">Curriculum-Aligned</h3>
-				<p class="lp-bento-desc">Knows WAEC, JAMB, KCSE, BECE, and Cambridge by name — not by guess. Every answer is shaped by your actual syllabus.</p>
+				<h3 class="lp-bento-title">Context-Aware Guidance</h3>
+				<p class="lp-bento-desc">Every answer is shaped by your level, your focus, and the pace you need. It feels personal from the first session.</p>
 				<div class="lp-bento-tags">
-					{#each ['WAEC', 'JAMB', 'KCSE', 'BECE', 'Cambridge'] as tag}
+					{#each ['Focused', 'Practical', 'Personalized', 'Clear', 'Supportive'] as tag}
 						<span class="lp-bento-tag">{tag}</span>
 					{/each}
 				</div>
@@ -190,8 +191,8 @@
 				<div class="lp-bento-icon">
 					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
 				</div>
-				<h3 class="lp-bento-title">Personalized Study Plans</h3>
-				<p class="lp-bento-desc">Give XYLO your exam date. Get a day-by-day plan built around your actual life, not a generic template.</p>
+				<h3 class="lp-bento-title">Personalized Action Plans</h3>
+				<p class="lp-bento-desc">Turn a goal into a realistic plan with daily actions, checkpoints, and a pace you can actually sustain.</p>
 			</div>
 
 			<!-- Card 3: Daily Consistency (row 2, col 1) -->
@@ -221,13 +222,13 @@
 				<p class="lp-bento-desc">See exactly what you've covered, what still needs work, and how your consistency compares week over week.</p>
 			</div>
 
-			<!-- Card 6: School Dashboard (row 3, col 3) -->
+			<!-- Card 6: Organization Dashboard (row 3, col 3) -->
 			<div class="lp-bento-card lp-bento-f lp-stagger">
 				<div class="lp-bento-icon">
 					<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
 				</div>
-				<h3 class="lp-bento-title">School Dashboard</h3>
-				<p class="lp-bento-desc">Admins see who's engaged and who's struggling — without ever reading a student's private messages.</p>
+				<h3 class="lp-bento-title">Organization Dashboard</h3>
+				<p class="lp-bento-desc">Admins see who's engaged and who needs support — without ever reading a member's private messages.</p>
 			</div>
 
 		</div>
@@ -242,7 +243,7 @@
 	<div class="lp-container lp-split">
 
 		<div class="lp-split-text lp-reveal">
-			<p class="lp-eyebrow">Four study modes</p>
+			<p class="lp-eyebrow">Four focus modes</p>
 			<h2 class="lp-h2">Pick how you want to learn today</h2>
 			<p class="lp-body-lg">
 				Every session starts with a choice. Tell XYLO what kind of
@@ -254,8 +255,8 @@
 			{#each [
 				{ accent: 'oklch(32% 0.016 55)', label: 'Help me understand this topic', desc: 'Concepts broken down clearly with examples and follow-up questions' },
 				{ accent: 'oklch(50% 0.022 60)', label: 'Quiz me on what I know', desc: 'One question at a time, with feedback and a score at the end' },
-				{ accent: 'var(--lp-amber)', label: 'Create a study plan for me', desc: 'A structured daily plan based on your exam date and weak areas' },
-				{ accent: 'oklch(62% 0.018 65)', label: 'Exam prep mode', desc: 'High-yield topics, past question patterns, and tight summaries' },
+				{ accent: 'var(--lp-amber)', label: 'Create a plan for me', desc: 'A structured daily plan based on your goal, timing, and weak areas' },
+				{ accent: 'oklch(62% 0.018 65)', label: 'Deep practice mode', desc: 'Focused drills, tighter feedback, and compact summaries that help you perform better' },
 			] as m, i}
 				<div class="lp-mode-row lp-stagger">
 					<div class="lp-mode-index">{String(i + 1).padStart(2, '0')}</div>
@@ -300,7 +301,7 @@
 ════════════════════════════════════════════════════ -->
 <section class="lp-section lp-section-warm" id="testimonials">
 	<div class="lp-container">
-		<p class="lp-eyebrow lp-reveal" style="margin-bottom: 3rem">What students say</p>
+		<p class="lp-eyebrow lp-reveal" style="margin-bottom: 3rem">What people say</p>
 
 		<div class="lp-quotes lp-reveal">
 			{#each testimonials as t, i}
@@ -326,16 +327,16 @@
 		<!-- Dark school card -->
 		<div class="lp-school-card lp-reveal">
 			<div class="lp-school-card-head">
-				<p class="lp-school-plan-label">School Plan</p>
+				<p class="lp-school-plan-label">Organization Plan</p>
 				<p class="lp-school-plan-trial">14-day free trial · No credit card</p>
 			</div>
 			<ul class="lp-school-features">
 				{#each [
-					'Full AI access for all students',
+					'Full AI access for all members',
 					'Admin engagement dashboard',
 					'CSV reports & data export',
-					'Curriculum focus settings',
-					'Student management tools',
+					'Shared focus settings',
+					'Member management tools',
 					'Seat-based billing',
 				] as f}
 					<li>
@@ -349,19 +350,19 @@
 
 		<!-- Text -->
 		<div class="lp-split-text lp-reveal">
-			<p class="lp-eyebrow">For Schools & Institutions</p>
-			<h2 class="lp-h2">Give every student a personal AI tutor</h2>
+			<p class="lp-eyebrow">For Organizations & Institutions</p>
+			<h2 class="lp-h2">Give every member a personal AI tutor</h2>
 			<p class="lp-body-lg">
-				One subscription covers all your students. Set your curriculum,
+				One subscription covers all your members. Set your shared focus,
 				invite via link, and get real-time engagement data —
 				without ever reading private conversations.
 			</p>
 			<ul class="lp-checklist">
 				{#each [
 					'Admin dashboard with engagement metrics',
-					'Early identification of at-risk students',
-					'Student invites via link or email',
-					'Seat-based billing — pay only for enrolled students',
+					'Early identification of at-risk members',
+					'Member invites via link or email',
+					'Seat-based billing — pay only for enrolled members',
 					'14-day free trial, no commitment',
 				] as item}
 					<li>
@@ -371,7 +372,7 @@
 				{/each}
 			</ul>
 			<a href="/auth/signup?type=school" class="lp-btn-primary lp-btn-lg" style="margin-top: 2rem; display: inline-flex;">
-				Register your school
+				Register your organization
 				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
 		</div>
@@ -425,14 +426,15 @@
 ════════════════════════════════════════════════════ -->
 <section class="lp-cta-band">
 	<div class="lp-container lp-cta-inner lp-reveal">
-		<h2 class="lp-cta-h2">Ready to study smarter?</h2>
-		<p class="lp-cta-sub">Join thousands of African students preparing for their exams with XYLO.</p>
+		<h2 class="lp-cta-h2">Ready to move smarter?</h2>
+		<p class="lp-cta-sub">Join individuals and organizations across Africa building momentum with XYLO.</p>
 		<div class="lp-cta-actions">
 			<a href="/auth/signup" class="lp-btn-primary lp-btn-lg">
 				Get started free
 				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
-			<a href="/auth/signup?type=school" class="lp-btn-ghost-dark lp-btn-lg">Register your school</a>
+			<a href="/auth/signup?type=school" class="lp-btn-ghost-dark lp-btn-lg">Register your organization</a>
+			<a href="/auth/login" class="lp-btn-ghost-dark lp-btn-lg">Sign in</a>
 		</div>
 	</div>
 </section>

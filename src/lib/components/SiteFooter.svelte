@@ -7,7 +7,7 @@
 		<!-- Brand -->
 		<div class="sf-brand">
 			<span class="sf-logo">XYLO</span>
-			<p>The AI study companion built for African students. Always available.</p>
+			<p>The AI companion for individuals and organizations across Africa. Always available.</p>
 			<div class="sf-social">
 				<a href="https://twitter.com/xyloxs" aria-label="Twitter">𝕏</a>
 				<a href="https://instagram.com/xyloxs" aria-label="Instagram">Ig</a>
@@ -20,7 +20,7 @@
 			<p class="sf-col-title">Product</p>
 			<a href="/pricing">Pricing</a>
 			<a href="/#features">Features</a>
-			<a href="/#schools">For Schools</a>
+			<a href="/#schools">For Organizations</a>
 			<a href="/#faq">FAQ</a>
 		</div>
 
@@ -29,17 +29,17 @@
 			<p class="sf-col-title">Account</p>
 			<a href="/auth/login">Sign in</a>
 			<a href="/auth/signup">Get started free</a>
-			<a href="/auth/signup?type=school">School signup</a>
+			<a href="/auth/signup?type=school">Organization signup</a>
 		</div>
 
-		<!-- Curricula -->
+		<!-- Uses -->
 		<div class="sf-col">
-			<p class="sf-col-title">Curricula</p>
-			<span>WAEC / NECO</span>
-			<span>JAMB</span>
-			<span>KCSE</span>
-			<span>BECE / WASSCE</span>
-			<span>Cambridge / IGCSE</span>
+			<p class="sf-col-title">Use Cases</p>
+			<span>Deep explanations</span>
+			<span>Focused practice</span>
+			<span>Action plans</span>
+			<span>Progress tracking</span>
+			<span>Organization insight</span>
 		</div>
 	</div>
 

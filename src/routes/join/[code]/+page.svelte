@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Joining School | XYLO</title>
+	<title>Joining Organization | XYLO</title>
 </svelte:head>
 
 <div class="aw-page join-wrapper">
@@ -16,7 +16,7 @@
 			</div>
 			<div class="text-content">
 				<h1 class="join-title">Linking your account...</h1>
-				<p class="join-sub">Connecting you to your school's AI resources.</p>
+				<p class="join-sub">Connecting you to your organization's AI resources.</p>
 			</div>
 		</div>
 	</div>

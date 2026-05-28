@@ -6,9 +6,15 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const code = url.searchParams.get('code');
 	const next = url.searchParams.get('next');
+	const normalizedNext = next?.startsWith('/') ? next : null;
 
 	if (code) {
 		await locals.supabase.auth.exchangeCodeForSession(code);
+	}
+
+	if (normalizedNext === '/auth/login' || normalizedNext?.startsWith('/auth/login?')) {
+		await locals.supabase.auth.signOut();
+		throw redirect(302, normalizedNext);
 	}
 
 	// Check if the user has completed onboarding
@@ -25,5 +31,5 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 
 	// New user or not onboarded yet
-	throw redirect(302, next ?? '/onboarding');
+	throw redirect(302, normalizedNext ?? '/onboarding');
 };

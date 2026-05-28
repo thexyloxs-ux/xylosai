@@ -15,7 +15,13 @@
 	let activeTab = $state('profile');
 	let saving = $state(false);
 
-	const CURRICULA = ['WAEC', 'KCSE', 'BECE', 'Cambridge', 'Other'];
+	const CURRICULA = [
+		{ value: 'WAEC', label: 'Structured Core' },
+		{ value: 'KCSE', label: 'Analytical Track' },
+		{ value: 'BECE', label: 'Applied Basics' },
+		{ value: 'Cambridge', label: 'Global Standard' },
+		{ value: 'Other', label: 'Custom Path' }
+	];
 	const LEVELS = [
 		{ value: 'primary', label: 'Primary School' },
 		{ value: 'jss', label: 'Junior Secondary' },
@@ -39,7 +45,7 @@
 				: profile?.plan === 'pro'
 					? 'XYLO Pro'
 					: profile?.plan === 'school'
-						? 'XYLO School'
+						? 'XYLO Organization'
 						: 'XYLO Standard'
 	);
 	const isFreePlan = $derived(!profile?.plan || profile.plan === 'free');
@@ -123,12 +129,12 @@
 				</button>
 				<button class="nav-item" class:active={activeTab === 'academic'} onclick={() => activeTab = 'academic'}>
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
-					Academic Focus
+					Focus Profile
 				</button>
 				{#if profile?.role === 'school_admin'}
 					<button class="nav-item" class:active={activeTab === 'organization'} onclick={() => activeTab = 'organization'}>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 21v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/></svg>
-						My School
+						My Organization
 					</button>
 				{/if}
 				<button class="nav-item" class:active={activeTab === 'billing'} onclick={() => activeTab = 'billing'}>
@@ -178,8 +184,8 @@
 					{:else if activeTab === 'academic'}
 						<div class="section-head">
 							<p class="eyebrow">AI Personalisation</p>
-							<h1 class="section-title">Academic Focus</h1>
-							<p class="section-desc">XYLO uses this to tailor every response to your level and goals.</p>
+							<h1 class="section-title">Focus Profile</h1>
+							<p class="section-desc">XYLO uses this to tailor every response to your level, pace, and goals.</p>
 						</div>
 
 						<form method="POST" action="?/updateProfile"
@@ -188,7 +194,7 @@
 							<div class="card" style="margin-bottom: 1.5rem;">
 								<div class="field-row">
 									<div class="field">
-										<label for="level">Study Level</label>
+										<label for="level">Current Level</label>
 										<div class="select-wrap">
 											<select id="level" name="level" value={profile?.level}>
 												{#each LEVELS as l}<option value={l.value}>{l.label}</option>{/each}
@@ -197,10 +203,10 @@
 										</div>
 									</div>
 									<div class="field">
-										<label for="curriculum">Curriculum</label>
+										<label for="curriculum">Learning Path</label>
 										<div class="select-wrap">
 											<select id="curriculum" name="curriculum" value={profile?.curriculum}>
-												{#each CURRICULA as c}<option value={c}>{c}</option>{/each}
+												{#each CURRICULA as c}<option value={c.value}>{c.label}</option>{/each}
 											</select>
 											<svg class="select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
 										</div>
@@ -210,9 +216,9 @@
 
 							<div class="card" style="margin-bottom: 1.5rem;">
 								<div class="field">
-									<label for="studyChallenge">Biggest Study Challenge</label>
+									<label for="studyChallenge">Biggest Focus Challenge</label>
 									<textarea id="studyChallenge" name="studyChallenge" rows="3"
-										placeholder="e.g. I struggle with maths formulas and essay writing under time pressure"
+										placeholder="e.g. I struggle with staying focused and finishing complex tasks under time pressure"
 									>{profile?.study_challenge || ''}</textarea>
 									<p class="hint">XYLO reads this before every session.</p>
 								</div>
@@ -231,24 +237,24 @@
 									{/each}
 								</div>
 								<button type="submit" class="btn-primary" style="margin-top: 2rem;" disabled={saving}>
-									{saving ? 'Saving…' : 'Save Academic Focus'}
+									{saving ? 'Saving…' : 'Save Focus Profile'}
 								</button>
 							</div>
 						</form>
 
-					<!-- ── My School ── -->
+					<!-- ── My Organization ── -->
 					{:else if activeTab === 'organization'}
 						<div class="section-head">
 							<p class="eyebrow">Admin</p>
-							<h1 class="section-title">School Settings</h1>
-							<p class="section-desc">Manage your school's profile and student invite code.</p>
+							<h1 class="section-title">Organization Settings</h1>
+							<p class="section-desc">Manage your organization's profile and member invite code.</p>
 						</div>
 
 						<form method="POST" action="?/updateOrg"
 							use:enhance={() => { saving = true; return ({ update }) => { saving = false; update(); }; }}>
 							<div class="card">
 								<div class="field">
-									<label for="orgName">School Name</label>
+									<label for="orgName">Organization Name</label>
 									<input id="orgName" name="name" type="text" value={organization?.name} required />
 								</div>
 
@@ -266,11 +272,11 @@
 											{/if}
 										</button>
 									</div>
-									<p class="hint">Share this with students so they can join your school on XYLO.</p>
+									<p class="hint">Share this with members so they can join your organization on XYLO.</p>
 								</div>
 
 								<button type="submit" class="btn-primary" disabled={saving}>
-									{saving ? 'Saving…' : 'Update School Details'}
+									{saving ? 'Saving…' : 'Update Organization Details'}
 								</button>
 							</div>
 						</form>
@@ -300,10 +306,10 @@
 									<div class="meter-wrap">
 										<div class="meter-labels">
 											<span>Daily messages</span>
-											<span>{profile?.messages_today || 0} / 20</span>
+											<span>{profile?.messages_today || 0} / 5</span>
 										</div>
 										<div class="meter-rail">
-											<div class="meter-fill" style="width: {Math.min(((profile?.messages_today || 0) / 20) * 100, 100)}%"></div>
+											<div class="meter-fill" style="width: {Math.min(((profile?.messages_today || 0) / 5) * 100, 100)}%"></div>
 										</div>
 									</div>
 								{:else}
@@ -319,7 +325,7 @@
 							<div class="upgrade-card">
 								<div class="upgrade-text">
 									<h3>Upgrade your plan</h3>
-									<p>Unlimited messages, full history, and advanced exam tools.</p>
+									<p>Unlimited messages, full history, and deeper planning tools.</p>
 								</div>
 								<div class="billing-actions">
 									{#if billingAvailability.plus}
@@ -340,7 +346,7 @@
 									<h3>Manage membership</h3>
 									<p>
 										{#if profile?.plan === 'plus'}
-											Move to Pro for study plan and exam drill tools, or contact billing to change or cancel.
+											Move to Pro for stronger planning and guided practice tools, or contact billing to change or cancel.
 										{:else}
 											Contact billing to change your plan, update payment details, or cancel at period end.
 										{/if}
@@ -363,18 +369,18 @@
 						{#if profile?.role === 'school_admin'}
 							<div class="upgrade-card school-billing">
 								<div class="upgrade-text">
-									<h3>School billing</h3>
-									<p>School status: {organizationStatusLabel}. Student access stays private while billing is managed by the school admin.</p>
+									<h3>Organization billing</h3>
+									<p>Organization status: {organizationStatusLabel}. Member access stays private while billing is managed by the organization admin.</p>
 								</div>
 								<div class="billing-actions">
 									{#if organizationStatusLabel !== 'active' && billingAvailability.school}
-										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate school billing</a>
+										<a href="/api/paystack/initialize?plan=school" class="btn-primary">Activate organization billing</a>
 									{:else if organizationStatusLabel !== 'active'}
-										<div class="btn-primary btn-disabled">School checkout coming soon</div>
+										<div class="btn-primary btn-disabled">Organization checkout coming soon</div>
 									{/if}
 									<a href="/api/paystack/manage" class="btn-secondary">Manage on Paystack</a>
 									<form method="POST" action="/api/paystack/cancel">
-										<button type="submit" class="btn-secondary danger">Cancel school billing</button>
+										<button type="submit" class="btn-secondary danger">Cancel organization billing</button>
 									</form>
 								</div>
 							</div>

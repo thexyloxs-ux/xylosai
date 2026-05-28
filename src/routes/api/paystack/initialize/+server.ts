@@ -55,7 +55,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 
 	if (planType === 'school' && (profile.role !== 'school_admin' || !profile.org_id)) {
-		throw error(403, 'Only school admins can activate school billing.');
+		throw error(403, 'Only organization admins can activate organization billing.');
 	}
 
 	const planCode =

@@ -7,35 +7,35 @@
 
 	const studentFeatures = {
 		free: [
-			'20 AI messages per day — forever',
-			'WAEC, JAMB, KCSE, BECE & Cambridge',
-			'Understand, Quiz & Exam Prep modes',
+			'5 AI messages per day — forever',
+			'Personalized guidance across your focus areas',
+			'Understand, Quiz & Deep Practice modes',
 			'Conversation history (7 days)',
 		],
 		plus: [
 			'Unlimited AI messages',
-			'Understand, Quiz & Exam Prep modes',
+			'Understand, Quiz & Deep Practice modes',
 			'Full conversation history',
-			'Personalized academic focus',
+			'Personalized focus profile',
 			'Everything in Free',
 		],
 		pro: [
 			'Unlimited AI messages',
-			'All study modes + Study Plan builder',
+			'All focus modes + Plan builder',
 			'Full conversation history',
 			'Priority response speed',
-			'Exam countdown & daily reminders',
+			'Goal countdowns & daily reminders',
 			'Everything in Free',
 		],
 	};
 
 	const schoolFeatures = [
-		'Everything in Pro — for every student',
-		'School admin dashboard',
-		'Student engagement analytics',
+		'Everything in Pro — for every member',
+		'Organization admin dashboard',
+		'Member engagement analytics',
 		'Invite-code onboarding',
-		'Student conversations stay private',
-		'Billing activation from the school admin dashboard',
+		'Member conversations stay private',
+		'Billing activation from the organization admin dashboard',
 	];
 
 	const faqs = [
@@ -48,15 +48,15 @@
 			a: 'We use Paystack, so you can pay via card (Visa, Mastercard), bank transfer, or mobile money across Nigeria, Kenya, Ghana, and South Africa.',
 		},
 		{
-			q: 'How does the school seat limit work?',
-			a: 'School admins start with invite-code onboarding and activate school billing from their dashboard when the school is ready to go live.',
+			q: 'How does the organization seat limit work?',
+			a: 'Organization admins start with invite-code onboarding and activate organization billing from their dashboard when the organization is ready to go live.',
 		},
 		{
-			q: 'Is there a free trial for the school plan?',
-			a: 'Yes — 14 days free when you register your school, no credit card required. Full access for all your students during the trial.',
+			q: 'Is there a free trial for the organization plan?',
+			a: 'Yes — 14 days free when you register your organization, no credit card required. Full access for all your members during the trial.',
 		},
 		{
-			q: 'What happens if I hit the 20-message limit on Free?',
+			q: 'What happens if I hit the 5-message limit on Free?',
 			a: "You'll see a friendly nudge. Your history is preserved and your streak is safe. Limits reset every midnight.",
 		},
 	];
@@ -90,7 +90,7 @@
 	<p class="pricing-sub">No hidden fees. No expiring trials. The Free plan stays free forever.</p>
 </section>
 
-<!-- ── Student plans ── -->
+<!-- ── Individual plans ── -->
 <section class="plans-section">
 	<div class="plans-grid">
 
@@ -156,7 +156,7 @@
 					<span class="plan-price">₦5,000</span>
 					<span class="plan-cadence">/ month</span>
 				</div>
-				<p class="plan-tagline">Advanced tools for serious exam prep.</p>
+				<p class="plan-tagline">Advanced tools for deeper, more structured work.</p>
 			</div>
 			<ul class="plan-features">
 				{#each studentFeatures.pro as feat}
@@ -192,29 +192,29 @@
 
 <!-- ── Divider ── -->
 <div class="section-divider">
-	<span>For schools &amp; institutions</span>
+	<span>For organizations &amp; institutions</span>
 </div>
 
-<!-- ── School plan ── -->
+<!-- ── Organization plan ── -->
 <section class="school-section">
 	<div class="school-inner">
 		<div class="school-left">
-			<p class="section-eyebrow">School Plan</p>
-			<h2 class="school-heading">One subscription.<br>Every student covered.</h2>
+			<p class="section-eyebrow">Organization Plan</p>
+			<h2 class="school-heading">One subscription.<br>Every member covered.</h2>
 			<p class="school-body">
-				XYLO gives every student at your school unlimited Pro access — and gives you
+				XYLO gives every member in your organization unlimited Pro access — and gives you
 				a dashboard that shows engagement without ever reading their conversations.
 			</p>
 			<div class="school-price-block">
-				<span class="school-price">Custom school subscription</span>
+				<span class="school-price">Custom organization subscription</span>
 				<span class="school-price-note">14-day onboarding trial · activate billing from Settings</span>
 			</div>
 			<div class="school-actions">
 				<a href="/auth/signup?type=school" class="plan-btn primary">
-					Register your school
+					Register your organization
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
-				<a href="mailto:schools@xyloxs.com" class="plan-btn secondary">Talk to us first</a>
+				<a href="mailto:hello@xyloxs.com" class="plan-btn secondary">Talk to us first</a>
 			</div>
 		</div>
 
@@ -241,22 +241,22 @@
 					<th>Free</th>
 					<th class="col-pro">Plus</th>
 					<th>Pro</th>
-					<th>School</th>
+					<th>Organization</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each [
-					['Daily messages',          '20 / day',  'Unlimited', 'Unlimited', 'Unlimited'],
+					['Daily messages',          '5 / day',   'Unlimited', 'Unlimited', 'Unlimited'],
 					['Understand mode',          true,        true,        true,        true],
 					['Quiz mode',                true,        true,        true,        true],
-					['Exam Prep mode',           true,        true,        true,        true],
+					['Deep Practice mode',       true,        true,        true,        true],
 					['Study Plan builder',       false,       false,       true,        true],
 					['Conversation history',     '7 days',    'Full',      'Full',      'Full'],
 					['Priority response speed',  false,       false,       true,        true],
-					['Exam countdown reminders', false,       false,       true,        true],
+					['Goal countdown reminders', false,       false,       true,        true],
 					['Admin dashboard',          false,       false,       false,       true],
 					['Engagement analytics',     false,       false,       false,       true],
-					['Student privacy controls', false,       false,       false,       true],
+					['Member privacy controls', false,       false,       false,       true],
 				] as row}
 					<tr>
 						<td class="feature-col">{row[0]}</td>
@@ -301,11 +301,11 @@
 <!-- ── CTA band ── -->
 <section class="cta-section">
 	<p class="section-eyebrow light">Ready?</p>
-	<h2 class="cta-heading">Your next exam is closer<br>than you think.</h2>
+	<h2 class="cta-heading">Your next breakthrough is closer<br>than you think.</h2>
 	<p class="cta-sub">Start free in 30 seconds. No credit card.</p>
 	<div class="cta-actions">
 		<a href="/auth/signup" class="cta-btn-primary">Create free account</a>
-		<a href="/auth/signup?type=school" class="cta-btn-ghost">Register your school →</a>
+		<a href="/auth/signup?type=school" class="cta-btn-ghost">Register your organization →</a>
 	</div>
 </section>
 

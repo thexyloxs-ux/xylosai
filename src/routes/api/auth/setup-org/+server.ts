@@ -36,7 +36,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.single();
 
 	if (existing?.role === 'student') {
-		throw error(403, 'Student accounts cannot create organizations');
+		throw error(403, 'Member accounts cannot create organizations');
 	}
 
 	if (existing?.org_id) {

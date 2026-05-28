@@ -1,6 +1,5 @@
 import { redirect, error } from '@sveltejs/kit';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$env/static/private';
-import { PUBLIC_APP_URL } from '$env/static/public';
 import { logger } from '$lib/server/logger';
 import { createSupabaseAdminClient } from '$lib/server/supabase';
 import { ensureProfileForUser } from '$lib/server/profile';
@@ -11,6 +10,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 	const state = url.searchParams.get('state');
 	const storedState = cookies.get('oauth_state');
 	const next = cookies.get('oauth_next') ?? '';
+	const redirectUri = `${url.origin}/auth/google/callback`;
 
 	cookies.delete('oauth_state', { path: '/' });
 	cookies.delete('oauth_next', { path: '/' });
@@ -28,7 +28,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 			code,
 			client_id: GOOGLE_CLIENT_ID,
 			client_secret: GOOGLE_CLIENT_SECRET,
-			redirect_uri: `${PUBLIC_APP_URL}/auth/google/callback`,
+			redirect_uri: redirectUri,
 			grant_type: 'authorization_code'
 		})
 	});

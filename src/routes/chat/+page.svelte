@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
 	import type { Conversation, Organization, Profile } from '$lib/types/database';
@@ -16,6 +16,29 @@
 	const previewMode = $derived(Boolean(data.previewMode));
 	let conversations = $state<Conversation[]>([]);
 	$effect(() => { conversations = data.conversations; });
+
+	// ── Background Color Theme ──────────────────────────────────────────────────
+	let bgTheme = $state('dark'); // 'dark' | 'midnight' | 'charcoal' | 'light' | 'sepia'
+
+	onMount(() => {
+		const saved = localStorage.getItem('xylo-bg-theme');
+		if (saved) {
+			bgTheme = saved;
+		}
+	});
+
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.classList.remove('theme-dark', 'theme-midnight', 'theme-charcoal', 'theme-light', 'theme-sepia');
+			document.documentElement.classList.add(`theme-${bgTheme}`);
+			if (bgTheme === 'light' || bgTheme === 'sepia') {
+				document.documentElement.classList.add('light');
+			} else {
+				document.documentElement.classList.remove('light');
+			}
+			localStorage.setItem('xylo-bg-theme', bgTheme);
+		}
+	});
 
 	type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -271,6 +294,18 @@
 				</div>
 				<svg class="settings-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 			</a>
+
+			<div class="theme-changer">
+				<span class="theme-label">Background</span>
+				<div class="theme-dots">
+					<button class="theme-dot dark" class:active={bgTheme === 'dark'} onclick={() => bgTheme = 'dark'} title="Default Dark" aria-label="Default Dark"></button>
+					<button class="theme-dot midnight" class:active={bgTheme === 'midnight'} onclick={() => bgTheme = 'midnight'} title="Midnight Blue" aria-label="Midnight Blue"></button>
+					<button class="theme-dot charcoal" class:active={bgTheme === 'charcoal'} onclick={() => bgTheme = 'charcoal'} title="Charcoal" aria-label="Charcoal"></button>
+					<button class="theme-dot sepia" class:active={bgTheme === 'sepia'} onclick={() => bgTheme = 'sepia'} title="Warm Sepia" aria-label="Warm Sepia"></button>
+					<button class="theme-dot light" class:active={bgTheme === 'light'} onclick={() => bgTheme = 'light'} title="Soft Light" aria-label="Soft Light"></button>
+				</div>
+			</div>
+
 			<button
 				class="signout-btn"
 				onclick={async () => { await data.supabase.auth.signOut(); goto('/'); }}
@@ -406,7 +441,6 @@
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
 				</button>
 			</div>
-			<p class="input-note">XYLO can make mistakes. Verify important info.</p>
 		</div>
 	</div>
 </div>
@@ -616,6 +650,50 @@
 		text-align: center;
 	}
 	.signout-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+
+	/* ── Background Color Theme Switcher ── */
+	.theme-changer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 0.25rem;
+		margin: 0.25rem 0 0.75rem;
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
+	}
+	.theme-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--ink-3);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	.theme-dots {
+		display: flex;
+		gap: 0.375rem;
+	}
+	.theme-dot {
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		cursor: pointer;
+		padding: 0;
+		transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+	}
+	.theme-dot:hover {
+		transform: scale(1.2);
+	}
+	.theme-dot.active {
+		transform: scale(1.25);
+		border-color: var(--amber);
+		box-shadow: 0 0 0 2px var(--amber-deep);
+	}
+	.theme-dot.dark { background: #0f1117; }
+	.theme-dot.midnight { background: #090d16; }
+	.theme-dot.charcoal { background: #121212; }
+	.theme-dot.sepia { background: #f4ecd8; border-color: rgba(0, 0, 0, 0.15); }
+	.theme-dot.light { background: #ffffff; border-color: rgba(0, 0, 0, 0.15); }
 
 	/* ── Mobile bar ── */
 	.mobile-bar {

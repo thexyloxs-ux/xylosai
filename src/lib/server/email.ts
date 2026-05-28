@@ -1,9 +1,11 @@
 import { Resend } from 'resend';
 import { RESEND_API_KEY } from '$env/static/private';
 import { PUBLIC_APP_URL } from '$env/static/public';
+import { getCanonicalAppOrigin } from '$lib/app-origin';
 
 const resend = new Resend(RESEND_API_KEY);
 const FROM = 'XYLO <hello@contact.xyloss.tech>';
+const APP_URL = getCanonicalAppOrigin() || PUBLIC_APP_URL;
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
@@ -34,7 +36,7 @@ function shell(preview: string, body: string) {
           <tr>
             <td style="padding-top:32px;border-top:1px solid #1e2336;">
               <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.6;">
-                © 2026 XYLO · Smarter Learning. Stronger Students. Better Outcomes.
+                © 2026 XYLO · Smarter Learning. Stronger People. Better Outcomes.
               </p>
             </td>
           </tr>
@@ -75,8 +77,8 @@ function logoRow() {
 
 export async function sendWelcomeEmail(to: string, name: string): Promise<void> {
 	const firstName = name?.split(' ')[0] || '';
-	const chatUrl = `${PUBLIC_APP_URL}/chat`;
-	const unsubUrl = `${PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(to)}`;
+	const chatUrl = `${APP_URL}/chat`;
+	const unsubUrl = `${APP_URL}/unsubscribe?email=${encodeURIComponent(to)}`;
 
 	const greeting = firstName ? `You're in, ${firstName}.` : "You're in.";
 	const previewStr = `Your first session is one click away — ask XYLO anything.`;
@@ -93,16 +95,15 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
   <tr>
     <td style="padding-bottom:16px;">
       <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
-        XYLO is your AI study companion built for African students — ask it anything about
-        WAEC, JAMB, KCSE, Cambridge, or whatever you're studying right now.
+        XYLO is your AI companion for individuals across Africa — ask it anything you're trying to understand, practice, plan, or work through right now.
       </p>
     </td>
   </tr>
   <tr>
     <td style="padding-bottom:32px;">
       <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
-        Start by asking a question, uploading a past paper, or saying
-        <em>"build me a study plan for my maths exam in 3 weeks."</em>
+        Start by asking a question or saying
+        <em>"build me a 2-week action plan for this goal."</em>
       </p>
     </td>
   </tr>
@@ -120,8 +121,8 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
             <p style="margin:0;font-size:14px;color:#94a3b8;line-height:1.7;">
               💡 <strong style="color:#f1f5f9;">Understand</strong> — explain any topic simply<br/>
               📝 <strong style="color:#f1f5f9;">Quiz me</strong> — practice questions with instant feedback<br/>
-              📅 <strong style="color:#f1f5f9;">Study plan</strong> — personalised schedule to your exam<br/>
-              🎯 <strong style="color:#f1f5f9;">Exam prep</strong> — past questions, predicted topics, tactics
+              📅 <strong style="color:#f1f5f9;">Plan</strong> — a personalised schedule around your goal<br/>
+              🎯 <strong style="color:#f1f5f9;">Deep practice</strong> — tighter drills, feedback, and momentum
             </p>
           </td>
         </tr>
@@ -131,8 +132,8 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
   <tr>
     <td style="padding-bottom:32px;">
       <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.6;">
-        You have 20 free messages every day — no credit card, no trial.
-        <a href="${PUBLIC_APP_URL}/pricing" style="color:#f59e0b;text-decoration:none;">Upgrade to Pro</a>
+        You have 5 free messages every day — no credit card, no trial.
+        <a href="${APP_URL}/pricing" style="color:#f59e0b;text-decoration:none;">Upgrade to Pro</a>
         any time for unlimited access.
       </p>
     </td>
@@ -149,17 +150,17 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
 
 	const text = `Welcome to XYLO${firstName ? `, ${firstName}` : ''}!
 
-XYLO is your AI study companion for WAEC, JAMB, KCSE, Cambridge and more.
+XYLO is your AI companion for focused work, guided practice, and better follow-through.
 
 Start your first session: ${chatUrl}
 
 What you can do:
 - Understand: explain any topic simply
 - Quiz me: practice questions with instant feedback
-- Study plan: personalised schedule to your exam
-- Exam prep: past questions, predicted topics, tactics
+- Plan: personalised schedule around your goal
+- Deep practice: tighter drills, feedback, and momentum
 
-You have 20 free messages every day. Upgrade to Pro: ${PUBLIC_APP_URL}/pricing
+You have 5 free messages every day. Upgrade to Pro: ${APP_URL}/pricing
 
 Unsubscribe: ${unsubUrl}
 © 2026 XYLO`;
@@ -168,8 +169,8 @@ Unsubscribe: ${unsubUrl}
 		from: FROM,
 		to,
 		subject: firstName
-			? `You're in, ${firstName} — your study companion is ready`
-			: "You're in — your XYLO study companion is ready",
+			? `You're in, ${firstName} — your companion is ready`
+			: "You're in — your XYLO companion is ready",
 		html,
 		text,
 	});
@@ -182,8 +183,8 @@ export async function sendInviteEmail(
 	schoolName: string,
 	inviteCode: string
 ): Promise<void> {
-	const inviteUrl = `${PUBLIC_APP_URL}/join/${inviteCode}`;
-	const previewStr = `Full AI study companion — no cost to you, paid for by ${schoolName}.`;
+	const inviteUrl = `${APP_URL}/join/${inviteCode}`;
+	const previewStr = `Full AI companion access — no cost to you, paid for by ${schoolName}.`;
 
 	const html = shell(previewStr, `
   ${logoRow()}
@@ -197,16 +198,16 @@ export async function sendInviteEmail(
   <tr>
     <td style="padding-bottom:16px;">
       <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
-        XYLO is an AI-powered academic companion built for African students —
-        it helps you understand tough topics, quiz yourself, build study plans,
-        and prep for exams.
+        XYLO is an AI-powered companion for individuals across Africa —
+        it helps people understand hard things, practice deliberately, build action plans,
+        and stay consistent.
       </p>
     </td>
   </tr>
   <tr>
     <td style="padding-bottom:32px;">
       <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
-        ${schoolName} has a school subscription, so you get <strong style="color:#f1f5f9;">unlimited access at zero cost.</strong>
+        ${schoolName} has an organization subscription, so you get <strong style="color:#f1f5f9;">unlimited access at zero cost.</strong>
         Click below to activate your account.
       </p>
     </td>
@@ -228,7 +229,7 @@ export async function sendInviteEmail(
 
 	const text = `${schoolName} gave you free access to XYLO.
 
-XYLO is an AI-powered academic companion for African students — understand tough topics, quiz yourself, build study plans, and prep for exams.
+XYLO is an AI-powered companion for individuals across Africa — understand hard topics, practice deliberately, build action plans, and stay consistent.
 
 ${schoolName} pays for your subscription, so you get unlimited access at no cost.
 
@@ -246,7 +247,7 @@ Activate your account: ${inviteUrl}
 }
 
 function planLabel(planType: string) {
-	if (planType === 'school') return 'XYLO School';
+	if (planType === 'school') return 'XYLO Organization';
 	if (planType === 'pro') return 'XYLO Pro';
 	if (planType === 'plus') return 'XYLO Plus';
 	return 'XYLO';
@@ -259,7 +260,7 @@ export async function sendPlanActivatedEmail(
 ): Promise<void> {
 	const firstName = name?.split(' ')[0] || '';
 	const label = planLabel(planType);
-	const settingsUrl = `${PUBLIC_APP_URL}/settings`;
+	const settingsUrl = `${APP_URL}/settings`;
 	const greeting = firstName ? `${firstName}, your ${label} access is active.` : `Your ${label} access is active.`;
 
 	const html = shell(`${label} is active on your account.`, `
@@ -309,7 +310,7 @@ export async function sendSubscriptionCancelledEmail(
 ): Promise<void> {
 	const firstName = name?.split(' ')[0] || '';
 	const label = planLabel(planType);
-	const settingsUrl = `${PUBLIC_APP_URL}/settings`;
+	const settingsUrl = `${APP_URL}/settings`;
 	const greeting = firstName ? `${firstName}, your ${label} cancellation is recorded.` : `Your ${label} cancellation is recorded.`;
 
 	const html = shell(`${label} cancellation is recorded.`, `
@@ -347,6 +348,120 @@ Review membership: ${settingsUrl}
 		from: FROM,
 		to,
 		subject: `${label} cancellation recorded`,
+		html,
+		text
+	});
+}
+
+export async function sendConfirmationEmail(
+	to: string,
+	name: string | null,
+	actionUrl: string
+): Promise<void> {
+	const firstName = name?.split(' ')[0] || '';
+	const heading = firstName ? `${firstName}, confirm your XYLO account.` : 'Confirm your XYLO account.';
+
+	const html = shell('Confirm your XYLO account and sign in.', `
+  ${logoRow()}
+  <tr>
+    <td style="padding-bottom:12px;">
+      <h1 style="margin:0;font-size:28px;font-weight:800;color:#f1f5f9;line-height:1.2;letter-spacing:-0.02em;">
+        ${heading}
+      </h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:20px;">
+      <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
+        Finish setting up your account by confirming this email address. Once that is done, we’ll take you straight back to sign in.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:28px;">
+      ${ctaButton(actionUrl, 'Confirm email')}
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:18px;">
+      <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.7;">
+        If the button does not open, copy this link into your browser:
+        <br />
+        <span style="color:#94a3b8;word-break:break-all;">${actionUrl}</span>
+      </p>
+    </td>
+  </tr>
+  `);
+
+	const text = `${heading}
+
+Finish setting up your account by confirming this email address:
+${actionUrl}
+
+Once that is done, we’ll take you straight back to sign in.
+
+© 2026 XYLO`;
+
+	await resend.emails.send({
+		from: FROM,
+		to,
+		subject: 'Confirm your XYLO account',
+		html,
+		text
+	});
+}
+
+export async function sendPasswordResetEmail(
+	to: string,
+	actionUrl: string
+): Promise<void> {
+	const html = shell('Reset your XYLO password.', `
+  ${logoRow()}
+  <tr>
+    <td style="padding-bottom:12px;">
+      <h1 style="margin:0;font-size:28px;font-weight:800;color:#f1f5f9;line-height:1.2;letter-spacing:-0.02em;">
+        Reset your password.
+      </h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:20px;">
+      <p style="margin:0;font-size:16px;color:#94a3b8;line-height:1.6;">
+        A request was made to reset your XYLO password. Use the button below to choose a new one.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:28px;">
+      ${ctaButton(actionUrl, 'Set new password')}
+    </td>
+  </tr>
+  <tr>
+    <td style="padding-bottom:18px;">
+      <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.7;">
+        If you did not request this, you can safely ignore this email.
+        <br />
+        Or copy this link into your browser:
+        <br />
+        <span style="color:#94a3b8;word-break:break-all;">${actionUrl}</span>
+      </p>
+    </td>
+  </tr>
+  `);
+
+	const text = `Reset your XYLO password.
+
+Use this link to choose a new password:
+${actionUrl}
+
+If you did not request this, you can safely ignore this email.
+
+© 2026 XYLO`;
+
+	await resend.emails.send({
+		from: FROM,
+		to,
+		subject: 'Reset your XYLO password',
 		html,
 		text
 	});

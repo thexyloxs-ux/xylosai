@@ -30,6 +30,17 @@
 	let inviteResult = $state<{ sent: number; failed: number; message: string } | null>(null);
 
 	let search = $state('');
+	const curriculumLabels: Record<string, string> = {
+		WAEC: 'Structured Core',
+		KCSE: 'Analytical Track',
+		BECE: 'Applied Basics',
+		Cambridge: 'Global Standard',
+		Other: 'Custom Path'
+	};
+	function displayPath(value: string | null | undefined) {
+		if (!value) return null;
+		return curriculumLabels[value] ?? value;
+	}
 	let filteredStudents = $derived(
 		search.trim()
 			? students.filter((s: any) => {
@@ -37,7 +48,7 @@
 					return (
 						s.full_name?.toLowerCase().includes(q) ||
 						s.level?.toLowerCase().includes(q) ||
-						s.curriculum?.toLowerCase().includes(q)
+						displayPath(s.curriculum)?.toLowerCase().includes(q)
 					);
 				})
 			: students
@@ -46,7 +57,7 @@
 </script>
 
 <svelte:head>
-	<title>{org?.name || 'School'} Dashboard — XYLO</title>
+	<title>{org?.name || 'Organization'} Dashboard — XYLO</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -56,7 +67,7 @@
 		<div class="header-inner">
 			<div class="header-left">
 				<a href="/?preview" class="wordmark">XYLO</a>
-				<span class="admin-pill">School Admin</span>
+				<span class="admin-pill">Organization Admin</span>
 			</div>
 			<div class="header-actions">
 				<a href="/settings" class="settings-link">Settings</a>
@@ -78,8 +89,8 @@
 					<p class="no-org-label">Setup required</p>
 					<h2 class="no-org-heading">Organization not linked</h2>
 					<p class="no-org-body">
-						Your account isn't connected to a school organization yet.
-						Contact XYLO support or finish your setup to view student data.
+						Your account isn't connected to an organization yet.
+						Contact XYLO support or finish your setup to view member data.
 					</p>
 				</div>
 			</div>
@@ -123,11 +134,11 @@
 				</div>
 			</div>
 
-			<!-- ── Invite students ── -->
+			<!-- ── Invite members ── -->
 			<div class="invite-card">
 				<div class="invite-card-head">
 					<div>
-						<h2 class="invite-card-title">Invite Students</h2>
+						<h2 class="invite-card-title">Invite Members</h2>
 						<p class="invite-card-sub">Paste email addresses — one per line or comma-separated. Max 100 per batch.</p>
 					</div>
 					{#if org.invite_code}
@@ -162,7 +173,7 @@
 						class="invite-textarea"
 						name="emails"
 						bind:value={inviteEmails}
-						placeholder="student@school.edu&#10;another@school.edu&#10;..."
+						placeholder="member@company.com&#10;another@company.com&#10;..."
 						rows="4"
 					></textarea>
 					{#if inviteResult}
@@ -181,30 +192,30 @@
 				</form>
 			</div>
 
-			<!-- ── Student table ── -->
+			<!-- ── Member table ── -->
 			<div class="table-section">
 				<div class="table-head">
 					<div class="table-head-left">
-						<h2 class="table-title">Student Directory</h2>
+						<h2 class="table-title">Member Directory</h2>
 						<span class="student-count">
-							{filteredStudents.length}{search ? ` of ${totalStudents}` : ''} student{totalStudents !== 1 ? 's' : ''}
+							{filteredStudents.length}{search ? ` of ${totalStudents}` : ''} member{totalStudents !== 1 ? 's' : ''}
 						</span>
 					</div>
 					<div class="search-wrap">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-						<input class="search-input" type="search" placeholder="Search by name, level, curriculum…" bind:value={search} />
+						<input class="search-input" type="search" placeholder="Search by name, level, or path…" bind:value={search} />
 					</div>
 				</div>
 
 				{#if students.length === 0}
 					<div class="table-empty">
-						<p class="empty-heading">No students yet</p>
-						<p class="empty-sub">Share your invite code above to add your first students.</p>
+						<p class="empty-heading">No members yet</p>
+						<p class="empty-sub">Share your invite code above to add your first members.</p>
 					</div>
 				{:else if filteredStudents.length === 0}
 					<div class="table-empty">
 						<p class="empty-heading">No results for "{search}"</p>
-						<p class="empty-sub">Try a different name, level, or curriculum.</p>
+						<p class="empty-sub">Try a different name, level, or path.</p>
 					</div>
 				{:else}
 					<div class="table-wrap">
@@ -213,7 +224,7 @@
 								<tr>
 									<th>Name</th>
 									<th>Level</th>
-									<th>Curriculum</th>
+									<th>Path</th>
 									<th>Last active</th>
 									<th class="right">This week</th>
 									<th></th>
@@ -226,7 +237,7 @@
 										<td>{student.level || '—'}</td>
 										<td>
 											{#if student.curriculum}
-												<span class="curriculum-tag">{student.curriculum}</span>
+												<span class="curriculum-tag">{displayPath(student.curriculum)}</span>
 											{:else}
 												<span class="not-set">Not set</span>
 											{/if}
@@ -264,7 +275,7 @@
 												</form>
 												<button class="btn-cancel" onclick={() => confirmId = null}>No</button>
 											{:else}
-												<button class="btn-remove" onclick={() => confirmId = student.id} title="Remove student">
+												<button class="btn-remove" onclick={() => confirmId = student.id} title="Remove member">
 													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
 												</button>
 											{/if}

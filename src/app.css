@@ -408,3 +408,47 @@
     border-color: oklch(100% 0 0 / 0.18);
   }
 }
+
+/* ─── Dynamic Background Color Themes ────────────────────────── */
+:root.theme-dark {
+  --color-bg: var(--color-dark-base);
+  --color-surface: var(--color-dark-surface);
+  --color-card-bg: var(--color-dark-card);
+  --color-border: var(--color-dark-border);
+  --color-text: #f1f5f9;
+  --color-text-sub: #94a3b8;
+}
+:root.theme-midnight {
+  --color-bg: #090d16;
+  --color-surface: #101726;
+  --color-card-bg: #172033;
+  --color-border: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-sub: #94a3b8;
+}
+:root.theme-charcoal {
+  --color-bg: #121212;
+  --color-surface: #1e1e1e;
+  --color-card-bg: #262626;
+  --color-border: #2e2e2e;
+  --color-text: #f1f5f9;
+  --color-text-sub: #a3a3a3;
+}
+:root.theme-light {
+  --color-bg: var(--color-light-base);
+  --color-surface: var(--color-light-surface);
+  --color-card-bg: var(--color-light-card);
+  --color-border: var(--color-light-border);
+  --color-text: #0f172a;
+  --color-text-sub: #64748b;
+}
+:root.theme-sepia {
+  --color-bg: #f4ecd8;
+  --color-surface: #e9dfc9;
+  --color-card-bg: #fdfaf2;
+  --color-border: #dcd1ba;
+  --color-text: #433422;
+  --color-text-sub: #7c6a52;
+  --color-accent: #b45309;
+  --color-accent-hover: #92400e;
+}

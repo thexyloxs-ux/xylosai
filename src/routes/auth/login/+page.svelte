@@ -19,6 +19,8 @@
 		`/api/auth/google?source=login${joinCode ? `&next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
 	);
 	const needsConfirmation = $derived(error.toLowerCase().includes('email not confirmed'));
+	const confirmed = $derived($page.url.searchParams.get('confirmed') === '1');
+	const passwordReset = $derived($page.url.searchParams.get('reset') === '1');
 
 	function friendlyAuthError(message: string) {
 		const normalized = message.toLowerCase();
@@ -35,7 +37,7 @@
 			return;
 		}
 		if (incoming === 'invite_full') {
-			error = 'This school has reached its student limit. Ask the school admin to add more seats.';
+			error = 'This organization has reached its member limit. Ask the organization admin to add more seats.';
 			return;
 		}
 		if (incoming === 'google_unavailable') {
@@ -73,16 +75,18 @@
 		resendMessage = '';
 		error = '';
 
-		const { error: resendError } = await supabase.auth.resend({
-			type: 'signup',
-			email,
-			options: {
-				emailRedirectTo: `${$page.url.origin}/auth/callback${joinCode ? `?next=${encodeURIComponent(`/join/${joinCode}`)}` : ''}`
-			}
+		const response = await fetch('/api/auth/resend-confirmation', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				email,
+				joinCode
+			})
 		});
 
-		if (resendError) {
-			error = friendlyAuthError(resendError.message);
+		if (!response.ok) {
+			const payload = await response.json().catch(() => null);
+			error = friendlyAuthError(payload?.message || payload?.error || 'Unable to resend confirmation email.');
 			resendLoading = false;
 			return;
 		}
@@ -110,7 +114,7 @@
 			{#if joinCode}
 				<div class="auth-badge">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-					Accepting school invite
+					Accepting organization invite
 				</div>
 			{/if}
 
@@ -144,6 +148,14 @@
 			</div>
 
 			<form class="auth-form" onsubmit={handleLogin}>
+				{#if confirmed}
+					<p class="auth-success">Email confirmed. Sign in to continue.</p>
+				{/if}
+
+				{#if passwordReset}
+					<p class="auth-success">Password updated. Sign in with your new password.</p>
+				{/if}
+
 				<div class="field">
 					<label for="email">Email address</label>
 					<input
@@ -216,7 +228,7 @@
 				New to XYLO? <a href="/auth/signup{joinCode ? `?join=${joinCode}` : ''}">Create a free account</a>
 			</p>
 			<p class="auth-switch-school">
-				School leader? <a href="/auth/signup?type=school">Register your school →</a>
+				Organization leader? <a href="/auth/signup?type=school">Register your organization →</a>
 			</p>
 		</div>
 

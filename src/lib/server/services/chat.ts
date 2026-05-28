@@ -8,6 +8,7 @@ import { orchestrateChatStream } from '$lib/server/ai/orchestrator';
 import { classifyTurn } from '$lib/server/ai/router';
 
 type AdminClient = SupabaseClient<Database>;
+const FREE_DAILY_MESSAGE_LIMIT = 5;
 
 export class RateLimitError extends Error {
 	constructor(message: string) {
@@ -50,9 +51,9 @@ export function enforceRateLimit(profile: Profile, org: Organization | null): vo
 
 	const todayStr = new Date().toDateString();
 	const resetStr = new Date(profile.messages_today_reset_at).toDateString();
-	if (resetStr === todayStr && (profile.messages_today ?? 0) >= 20) {
+	if (resetStr === todayStr && (profile.messages_today ?? 0) >= FREE_DAILY_MESSAGE_LIMIT) {
 		throw new RateLimitError(
-			'Daily free limit reached (20 messages). Join a school or upgrade to Pro for unlimited access.'
+			`Daily free limit reached (${FREE_DAILY_MESSAGE_LIMIT} messages). Join an organization or upgrade to Pro for unlimited access.`
 		);
 	}
 }
@@ -62,7 +63,7 @@ export async function reserveMessageQuota(ctx: ChatContext): Promise<void> {
 
 	const { data, error } = await ctx.admin.rpc('reserve_free_message_quota', {
 		p_user_id: ctx.userId,
-		p_limit: 20,
+		p_limit: FREE_DAILY_MESSAGE_LIMIT,
 	});
 
 	if (error) {
@@ -71,7 +72,7 @@ export async function reserveMessageQuota(ctx: ChatContext): Promise<void> {
 
 	if (!data) {
 		throw new RateLimitError(
-			'Daily free limit reached (20 messages). Join a school or upgrade to Pro for unlimited access.'
+			`Daily free limit reached (${FREE_DAILY_MESSAGE_LIMIT} messages). Join an organization or upgrade to Pro for unlimited access.`
 		);
 	}
 }

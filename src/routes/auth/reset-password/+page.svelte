@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { createSupabaseBrowserClient } from '$lib/supabase';
 
 	const supabase = createSupabaseBrowserClient();
@@ -7,8 +8,59 @@
 	let password = $state('');
 	let confirm = $state('');
 	let loading = $state(false);
+	let bootstrapping = $state(true);
 	let error = $state('');
 	let done = $state(false);
+	let validRecoveryLink = $state(false);
+
+	onMount(async () => {
+		error = '';
+
+		try {
+			const currentUrl = new URL(window.location.href);
+			const code = currentUrl.searchParams.get('code');
+
+			if (code) {
+				const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+				if (exchangeError) {
+					error = 'This password reset link is invalid or has expired. Please request a new one.';
+					return;
+				}
+			} else if (window.location.hash) {
+				const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+				const accessToken = hashParams.get('access_token');
+				const refreshToken = hashParams.get('refresh_token');
+				const type = hashParams.get('type');
+
+				if (type === 'recovery' && accessToken && refreshToken) {
+					const { error: sessionError } = await supabase.auth.setSession({
+						access_token: accessToken,
+						refresh_token: refreshToken
+					});
+
+					if (sessionError) {
+						error = 'This password reset link is invalid or has expired. Please request a new one.';
+						return;
+					}
+
+					window.history.replaceState({}, document.title, currentUrl.pathname + currentUrl.search);
+				}
+			}
+
+			const {
+				data: { session }
+			} = await supabase.auth.getSession();
+
+			if (!session) {
+				error = 'This password reset link is invalid or has expired. Please request a new one.';
+				return;
+			}
+
+			validRecoveryLink = true;
+		} finally {
+			bootstrapping = false;
+		}
+	});
 
 	async function handleReset(e: Event) {
 		e.preventDefault();
@@ -28,8 +80,9 @@
 		loading = false;
 
 		if (err) { error = err.message; return; }
+		await supabase.auth.signOut();
 		done = true;
-		setTimeout(() => goto('/chat'), 2000);
+		setTimeout(() => goto('/auth/login?reset=1'), 1500);
 	}
 </script>
 
@@ -42,11 +95,24 @@
 	<div class="auth-card">
 		<a href="/" class="auth-logo">XYLO</a>
 
-		{#if done}
+		{#if bootstrapping}
+			<div class="success-state">
+				<div class="success-icon">⏳</div>
+				<h1 class="auth-title">Checking your reset link</h1>
+				<p class="auth-sub">Hold on while we prepare your password reset session.</p>
+			</div>
+		{:else if done}
 			<div class="success-state">
 				<div class="success-icon">✅</div>
 				<h1 class="auth-title">Password updated!</h1>
-				<p class="auth-sub">Taking you to the app now…</p>
+				<p class="auth-sub">Taking you to sign in now…</p>
+			</div>
+		{:else if !validRecoveryLink}
+			<div class="success-state">
+				<div class="success-icon">🔒</div>
+				<h1 class="auth-title">Reset link unavailable</h1>
+				<p class="auth-sub">{error || 'This password reset link is invalid or has expired. Please request a new one.'}</p>
+				<a href="/auth/forgot-password" class="auth-back">Request a new reset link</a>
 			</div>
 		{:else}
 			<h1 class="auth-title">Set a new password</h1>
@@ -78,6 +144,7 @@
 	.auth-page { min-height: 100dvh; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 1.5rem; }
 	.auth-card { width: 100%; max-width: 420px; background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 2.5rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
 	.auth-logo { display: block; font-size: 1.375rem; font-weight: 800; color: #f59e0b; letter-spacing: -0.03em; margin-bottom: 1.75rem; }
+	.auth-back { color: #d97706; font-weight: 700; text-decoration: none; }
 	.auth-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; margin-bottom: 0.375rem; }
 	.auth-sub { font-size: 0.9375rem; color: #64748b; margin-bottom: 1.75rem; }
 	.success-state { text-align: center; }

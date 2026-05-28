@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { getCanonicalAppOrigin, shouldRedirectToCanonicalOrigin } from '$lib/app-origin';
 import type { Database } from '$lib/types/database';
 import { checkRateLimit } from '$lib/server/rate-limit';
 
@@ -57,6 +58,20 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 				headers: { 'Content-Type': 'text/plain' }
 			});
 		}
+	}
+
+	return resolve(event);
+};
+
+const canonicalHostHandle: Handle = async ({ event, resolve }) => {
+	if (shouldRedirectToCanonicalOrigin(event.url)) {
+		const target = new URL(event.url.pathname + event.url.search, getCanonicalAppOrigin());
+		return new Response(null, {
+			status: 308,
+			headers: {
+				location: target.toString()
+			}
+		});
 	}
 
 	return resolve(event);
@@ -145,4 +160,10 @@ const authHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle = sequence(rateLimitHandle, supabaseHandle, authHandle, securityHandle);
+export const handle = sequence(
+	canonicalHostHandle,
+	rateLimitHandle,
+	supabaseHandle,
+	authHandle,
+	securityHandle
+);

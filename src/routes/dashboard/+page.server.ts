@@ -94,7 +94,7 @@ export const actions: Actions = {
 		const studentId = formData.get('studentId') as string;
 		if (!studentId) return fail(400, { message: 'Missing studentId' });
 
-		// Verify the student actually belongs to this admin's org before removing
+		// Verify the member actually belongs to this admin's org before removing
 		const { data: student } = await locals.supabase
 			.from('profiles')
 			.select('id, org_id')
@@ -102,7 +102,7 @@ export const actions: Actions = {
 			.eq('org_id', adminProfile.org_id)
 			.single();
 
-		if (!student) return fail(404, { message: 'Student not found in your organisation' });
+		if (!student) return fail(404, { message: 'Member not found in your organisation' });
 
 		const admin = createSupabaseAdminClient();
 		const { error } = await admin

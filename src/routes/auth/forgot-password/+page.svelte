@@ -1,9 +1,4 @@
 <script lang="ts">
-	import { createSupabaseBrowserClient } from '$lib/supabase';
-	import { PUBLIC_APP_URL } from '$env/static/public';
-
-	const supabase = createSupabaseBrowserClient();
-
 	let email = $state('');
 	let loading = $state(false);
 	let sent = $state(false);
@@ -14,12 +9,18 @@
 		error = '';
 		loading = true;
 
-		const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${PUBLIC_APP_URL}/auth/reset-password`
+		const response = await fetch('/api/auth/request-password-reset', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ email })
 		});
 
 		loading = false;
-		if (err) { error = err.message; return; }
+		if (!response.ok) {
+			const payload = await response.json().catch(() => null);
+			error = payload?.message || payload?.error || 'We could not send a reset link right now.';
+			return;
+		}
 		sent = true;
 	}
 </script>
