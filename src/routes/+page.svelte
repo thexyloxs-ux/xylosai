@@ -104,11 +104,13 @@
 					Start for free
 					<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
-				<a href="/auth/signup?type=school" class="lp-btn-outline lp-btn-lg">For organizations →</a>
 				<a href="/auth/login" class="lp-btn-outline lp-btn-lg">Sign in</a>
 			</div>
 
-			<p class="lp-hero-note">No credit card · 5 free messages/day · Cancel anytime</p>
+			<p class="lp-hero-note">
+				No credit card · 5 free messages/day · 
+				For organizations: <a href="/auth/signup?type=school" style="text-decoration: underline; font-weight: 600;">Register here</a>
+			</p>
 		</div>
 
 		<!-- Chat preview -->
@@ -433,9 +435,11 @@
 				Get started free
 				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 			</a>
-			<a href="/auth/signup?type=school" class="lp-btn-ghost-dark lp-btn-lg">Register your organization</a>
 			<a href="/auth/login" class="lp-btn-ghost-dark lp-btn-lg">Sign in</a>
 		</div>
+		<p style="margin-top: 1.25rem; font-size: 0.9375rem; color: oklch(88% 0.01 85 / 0.8);">
+			For organizations: <a href="/auth/signup?type=school" style="color: var(--lp-amber); font-weight: 600; text-decoration: underline;">Register here</a>
+		</p>
 	</div>
 </section>
 
