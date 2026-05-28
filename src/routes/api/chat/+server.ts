@@ -15,7 +15,7 @@ const chatSchema = z.object({
 		)
 		.min(1)
 		.max(100),
-	conversationId: z.string().uuid().optional()
+	conversationId: z.string().uuid().nullable().optional()
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -66,7 +66,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const { stream, conversationId } = await streamChatResponse(
 			{ userId: user.id, profile, org, admin },
-			body
+			{ messages: body.messages, conversationId: body.conversationId ?? undefined }
 		);
 
 		return new Response(stream, {
